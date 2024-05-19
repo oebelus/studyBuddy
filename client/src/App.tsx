@@ -3,10 +3,11 @@ import { useEffect, useState } from "react";
 import { formatJson } from "./utils/formatJson";
 
 type Answer = {
+  0: boolean,
   1: boolean,
   2: boolean,
   3: boolean,
-  4: boolean,
+  4: boolean
 }
 
 function App() {
@@ -14,24 +15,24 @@ function App() {
   const [quiz, setQuiz] = useState<unknown[]>([])
   const [answersArray, setAnswersArray] = useState<Record<number, number[]>>({})
   const [correctionArray, setCorrectionArray] = useState<Record<number, Answer>>({})
-  const [corrected, setCorrected] = useState<boolean>(false)
-  const [questionId, setQuestionId] = useState<number | undefined>(undefined)
   const [correctedQuestions, setCorrectedQuestions] = useState<Record<number, boolean>>({})
   
   useEffect(() => {
     const initialAnswersArray: Record<number, number[]> = {};
     const initialCorrectionArray: Record<number, Answer> = {};
     const initialCorrectedQuestions: Record<number, boolean> = {};
-
+    console.log(quiz)
     for (let i = 0; i < quiz.length; i++) {
       initialAnswersArray[i] = [];
       initialCorrectedQuestions[i] = false
 
+      const correctAnswers = quiz[i].answers.map((answer: string) => parseInt(answer));
       initialCorrectionArray[i] = {
-        1: (parseInt(quiz[i].answers[0]) == 1),
-        2: (parseInt(quiz[i].answers[0]) == 2),
-        3: (parseInt(quiz[i].answers[0]) == 3),
-        4: (parseInt(quiz[i].answers[0]) == 4),
+        0: correctAnswers.includes(0),
+        1: correctAnswers.includes(1),
+        2: correctAnswers.includes(2),
+        3: correctAnswers.includes(3),
+        4: correctAnswers.includes(4),
       };
     }
     setAnswersArray(initialAnswersArray)
@@ -80,8 +81,8 @@ function App() {
       .then((response) => {
         try {
           const ans = response.data.aiResponse;
-          console.log(JSON.parse(formatJson(ans).toString()).questions)
-          setQuiz(JSON.parse(formatJson(ans).toString()).questions)
+          //console.log(JSON.parse(formatJson(ans).toString()).questions)
+          setQuiz(JSON.parse(formatJson(ans).toString().trim()).questions)
         } catch (error) {
           console.error('Error parsing JSON:', error);
         }
