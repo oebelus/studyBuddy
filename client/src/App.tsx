@@ -13,6 +13,8 @@ type Answer = {
 function App() {
   const [extractedText, setExtractedText] = useState<string | undefined>('')
   const [quiz, setQuiz] = useState<unknown[]>([])
+  const [module, setModule] = useState<string>("")
+  const [subject, setSubject] = useState<string>("")
   const [answersArray, setAnswersArray] = useState<Record<number, number[]>>({})
   const [correctionArray, setCorrectionArray] = useState<Record<number, Answer>>({})
   const [correctedQuestions, setCorrectedQuestions] = useState<Record<number, boolean>>({})
@@ -64,7 +66,6 @@ function App() {
   useEffect(() => {
   }, [correctedQuestions]);
 
-  
   async function handlePdf(e: React.ChangeEvent<HTMLInputElement>) {
     console.log("clicked")
     const selectedFile = e.target.files![0]
@@ -77,7 +78,7 @@ function App() {
   }
 
   function generateMcq() {
-    axios.get(`http://localhost:3000/api/questions?lesson=${encodeURIComponent(extractedText!)}`)
+    axios.get(`http://localhost:3000/api/questions?lesson=${encodeURIComponent(extractedText!)}$module=${encodeURIComponent(module)}$subject=${encodeURIComponent(subject)}`)
       .then((response) => {
         try {
           const ans = response.data.aiResponse;
@@ -95,9 +96,15 @@ function App() {
       <h1 className="text-5xl flex justify-center font-semibold p-6 text-white font-serif">PDF to MCQ Generator</h1>
       <div className="flex flex-col justify-center">
         <div className="bg-white w-fit h-fit p-3 rounded mx-auto mt-4">
-          <div>
-            <p className="text-black font-semibold text-xl mb-5">Select File:</p>
-            <input onChange={handlePdf} type="file" name="pdf" id="pdf" accept="application/pdf" />
+          <div className="flex flex-col">
+            <div className="flex flex-col">
+              <p className="text-black font-semibold text-xl mb-5">Select File:</p>
+              <input onChange={handlePdf} type="file" name="pdf" id="pdf" accept="application/pdf" />
+            </div>
+            <div className="flex mt-6 mx-auto gap-4">
+              <input required onChange={(e) => setModule(e.target.value)} value={module} className="shadow p-2" placeholder="Module Name" type="text" name="module" id="module" />
+              <input required onChange={(e) => setSubject(e.target.value)} value={subject} className="shadow p-2" placeholder="Lesson Name" type="text" name="subject" id="subject" />
+            </div>
           </div>
           <input className="hidden" type="text" value={extractedText} onChange={(e) => setExtractedText(e.target.value)} name="lesson" />
           <div className="flex justify-between">
