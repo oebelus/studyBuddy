@@ -94,7 +94,8 @@ function App() {
   }
 
   useEffect(() => {
-  }, [correctedQuestions, quiz, flashcards]);
+    console.log(type)
+  }, [correctedQuestions, quiz, flashcards, type]);
 
   async function handlePdf(e: React.ChangeEvent<HTMLInputElement>) {
     console.log("clicked")
@@ -113,7 +114,9 @@ function App() {
 
   function generateMcq(types: "quiz" | "flashcard") {
     setLoading(true);
-    axios.get(`http://localhost:3000/api/questions?lesson=${encodeURIComponent(extractedText!)}&module=${encodeURIComponent(module)}&subject=${encodeURIComponent(subject)}&type=${encodeURIComponent(types)}&n=${encodeURIComponent(n)}`)
+    setType(types)
+    console.log(type)
+    axios.get(`http://localhost:3000/api/questions?lesson=${encodeURIComponent(extractedText!)}&module=${encodeURIComponent(module)}&subject=${encodeURIComponent(subject)}&type=${encodeURIComponent(type)}&n=${encodeURIComponent(n)}`)
       .then((response) => {
         try {
           setLoading(false)
@@ -121,7 +124,6 @@ function App() {
           const ans = response.data.aiResponse
           const formattedJson = formatJson(ans.toString().trim());
           const parsedData = JSON.parse(formattedJson);
-          setType(types)
           type === "quiz" ? setQuiz(parsedData.questions) : setFlashcards(parsedData.questions);
           console.log(quiz)
           console.log(flashcards)
@@ -209,30 +211,32 @@ function App() {
                 </div>
               ))}
             </div>
-            {flashcards.length > 0 && type == "flashcard" &&
-            flashcards.map((question: Flashcard, index: number) => (
-              <div className="mx-auto max-w-lg mt-6 bg-white p-4 rounded shadow">
-                <div className="divide-y divide-gray-100">
-                  <details key={index} className="group" open>
-                    <summary
-                      className="flex cursor-pointer list-none items-center justify-between py-4 text-lg font-medium text-secondary-900 group-open:text-primary-500">
-                      {question.question}
-                      <div>
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                              stroke="currentColor" className="block h-5 w-5 group-open:hidden">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                          </svg>
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                              stroke="currentColor" className="hidden h-5 w-5 group-open:block">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
-                          </svg>
-                      </div>
-                    </summary>
-                    <div className="pb-4 text-secondary-500 bg-zinc-200 p-4 rounded">{question.answer}</div>
-                  </details>
+            <div className="overflow-auto max-h-[400px] md:max-h-[600px]">
+              {flashcards.length > 0 && type == "flashcard" &&
+              flashcards.map((question: Flashcard, index: number) => (
+                <div className="mx-auto max-w-lg mt-6 bg-white p-4 rounded shadow">
+                  <div className="divide-y divide-gray-100">
+                    <details key={index} className="group">
+                      <summary
+                        className="flex cursor-pointer list-none items-center justify-between py-4 text-lg font-medium text-secondary-900 group-open:text-primary-500">
+                        {question.question}
+                        <div>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" className="block h-5 w-5 group-open:hidden">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" className="hidden h-5 w-5 group-open:block">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
+                            </svg>
+                        </div>
+                      </summary>
+                      <div className="pb-4 text-secondary-500 bg-zinc-200 p-4 rounded">{question.answer}</div>
+                    </details>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
             {quiz.length && flashcards.length && <p className="p-4 text-white font-mono">Nothing to show ;) Try uploading a PDF</p>}
           </div>
         </div>
