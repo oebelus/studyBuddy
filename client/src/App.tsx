@@ -3,16 +3,12 @@ import { useEffect, useState } from "react";
 import { formatJson } from "./utils/format"
 import { Document, Page, pdfjs } from 'react-pdf';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import "react-pdf/dist/esm/Page/TextLayer.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
-type Answer = {
-  0: boolean,
-  1: boolean,
-  2: boolean,
-  3: boolean,
-  4: boolean
+type Answer = { 
+  [key: number]: boolean;
 }
 
 type Flashcard = {
@@ -28,6 +24,8 @@ type MCQ = {
   options: string[]
 }
 
+type Response = "quiz" | "flashcard"
+
 function App() {
   const [extractedText, setExtractedText] = useState<string | undefined>('')
   const [pdfName, setPDFName] = useState<string | undefined>('')
@@ -38,7 +36,9 @@ function App() {
   const [answersArray, setAnswersArray] = useState<Record<number, number[]>>({})
   const [correctionArray, setCorrectionArray] = useState<Record<number, Answer>>({})
   const [correctedQuestions, setCorrectedQuestions] = useState<Record<number, boolean>>({})
-  const [type, setType] = useState<boolean>(false)
+  const [type, setType] = useState<Response>("quiz")
+  const [n, setN] = useState<number>(20)
+  const [loading, setLoading] = useState(false);
 
 	const [allPageNumbers, setAllPageNumbers] = useState<number[]>(); // default value is undefined.
 	const PAGE_MAX_HEIGHT = 600; // maxHeight for scroll
@@ -54,7 +54,7 @@ function App() {
   useEffect(() => {
     const initialAnswersArray: Record<number, number[]> = {};
     const initialCorrectionArray: Record<number, Answer> = {};
-    const initialCorrectedQuestions: Record<number, boolean> = {};
+    const initialCorrectedQuestions: Record<number, boolean> = {};4
     
     for (let i = 0; i < quiz.length; i++) {
       initialAnswersArray[i] = [];
@@ -90,13 +90,11 @@ function App() {
   function handleCorrections(id: number) {
     const updatedArray = { ...correctedQuestions } 
     updatedArray[id] = !updatedArray[id] 
-    // console.log("corrected questions", correctedQuestions[id])
-    // console.log("corrected array", correctionArray[id][1] ? "trueeeeee ": "faaaalse")
     setCorrectedQuestions(updatedArray)
   }
 
   useEffect(() => {
-  }, [correctedQuestions]);
+  }, [correctedQuestions, quiz, flashcards]);
 
   async function handlePdf(e: React.ChangeEvent<HTMLInputElement>) {
     console.log("clicked")
@@ -113,14 +111,20 @@ function App() {
       .catch((error) => console.log(error))
   }
 
-  function generateMcq(types: boolean) {
-    axios.get(`http://localhost:3000/api/questions?lesson=${encodeURIComponent(extractedText!)}&module=${encodeURIComponent(module)}&subject=${encodeURIComponent(subject)}&type=${encodeURIComponent(types)}`)
+  function generateMcq(types: "quiz" | "flashcard") {
+    setLoading(true);
+    axios.get(`http://localhost:3000/api/questions?lesson=${encodeURIComponent(extractedText!)}&module=${encodeURIComponent(module)}&subject=${encodeURIComponent(subject)}&type=${encodeURIComponent(types)}&n=${encodeURIComponent(n)}`)
       .then((response) => {
         try {
-          const ans = response.data.aiResponse;
+          setLoading(false)
+          console.log(response.data)
+          const ans = response.data.aiResponse
+          const formattedJson = formatJson(ans.toString().trim());
+          const parsedData = JSON.parse(formattedJson);
           setType(types)
-          type ? setQuiz(JSON.parse(formatJson(ans).toString().trim()).questions) : setFlashcards(JSON.parse(formatJson(ans).toString().trim()).questions)
-          //console.log(JSON.parse(formatJson(ans).toString()).questions)
+          type === "quiz" ? setQuiz(parsedData.questions) : setFlashcards(parsedData.questions);
+          console.log(quiz)
+          console.log(flashcards)
         } catch (error) {
           console.error('Error parsing JSON:', error);
         }
@@ -129,31 +133,36 @@ function App() {
   }
 
   return (
-    <div className={`bg-zinc-800 ${quiz.length > 0 || pdfName != "" ? "h-full" : "h-screen"}`}>
-      <h1 className="text-5xl flex justify-center font-semibold p-6 text-white font-serif">PDF to MCQ Generator</h1>
+    <div className={`bg-zinc-900 ${quiz.length > 0 || pdfName != "" ? "h-full" : "h-screen"}`}>
+      <div className="flex justify-center bg-white">
+        <h1 className="text-2xl font-semibold p-2 text-zinc-800 font-serif">StudyBuddy,</h1>
+        <span className="text-zinc-600 p-2 mt-1">generates MCQs and Flashcards, Previews PDF</span>
+      </div>
       <div className="flex flex-col justify-center">
         <div className="bg-white w-fit h-fit p-3 rounded mx-auto mt-4">
-          <div className="flex flex-col">
-            <div className="flex flex-col">
-              <p className="text-black font-semibold text-xl mb-5">Select File:</p>
-              <input onChange={handlePdf} type="file" name="pdf" id="pdf" accept="application/pdf" />
+          <div className="lg:flex lg:justify-between lg:items-center">
+            <div className="flex flex-row gap-4">
+              <p className="text-black font-semibold text-xl">Select File:</p>
+              <input className="mt-1" onChange={handlePdf} type="file" name="pdf" id="pdf" accept="application/pdf" />
             </div>
-            <div className="flex mt-6 mx-auto gap-4">
+            <div className="flex mt-6 lg:mt-1 gap-2">
               <input required onChange={(e) => setModule(e.target.value)} value={module} className="shadow p-2" placeholder="Module Name" type="text" name="module" id="module" />
               <input required onChange={(e) => setSubject(e.target.value)} value={subject} className="shadow p-2" placeholder="Lesson Name" type="text" name="subject" id="subject" />
+              <input required onChange={(e) => setN(parseInt(e.target.value))} value={n} className="shadow p-2" placeholder="Questions" type="number" name="number" id="number" />
             </div>
           </div>
           <input className="hidden" type="text" value={extractedText} onChange={(e) => setExtractedText(e.target.value)} name="lesson" />
-          <div className="flex justify-between">
-            <button onClick={() => generateMcq(false)} type="button" className="mx-auto mt-10 px-5 py-3 font-semibold text-white rounded bg-zinc-900">Generate MCQ</button>
-            <button onClick={() => generateMcq(true)} type="button" className="mx-auto mt-10 px-5 py-3 font-semibold text-white rounded bg-zinc-900">Generate Flashcards</button>
-          </div>
         </div>
-        <div className="flex flex-col lg:flex-row">
-          <div className="ml-8 mt-8">
+        <div className="flex justify-center gap-4">
+          <button onClick={() => generateMcq("quiz")} type="button" className="mt-4 px-5 py-3 font-semibold text-zinc-900 rounded bg-white">Generate MCQ</button>
+          <button onClick={() => generateMcq("flashcard")} type="button" className="mt-4 px-5 py-3 font-semibold text-zinc-900 rounded bg-white">Generate Flashcards</button>
+        </div>
+        <button className={`${loading ? "" : "hidden"}`} type="submit">{loading ? <div className="w-16 h-16 mx-auto mt-5 border-4 border-dashed rounded-full animate-spin border-white"></div> : "<>Search</>"}</button>
+        <div className="flex justify-center flex-col lg:flex-row">
+          <div className="flex justify-center mt-8 mx-auto">
             {pdfName && (
               <Document file={`/pdfs/${pdfName}`}
-              onLoadSuccess={onDocumentLoadSuccess}>
+                onLoadSuccess={onDocumentLoadSuccess}>
                 <div
                   style={{
                     maxHeight: `${PAGE_MAX_HEIGHT}px`,
@@ -173,47 +182,58 @@ function App() {
               </Document>
             )}
           </div>
-          {/* { (quiz.length > 0 || flashcards.length > 0) && 
-            <div className="mx-auto mt-4">
-              
-            </div>
-          } */}
           <div className="mx-auto mt-4">
-            <h2 className="text-4xl flex justify-center font-semibold p-6 text-white font-serif">Questions: </h2>
-            {quiz.length > 0 && <p className="p-4 text-white">Number of questions: {quiz.length}</p>}
-            {type && quiz.length > 4 ? quiz.map((question: MCQ, index: number) => (
-              <div key={index} className="mb-10">
-                <div className="flex justify-center bg-white p-4 w-[600px] rounded">
-                  <h3>{question.question}</h3>
+            {quiz.length > 0 && type == "quiz" && <p className="p-4 text-white">Number of questions: {quiz.length - 1}</p>}
+            {flashcards.length > 0 && type =="flashcard" && <p className="p-4 text-white">Number of questions: {flashcards.length - 1}</p>}
+            <div className="overflow-auto max-h-[400px] md:max-h-[600px]">
+              {type == "quiz" && quiz.length > 4 && quiz.map((question: MCQ, index: number) => (
+                <div key={index} className="mb-10">
+                  <div className="bg-white rounded md:w-[550px] ">
+                    <h3 className="px-4 py-3">{question.question}</h3>
+                  </div>
+                  <div className="flex flex-col gap-2 mt-4 mb-4 justify-center">
+                    {question.options.map((option: string, optionIndex: number) => (
+                      <button
+                        key={optionIndex}
+                        type="button"
+                        className={`px-8 py-3 w-full md:w-[550px] rounded text-white font-semibold
+                        ${correctedQuestions[index] ? (correctionArray[index][optionIndex] ? "bg-green-800" : "bg-red-800") : (answersArray[index] && answersArray[index].includes(optionIndex) ? 'bg-zinc-400 text-zinc-900' : 'bg-zinc-700 hover:bg-zinc-600')}
+                        `}
+                        onClick={() => handleButtonClick(optionIndex, index)}
+                      >
+                      {option}
+                    </button>
+                    ))}
+                  </div>
+                  <button onClick={() => handleCorrections(index)} type="button" className="mx-auto flex px-5 py-3 font-semibold text-white text-zinc-900 bg-white rounded">Correction</button>
                 </div>
-                <div className="flex flex-col gap-3 mt-4 mb-4 justify-center">
-                  {question.options.map((option: string, optionIndex: number) => (
-                    <button
-                      key={optionIndex}
-                      type="button"
-                      className={`px-8 py-3 w-[600px] rounded text-white font-semibold 
-                        ${answersArray[index] && answersArray[index].includes(optionIndex) ? 'bg-zinc-400 text-zinc-900' : 'bg-zinc-900'} 
-                        ${correctedQuestions[index] && (correctionArray[index][optionIndex] ? "bg-green-800" : "bg-red-800")}
-                      `}
-                      onClick={() => handleButtonClick(optionIndex, index)}
-                    >
-                    {option}
-                  </button>
-                  ))}
-                </div>
-                <button onClick={() => handleCorrections(index)} type="button" className="mx-auto flex px-5 py-3 font-semibold text-white rounded bg-zinc-900">Correction</button>
-              </div>
-            )) 
-            : 
+              ))}
+            </div>
+            {flashcards.length > 0 && type == "flashcard" &&
             flashcards.map((question: Flashcard, index: number) => (
-              <div key={index} className="mb-10">
-                <div className="flex justify-center bg-white p-4 w-[600px] rounded">
-                  <h3>{question.question}</h3>
-                  <p>{question.answer}</p>
+              <div className="mx-auto max-w-lg mt-6 bg-white p-4 rounded shadow">
+                <div className="divide-y divide-gray-100">
+                  <details key={index} className="group" open>
+                    <summary
+                      className="flex cursor-pointer list-none items-center justify-between py-4 text-lg font-medium text-secondary-900 group-open:text-primary-500">
+                      {question.question}
+                      <div>
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                              stroke="currentColor" className="block h-5 w-5 group-open:hidden">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                          </svg>
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                              stroke="currentColor" className="hidden h-5 w-5 group-open:block">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
+                          </svg>
+                      </div>
+                    </summary>
+                    <div className="pb-4 text-secondary-500 bg-zinc-200 p-4 rounded">{question.answer}</div>
+                  </details>
                 </div>
               </div>
             ))}
-              <p className="p-4 text-white font-mono">Nothing to show ;) Try uploading a PDF</p>
+            {quiz.length && flashcards.length && <p className="p-4 text-white font-mono">Nothing to show ;) Try uploading a PDF</p>}
           </div>
         </div>
       </div>

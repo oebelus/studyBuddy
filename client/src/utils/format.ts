@@ -1,4 +1,7 @@
 export function formatJson(jsonString: string) {
+  if (!jsonString) {
+    return ''; // Return an empty string if jsonString is undefined or null
+  }
   const braceIndex = jsonString.indexOf('{');
   if (braceIndex !== -1) {
     return jsonString.substring(braceIndex);
