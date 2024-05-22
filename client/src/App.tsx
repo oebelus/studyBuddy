@@ -214,11 +214,11 @@ function App() {
             <div className="overflow-auto max-h-[400px] md:max-h-[600px]">
               {flashcards.length > 0 && type == "flashcard" &&
               flashcards.map((question: Flashcard, index: number) => (
-                <div className="mx-auto max-w-lg mt-6 bg-white p-4 rounded shadow">
+                <div className="max-w-lg mt-6 bg-white p-4 rounded shadow">
                   <div className="divide-y divide-gray-100">
                     <details key={index} className="group">
                       <summary
-                        className="flex cursor-pointer list-none items-center justify-between py-4 text-lg font-medium text-secondary-900 group-open:text-primary-500">
+                        className="flex cursor-pointer list-none items-center justify-between text-lg font-medium text-secondary-900 group-open:text-primary-500">
                         {question.question}
                         <div>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
