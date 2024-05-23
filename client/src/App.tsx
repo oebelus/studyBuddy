@@ -4,6 +4,8 @@ import { formatJson } from "./utils/format"
 import { Document, Page, pdfjs } from 'react-pdf';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 import "react-pdf/dist/esm/Page/TextLayer.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons'
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
@@ -21,7 +23,7 @@ type MCQ = {
   id: number,
   answers: number[],
   question: string,
-  options: string[]
+  options: string[],
 }
 
 type Response = "quiz" | "flashcard"
@@ -39,6 +41,10 @@ function App() {
   const [type, setType] = useState<Response>("quiz")
   const [n, setN] = useState<number>(20)
   const [loading, setLoading] = useState(false);
+  const [question, setQuestion] = useState<string>("")
+  const [answer, setAnswer] = useState<string>("")
+  const [answerLoading, setAnswerLoading] = useState<boolean>(false)
+  const [theme, setTheme] = useState<string>("dark")
 
 	const [allPageNumbers, setAllPageNumbers] = useState<number[]>(); // default value is undefined.
 	const PAGE_MAX_HEIGHT = 600; // maxHeight for scroll
@@ -94,8 +100,28 @@ function App() {
   }
 
   useEffect(() => {
-    console.log(type)
   }, [correctedQuestions, quiz, flashcards, type]);
+
+  useEffect(() => {
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark")
+    } else {
+      document.documentElement.classList.add("light")
+    }
+  }, [theme])
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+      setTheme('light')
+    } else {
+      setTheme('dark')
+    }
+  }, [])
+
+  const handleThemeSwitch = () => {
+    setTheme(theme === "dark" ? "light" : "dark")
+    console.log(theme)
+  }
 
   async function handlePdf(e: React.ChangeEvent<HTMLInputElement>) {
     console.log("clicked")
@@ -121,24 +147,52 @@ function App() {
         try {
           setLoading(false)
           console.log(response.data)
-          const ans = response.data.aiResponse
-          const formattedJson = formatJson(ans.toString().trim());
+          const ans = response.data.aiResponse.trim()
+          const formattedJson = formatJson(ans);
           const parsedData = JSON.parse(formattedJson);
           type === "quiz" ? setQuiz(parsedData.questions) : setFlashcards(parsedData.questions);
-          console.log(quiz)
-          console.log(flashcards)
+          console.log("quiz", quiz)
+          console.log("flashcards", flashcards)
         } catch (error) {
+          setLoading(false)
           console.error('Error parsing JSON:', error);
         }
       })
-      .catch((error) => console.log(error))
+      .catch((error) => {
+        setLoading(false)
+        console.log(error)
+      })
+  }
+
+  function askQuestion() {
+    setAnswerLoading(true)
+    axios.get(`http://localhost:3000/api/question?question=${question}&lesson=${extractedText}`)
+    .then((response) => {
+      setAnswerLoading(false)
+      setAnswer(response.data.aiResponse)
+    })
+    .catch(error => {
+      setAnswerLoading(false)
+      console.log(error)
+    })
   }
 
   return (
-    <div className={`bg-zinc-900 ${quiz.length > 0 || pdfName != "" ? "h-full" : "h-screen"}`}>
-      <div className="flex justify-center bg-white">
-        <h1 className="text-2xl font-semibold p-2 text-zinc-800 font-serif">StudyBuddy,</h1>
-        <span className="text-zinc-600 p-2 mt-1">generates MCQs and Flashcards, Previews PDF</span>
+    <div className={`bg-zinc-900 light:bg-white ${quiz.length > 0 || pdfName != "" ? "h-full" : "h-screen"}`}>
+      <div className="flex justify-between items-center w-full bg-white p-4">
+        <div className="flex items-center">
+          <h1 className="text-2xl font-semibold text-zinc-800 font-serif">StudyBuddy,</h1>
+          <span className="text-zinc-600 ml-4">Generates MCQs and Flashcards, Previews PDFs</span>
+        </div>
+        <label onClick={handleThemeSwitch} htmlFor="Toggle1" className="inline-flex items-center space-x-4 cursor-pointer dark:text-gray-800">
+          <span><FontAwesomeIcon icon={faMoon}/></span>
+          <span className="relative">
+            <input id="Toggle1" type="checkbox" className="hidden peer" />
+            <div className="w-10 h-6 rounded-full shadow-inner dark:bg-gray-600 bg-gray-400 peer-checked:dark:bg-white transition"></div>
+            <div className="absolute inset-y-0 left-0 w-4 h-4 m-1 rounded-full shadow peer-checked:right-0 peer-checked:left-auto bg-gray-300"></div>
+          </span>
+          <span><FontAwesomeIcon icon={faSun}/></span>
+        </label>
       </div>
       <div className="flex flex-col justify-center">
         <div className="bg-white w-fit h-fit p-3 rounded mx-auto mt-4">
@@ -150,48 +204,66 @@ function App() {
             <div className="flex mt-6 lg:mt-1 gap-2">
               <input required onChange={(e) => setModule(e.target.value)} value={module} className="shadow p-2" placeholder="Module Name" type="text" name="module" id="module" />
               <input required onChange={(e) => setSubject(e.target.value)} value={subject} className="shadow p-2" placeholder="Lesson Name" type="text" name="subject" id="subject" />
-              <input required onChange={(e) => setN(parseInt(e.target.value))} value={n} className="shadow p-2" placeholder="Questions" type="number" name="number" id="number" />
+              <input required onChange={(e) => setN(parseInt(e.target.value))} value={n} className="shadow p-2" placeholder="Questions" type="number" max={20} name="number" id="number" />
             </div>
           </div>
           <input className="hidden" type="text" value={extractedText} onChange={(e) => setExtractedText(e.target.value)} name="lesson" />
         </div>
         <div className="flex justify-center gap-4">
-          <button onClick={() => generateMcq("quiz")} type="button" className="mt-4 px-5 py-3 font-semibold text-zinc-900 rounded bg-white">Generate MCQ</button>
-          <button onClick={() => generateMcq("flashcard")} type="button" className="mt-4 px-5 py-3 font-semibold text-zinc-900 rounded bg-white">Generate Flashcards</button>
+          <button onClick={() => generateMcq("quiz")} type="button" className="mt-4 px-5 py-3 font-semibold text-zinc-900 rounded bg-white hover:bg-zinc-200 transition">Generate MCQs</button>
+          <button onClick={() => generateMcq("flashcard")} type="button" className="mt-4 px-5 py-3 font-semibold text-zinc-900 rounded bg-white hover:bg-zinc-200 transition">Generate Flashcards</button>
         </div>
         <button className={`${loading ? "" : "hidden"}`} type="submit">{loading ? <div className="w-16 h-16 mx-auto mt-5 border-4 border-dashed rounded-full animate-spin border-white"></div> : "<>Search</>"}</button>
         <div className="flex justify-center flex-col lg:flex-row">
           <div className="flex justify-center mt-8 mx-auto">
             {pdfName && (
-              <Document file={`/pdfs/${pdfName}`}
-                onLoadSuccess={onDocumentLoadSuccess}>
-                <div
-                  style={{
-                    maxHeight: `${PAGE_MAX_HEIGHT}px`,
-                    overflowY: 'scroll', 
-                    overflowX: 'hidden',
-
-                    border: '2px solid lightgray',
-                    borderRadius: '5px',
-                  }}>
-
-                  {allPageNumbers
-                  ? allPageNumbers.map((pn) => (
-                    <Page key={`page-${pn}`} pageNumber={pn} />
-                  ))
-                  : undefined}
+              <div>
+                <div className="bg-white p-4 rounded mb-4 max-w-[38rem]">
+                  <div className="flex gap-5 flex-col">
+                    <div className="flex">
+                      <input name="question" value={question} onChange={(e) => setQuestion(e.target.value)} className="shadow p-2 w-full" type="text"/>
+                      <button onClick={askQuestion} className="font-semibold text-white p-2 rounded bg-zinc-900 hover:bg-zinc-800 transition">Ask a Question</button>
+                    </div>
+                    {answerLoading ? 
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="w-4 h-4 rounded-full animate-pulse dark:bg-zinc-600"></div>
+                        <div className="w-4 h-4 rounded-full animate-pulse dark:bg-zinc-600"></div>
+                        <div className="w-4 h-4 rounded-full animate-pulse dark:bg-zinc-600"></div>
+                      </div>
+                      :
+                      answer != "" && <p>{answer}</p>}
+                  </div>
                 </div>
-              </Document>
+                <Document file={`/pdfs/${pdfName}`}
+                  onLoadSuccess={onDocumentLoadSuccess}>
+                  <div
+                    style={{
+                      maxHeight: `${PAGE_MAX_HEIGHT}px`,
+                      overflowY: 'scroll', 
+                      overflowX: 'hidden',
+
+                      border: '2px solid lightgray',
+                      borderRadius: '5px',
+                    }}>
+
+                    {allPageNumbers
+                    ? allPageNumbers.map((pn) => (
+                      <Page key={`page-${pn}`} pageNumber={pn} />
+                    ))
+                    : undefined}
+                  </div>
+                </Document>
+              </div>
             )}
           </div>
           <div className="mx-auto mt-4">
-            {quiz.length > 0 && type == "quiz" && <p className="p-4 text-white">Number of questions: {quiz.length - 1}</p>}
-            {flashcards.length > 0 && type =="flashcard" && <p className="p-4 text-white">Number of questions: {flashcards.length - 1}</p>}
+            {quiz.length > 0 && type == "quiz" && <p className="p-4 text-white">Number of questions: {quiz.length}</p>}
+            {flashcards.length > 0 && type =="flashcard" && <p className="p-4 text-white">Number of questions: {flashcards.length}</p>}
             <div className="overflow-auto max-h-[400px] md:max-h-[600px]">
               {type == "quiz" && quiz.length > 4 && quiz.map((question: MCQ, index: number) => (
                 <div key={index} className="mb-10">
                   <div className="bg-white rounded md:w-[550px] ">
-                    <h3 className="px-4 py-3">{question.question}</h3>
+                    <h3 className="px-4 py-3">{question.id + 1}. {question.question}</h3>
                   </div>
                   <div className="flex flex-col gap-2 mt-4 mb-4 justify-center">
                     {question.options.map((option: string, optionIndex: number) => (
@@ -237,10 +309,15 @@ function App() {
                 </div>
               ))}
             </div>
-            {quiz.length && flashcards.length && <p className="p-4 text-white font-mono">Nothing to show ;) Try uploading a PDF</p>}
+            {((quiz.length == 0 || flashcards.length == 0) && extractedText) && <p className="p-4 text-white font-mono mt-10">Try Generating MCQs or Flashcards :D</p>}
           </div>
         </div>
       </div>
+      {((quiz.length == 0 || flashcards.length == 0) && !extractedText) && 
+        <div className="flex justify-center">
+          <p className="p-4 text-white font-mono">Nothing to show ;) Try uploading a PDF</p>
+        </div>
+      }
     </div>
   )
 }

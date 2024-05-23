@@ -31,6 +31,9 @@ app.use(cors({
     origin: 'http://localhost:5173'
 }))
 
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY!);
+const model = genAI.getGenerativeModel({model: "gemini-1.0-pro"})
+
 app.get('/api/questions', async (req, res) => {
     console.log("GET /api/questions")
     const text = req.query.lesson
@@ -39,20 +42,29 @@ app.get('/api/questions', async (req, res) => {
     const type = req.query.type
     const n = req.query.n as string
 
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY!);
-    const model = genAI.getGenerativeModel({model: "gemini-1.0-pro"})
-
-    const frenchPromptMcq = `Générer JSON et respectez le format à partir d'un texte, vous êtes un médecin professeur. Générez es ${n} QCMS, les questions doivent avoir plusieurs réponses justes 'maximum 5 réponses justes, minimum 2) et elles doient être difficie, et issues tout le text et que le texte! Fournissez également les réponses séparément (1, 2, 3, 4, 5). Et n'envoyez que le JSON directement, sans texte d'introduction s'il vous plaît, pour que le challenge réussisse ! Votre réponse doit être dans le format suivant : {"questions": [{"id": 0, "question": "", "options": [], "answers": []}, ...], answers array should contain only numbers of the correct answers, Lisez tout le texte avant de générer un JSON. Générez ${n} questions possible avec 5 réponses exactement à choix multiple (c'est à dire une question peut avoir plusieurs réponses justes) à partir de ce texte : ${text} pour les étudiants en médecine (ils ne comprennent que le Français), le cours est ${subject}, le module est ${module}, `
-    const frenchPromptFlashcards = `Lisez tout le texte avant de générer un JSON et respectez le format du JSON. Générez ${n} flashcards à partir de ce texte : ${text} pour les étudiants en médecine (ils ne comprennent que le Français), le cours est ${subject}, le module est ${module}! Votre réponse doit être sous le format suivant : {"questions": [{"id": 0, "question": "", "answer": ""}, ...]}, où answer doit contenir un seul élément (la réponse à la question). Assurez-vous que chaque objet question/réponse est bien formaté et que le JSON est valide.`
+    const frenchPromptMcq = `Générer JSON et respectez le format à partir d'un texte, vous êtes un médecin professeur. Générez ${n} QCMSs, les questions doivent avoir plusieurs réponses justes 'maximum 5 réponses justes, minimum 2) et elles doient être difficie, et issues tout le text et que le texte! Fournissez également les réponses séparément (1, 2, 3, 4, 5). Et n'envoyez que le JSON directement. Votre réponse doit être dans le format suivant : {"questions": [{"id": 0, "question": "", "options": [], "answers": []}, ...], answers array should contain only numbers of the correct answers. Lisez tout le texte avant de générer un JSON. Générez ${n} questions possible avec 5 réponses exactement à choix multiple (c'est à dire une question peut avoir plusieurs réponses justes) à partir de ce texte : ${text} pour les étudiants en médecine (ils ne comprennent que le Français), le cours est ${subject}, le module est ${module}. IMPORTANT: la réponse est JSON!`
+    const frenchPromptFlashcards = `Lisez tout le texte avant de générer un JSON et respectez le format du JSON. IMPORTANT : La sortie doit être un tableau JSON. Assurez-vous que le JSON est valide! Générez ${n} flashcards à partir de ce texte : ${text} pour les étudiants en médecine (ils ne comprennent que le Français), le cours est ${subject}, le module est ${module}! Votre réponse doit être sous le format suivant : {"questions": [{"id": 0, "question": "", "answer": ""}, ...]}, où answer doit contenir un seul élément, et la réponse doit être longue et bien détaillée (la réponse à la question). Assurez-vous que chaque objet question/réponse est bien formaté et que le JSON est valide.`
 
     const englishPrompt = `You are a quiz master and a medical professional that wants to create a quiz containing the maximum number of questions from this text: ${text} for students. Generate as many questions as possible with 5 multiple choice answers each. Also, provide the answer separately (1, 2, 3, 4, 5). Your response should be in the following format: {"questions": [{"id": 0, "question": "", "options": [], "answer": 1}, ...]}`
+    
     console.log(type)
+    
     const result = await model.generateContent(type == "quiz" ? frenchPromptMcq : frenchPromptFlashcards);
-
+    
     const aiResponse = result.response;
     const response = aiResponse.text()
     
     res.json({aiResponse: response})
+})
+
+app.get('/api/question', async (req, res) => {
+  console.log("GET /api/question")
+  const question = req.query.question as string
+  const text = req.query.lesson
+  const result = await model.generateContent(`${question}, répond selon le text ${text}. Si il ne le contient pas, génère une réponse concise! Saute la ligne avec le caractère de sauter la ligne`)
+  const aiResponse = result.response.text()
+  console.log(aiResponse)
+  res.json({aiResponse: aiResponse})
 })
 
 app.post("/upload-pdf", upload.single('pdf'), async (req, res) => {
