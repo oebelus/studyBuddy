@@ -4,6 +4,7 @@ import { formatJson } from "./utils/format"
 import { Document, Page, pdfjs } from 'react-pdf';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 import "react-pdf/dist/esm/Page/TextLayer.css";
+import "react-pdf/dist/esm/Page/AnnotationLayer.css"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons'
 
@@ -149,6 +150,7 @@ function App() {
           console.log(response.data)
           const ans = response.data.aiResponse.trim()
           const formattedJson = formatJson(ans);
+          console.log("formatted", formattedJson)
           const parsedData = JSON.parse(formattedJson);
           type === "quiz" ? setQuiz(parsedData.questions) : setFlashcards(parsedData.questions);
           console.log("quiz", quiz)
@@ -220,9 +222,9 @@ function App() {
               <div>
                 <div className="bg-white p-4 rounded mb-4 max-w-[38rem]">
                   <div className="flex gap-5 flex-col">
-                    <div className="flex">
-                      <input name="question" value={question} onChange={(e) => setQuestion(e.target.value)} className="shadow p-2 w-full" type="text"/>
-                      <button onClick={askQuestion} className="font-semibold text-white p-2 rounded bg-zinc-900 hover:bg-zinc-800 transition">Ask a Question</button>
+                    <div className="flex gap-2">
+                      <input name="question" value={question} onChange={(e) => setQuestion(e.target.value)} className="shadow w-full" type="text"/>
+                      <button onClick={askQuestion} className="font-semibold text-white p-1 rounded bg-zinc-900 hover:bg-zinc-800 transition">Ask a Question</button>
                     </div>
                     {answerLoading ? 
                       <div className="flex items-center justify-center space-x-2">
@@ -235,7 +237,9 @@ function App() {
                   </div>
                 </div>
                 <Document file={`/pdfs/${pdfName}`}
-                  onLoadSuccess={onDocumentLoadSuccess}>
+                  onLoadSuccess={onDocumentLoadSuccess}
+                      scale={2.0}
+                >
                   <div
                     style={{
                       maxHeight: `${PAGE_MAX_HEIGHT}px`,
