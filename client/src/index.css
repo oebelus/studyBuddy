@@ -1,3 +1,24 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+.button {
+    padding: 15px 20px;
+    border: none;
+    outline: none;
+    background-color: #2448CD;
+    color: white;
+    border-radius: 7px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease-out;
+}
+
+.button:hover {
+    transform: translateY(-3px);
+}
+
+.button-span {
+    color: #B5CCFD;
+}

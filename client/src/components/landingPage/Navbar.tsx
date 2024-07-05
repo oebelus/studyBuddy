@@ -5,8 +5,8 @@ export default function Navbar() {
   const [toggle, setToggle] = useState(false);
 
   return (
-    <nav className="w-full flex py-6 justify-between items-center navbar">
-      <h1 className="text-2xl font-semibold text-zinc-800 font-serif">StudyBuddy;</h1>
+    <nav className="flex justify-between items-center py-6 navbar w-full">
+      <h1 className="text-4xl font-semibold text-zinc-800 font-serif mr-5">StudyBuddy</h1>
       <div className="sm:flex hidden">
         <ul className="list-none sm:flex hidden justify-end items-center flex-1">
         {

@@ -1,4 +1,4 @@
-import { Navbar, Hero, Stats, Introduction, Features, Testimonials, Pricing, Footer } from '../components/landingPage/index'
+import { Navbar, Hero, Stats, Introduction, Testimonials, Pricing, Footer } from '../components/landingPage/index'
 import styles from '../style'
 
 export default function Home() {
@@ -20,7 +20,6 @@ export default function Home() {
         <div className={`${styles.boxWidth}`}>
             <Stats/>
             <Introduction/>
-            <Features/>
             <Testimonials/>
             <Pricing/>
             <Footer/>
