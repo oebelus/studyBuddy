@@ -1,5 +1,9 @@
+import { layout } from "../../style";
+
 export default function Pricing() {
   return (
-    <div></div>
+    <section id="product" className={layout.sectionReverse}>
+      <div className={layout.sectionImgReverse}></div>  
+    </section>
   )
 }

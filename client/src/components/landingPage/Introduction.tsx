@@ -3,7 +3,7 @@ import { introductions } from "../../utils/constants";
 
 export default function Introduction() {
   return (
-    <section className="bg-[#f2f9ff] rounded-lg mt-10 gap-[80px] flex flex-col justify-center items-center p-8">
+    <section id="features" className="bg-[#f2f9ff] rounded-lg mt-10 gap-[80px] flex flex-col justify-center items-center p-8">
       <div className="text-center">
         <h1 className={`${styles.heading2} text-[52px] text-[#1f387c]`}>Introduction to StudyBuddy</h1>
         <p className="text-[30px]">Discover what is it like to generate quizzes and flashcards effortlessly!</p>

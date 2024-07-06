@@ -67,7 +67,7 @@ export const feedback =[
     id: 1,
     content: "The flashcards and MCQs generator on this website has been incredibly helpful for my studies. It makes reviewing topics so much easier!",
     name: "Alice Johnson",
-    title: "Medical Student",
+    title: "University Student",
   },
   {
     id: 2,

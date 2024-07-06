@@ -1,19 +1,20 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
 import {
   createBrowserRouter,
   createRoutesFromElements,
   Route,
   RouterProvider,
 } from "react-router-dom";
+import { App, Home, LoginPage, Register } from "./imports"
 import './index.css'
-import Home from './pages/Home.tsx';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path='/' element={<App />}>
-      <Route path='home' element={<Home/>}></Route>
+      <Route path='home' element={<Home/>} />
+      <Route path='login' element={<LoginPage/>} />
+      <Route path='Register' element={<Register/>} />
     </Route>
   )
 )
