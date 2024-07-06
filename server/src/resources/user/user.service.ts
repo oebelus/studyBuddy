@@ -1,6 +1,5 @@
 import userModel from "@/resources/user/user.model";
 import token from "@/utils/token";
-import User from "./user.interface";
 
 class UserService {
     private user = userModel;
@@ -10,13 +9,15 @@ class UserService {
      */
 
     public async register(
-        name: string, 
+        username: string, 
         email: string, 
         password:string, 
         role: string
     ): Promise<string | Error>{
         try {
-            const user = await this.user.create({ name, email, password, role });
+            console.log(username, email, password, role);
+            const user = await this.user.create({ username, email, password, role });
+            
             const accessToken = token.createToken(user);
 
             return accessToken;
@@ -34,7 +35,7 @@ class UserService {
         password: string
     ): Promise<string | Error> {
         try {
-            const user = await this.user.findOne({ email })
+            const user = await this.user.findOne({ email: email })
             
             if (!user) 
                 throw new Error('Unable to find a user with that email');

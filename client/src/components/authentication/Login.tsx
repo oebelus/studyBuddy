@@ -1,26 +1,39 @@
-import { useState } from "react";
+import { useReducer, useState } from "react";
+import { initialState, reducer } from "../../reducer/store";
+import axios from "axios";
+import { getError } from "../../utils/api";
+import { ApiError } from "../../types/ApiError";
+import { toast } from "react-toastify";
+import { jwtDecode } from "jwt-decode";
+import { User } from "../../types/User";
 
 export default function Login() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
 
+    const [, dispatch] = useReducer(reducer, initialState)
+
     const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault();
-        // await axios.post("http://localhost:4000/users/login", {
-        //     email,
-        //     password
-        // })
-        // .then(response => {
-        //     dispatch({type: "USER_SIGNIN", payload: response.data})
-        //     localStorage.setItem("userId", response.data.user._id)
-        //     localStorage.setItem('userInfo', JSON.stringify(response.data))
+        await axios.post("http://localhost:3000/api/users/login", {
+            email,
+            password
+        })
+        .then(response => {
+            dispatch({type: "USER_SIGNIN", payload: response.data})
+            const token = response.data.token;
+            const user: User = jwtDecode(token)
+            console.log(user);
             
-        //     window.location.href = `dashboard`;
-        // })
-        // .catch(err => {
-        //     console.log(getError(err as ApiError))
-        //     toast.error(getError(err as ApiError))
-        // })
+            localStorage.setItem('token', token);
+            dispatch({type: 'USER_SIGNIN', payload: user})
+            
+            //window.location.href = `dashboard`;
+        })
+        .catch(err => {
+            console.log(getError(err as ApiError))
+            toast.error(getError(err as ApiError))
+        })
     }
 
     return (

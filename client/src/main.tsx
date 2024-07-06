@@ -1,14 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  Route,
-  RouterProvider,
-} from "react-router-dom";
+import { createBrowserRouter, createRoutesFromElements,Route, RouterProvider } from "react-router-dom";
 import { App, Home, LoginPage, RegisterPage } from "./imports"
-import './index.css'
 import { HelmetProvider } from 'react-helmet-async';
+import './index.css'
 
 const router = createBrowserRouter(
   createRoutesFromElements(

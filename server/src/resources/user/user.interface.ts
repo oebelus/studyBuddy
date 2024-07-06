@@ -1,10 +1,10 @@
 import { Document } from "mongoose"
 
 interface User extends Document {
-    name: string,
+    username: string,
     email: string,
     password: string,
-    role:string,
+    role: string,
 
     isValidPassword(password: string): Promise<Error | boolean>,
 }

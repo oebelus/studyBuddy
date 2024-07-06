@@ -1,13 +1,13 @@
 import { Schema, model } from "mongoose";
 import bcrypt from 'bcrypt';
 import User from "@/resources/user/user.interface";
-import { required } from "joi";
 
 const userSchema = new Schema(
     {
-        name: {
+        username: {
             type: String,
-            required: true
+            required: true,
+            unique: true
         },
         email: {
             type: String,
@@ -17,7 +17,7 @@ const userSchema = new Schema(
         },
         password: {
             type: String,
-            // required or not, depends on Auth methods
+            required: true
         },
         role: {
             type: String,

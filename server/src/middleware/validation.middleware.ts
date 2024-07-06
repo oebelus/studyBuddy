@@ -14,15 +14,17 @@ function validationMiddleware(Schema: Joi.Schema): RequestHandler {
         }
 
         try {
+            console.log(req.body);
             const value = await Schema.validateAsync(
                 req.body,
                 validationOptions
             )
+            
             req.body = value;
             next();
         } catch (e: any) {
             const errors: string[] = [];
-            e.details.array.forEach((error: Joi.ValidationErrorItem) => {
+            e.details.forEach((error: Joi.ValidationErrorItem) => {
                 errors.push(error.message)
             });
             res.status(400).send({errors: errors})
