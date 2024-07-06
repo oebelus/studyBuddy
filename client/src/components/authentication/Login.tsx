@@ -65,7 +65,7 @@ export default function Login() {
                 </div>
 
                 <div className="mt-6">
-                    <button className="w-full px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50">
+                    <button className="w-full px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-700 dark:bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50">
                         Sign In
                     </button>
                 </div>
@@ -73,7 +73,7 @@ export default function Login() {
                 <div className="flex items-center justify-between mt-4">
                     <span className="w-1/5 border-b dark:border-gray-600 md:w-1/4"></span>
 
-                    <a href="/Signup" className="text-xs text-gray-500 uppercase dark:text-gray-400 hover:underline">or sign up</a>
+                    <a href="/register" className="text-xs text-gray-500 uppercase dark:text-gray-400 hover:underline">or sign up</a>
 
                     <span className="w-1/5 border-b dark:border-gray-600 md:w-1/4"></span>
                 </div>

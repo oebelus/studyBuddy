@@ -28,14 +28,16 @@ export default function Navbar() {
           ))
         }
         </ul>
-        <RouterLink to="/Login">
+        <RouterLink to="/login">
           <button className="border-slate-300 border-2 w-20 p-2 rounded-md">Login</button>
         </RouterLink>
       </div>
 
       <div className="sm:hidden flex flex-1 justify-end items-center">
           <div className="flex gap-4 mr-4">
-            <button className="border-slate-300 border-2 p-2 rounded-md">Login</button>
+            <RouterLink to="/login">
+              <button className="border-slate-300 border-2 p-2 rounded-md">Login</button>
+            </RouterLink>
           </div>
           <div className="cursor-pointer" onClick={() => setToggle(prev => !prev )}>
             {

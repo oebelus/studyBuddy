@@ -3,7 +3,7 @@ import GetStarted from "./GetStarted";
 
 export default function Hero() {
   return (
-    <section id="home" className={`flex md:flex-row flex-col ${styles.paddingY} mt-8`}>
+    <section id="home" className={`flex md:flex-row flex-col ${styles.paddingY} mt-16`}>
       <div className={`flex-1 ${styles.flexCenter} text-left flex-col xl:px-0 sm:px-16 px-6`}>
         <div className="flex flex-col xl:flex-row justify-between items-center w-full">
           <div className="xl:w-2/3">
