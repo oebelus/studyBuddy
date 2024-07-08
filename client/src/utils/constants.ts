@@ -88,3 +88,63 @@ export const feedback =[
     title: "High School Student",
   }
 ];
+
+export const sidebar = [
+    {
+        id: "deployed_code",
+        icon: "deployed_code",
+        link: "deployed"
+    },
+    {
+        id: "house",
+        icon: "house",
+        link: "dashboard"
+    },
+    {
+        id: "question_mark",
+        icon: "question_mark",
+        link: "quiz"
+    },
+    {
+        id: "description",
+        icon: "description",
+        link: "description"
+    },
+    {
+        id: "bar_chart",
+        icon: "bar_chart",
+        link: "statistics"
+    },
+    {
+        id: "settings",
+        icon: "settings",
+        link: "settings"
+    },
+]
+
+export const items = [
+    {
+        id: "item_1",
+        text: "item 1"
+    },
+    {
+        id: "item_2",
+        text: "item 2"
+    },
+    {
+        id: "item_3",
+        text: "item 3"
+    },
+    {
+        id: "item_4",
+        text: "item 4"
+    },
+    {
+        id: "item_5",
+        text: "item 5"
+    },
+    {
+        id: "item_6",
+        text: "item 6"
+    },
+]

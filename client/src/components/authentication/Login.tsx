@@ -28,7 +28,7 @@ export default function Login() {
             localStorage.setItem('token', token);
             dispatch({type: 'USER_SIGNIN', payload: user})
             
-            //window.location.href = `dashboard`;
+            window.location.href = `dashboard`;
         })
         .catch(err => {
             console.log(getError(err as ApiError))

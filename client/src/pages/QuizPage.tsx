@@ -2,12 +2,11 @@ import axios from "axios";
 import { useState } from "react";
 import { Flashcard, MCQ, Output } from "../types/output";
 import { formatJson } from "../utils/format";
-import Navbar from "../components/Navbar";
-import GenerateMenu from "../components/generateMenu/GenerateMenu";
-import PDFSection from "../components/pdf/PDFSection";
+import GenerateMenu from "../components/dashboard/generateMenu/GenerateMenu";
+import PDFSection from "../components/dashboard/pdf/PDFSection";
 import Quiz from "../components/Quiz";
 
-function App() {
+function QuizPage() {
   const [extractedText, setExtractedText] = useState<string | undefined>('')
   const [pdfName, setPDFName] = useState<string | undefined>('')
   const [quiz, setQuiz] = useState<MCQ[]>([])
@@ -63,9 +62,7 @@ function App() {
   }
 
   return (
-    <div className={`bg-zinc-900 :bg-white dark:bg-black ${quiz.length > 0 || pdfName != "" ? "h-full" : "h-screen"}`}>
-      <Navbar />
-
+    <div className={`bg-white dark:bg-[#121212] ${quiz.length > 0 || pdfName != "" ? "h-full" : "h-screen"}`}>
       <div className="flex flex-col justify-center">
         <GenerateMenu 
           extractedText={extractedText} 
@@ -92,4 +89,4 @@ function App() {
   )
 }
 
-export default App
+export default QuizPage

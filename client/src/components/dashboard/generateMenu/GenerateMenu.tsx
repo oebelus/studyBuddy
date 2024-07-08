@@ -1,4 +1,4 @@
-import { Output } from "../../types/output"
+import { Output } from "../../../types/output"
 import Filter from "./Filter"
 import Generate from "./Generate"
 
