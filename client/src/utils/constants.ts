@@ -108,7 +108,12 @@ export const sidebar = [
     {
         id: "description",
         icon: "description",
-        link: "description"
+        link: "flashcards"
+    },
+    {
+        id: "generate",
+        icon: "cycle",
+        link: "generate"
     },
     {
         id: "bar_chart",
@@ -119,32 +124,5 @@ export const sidebar = [
         id: "settings",
         icon: "settings",
         link: "settings"
-    },
-]
-
-export const items = [
-    {
-        id: "item_1",
-        text: "item 1"
-    },
-    {
-        id: "item_2",
-        text: "item 2"
-    },
-    {
-        id: "item_3",
-        text: "item 3"
-    },
-    {
-        id: "item_4",
-        text: "item 4"
-    },
-    {
-        id: "item_5",
-        text: "item 5"
-    },
-    {
-        id: "item_6",
-        text: "item 6"
     },
 ]

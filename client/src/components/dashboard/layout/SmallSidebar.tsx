@@ -1,4 +1,7 @@
+import { useEffect, useState } from "react";
 import { sidebar } from "../../../utils/constants";
+import Generate from "../../modals/Generate";
+import axiosInstance from "../../../api/instances";
 
 interface SmallSidebarProps {
     clicked: string,
@@ -6,10 +9,30 @@ interface SmallSidebarProps {
 }
 
 export default function SmallSidebar({clicked, setClicked}: SmallSidebarProps) {
+    const [modalIsOpen, setIsOpen] = useState(false);
+    const [titles, setTitles] = useState([])
+
+    function openModal() {
+        setIsOpen(true);
+    }
+    
     const handleClick = (e: React.MouseEvent<HTMLElement>, el: string) => {
         e.preventDefault();
         setClicked(el)
     }
+
+    useEffect(() => {
+        if (clicked == "generate") {
+            axiosInstance.get("/users")
+            .then((response) => {
+                console.log(response.data.user);
+                
+                setTitles(response.data.user.titles)})
+            .catch((err) => console.log(err))
+            openModal();
+        }
+    }, [clicked])
+
     return (
         <div className="flex flex-col items-center w-16 pb-4 overflow-auto border-r dark:bg-[#303030] border-gray-300">
             {
@@ -21,6 +44,7 @@ export default function SmallSidebar({clicked, setClicked}: SmallSidebarProps) {
                     </a>
                 ))
             }
+            <Generate titles={titles} setIsOpen={setIsOpen} modalIsOpen={modalIsOpen} setClicked={setClicked} />
         </div>
     )
 }

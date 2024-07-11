@@ -26,7 +26,6 @@ export const verifyToken = async (
                     console.error('JWT Verification Error', err);
                     reject(err);
                 } else {
-                    console.log('Decoded Token:');
                     resolve(payload as Token);
                 }
             }

@@ -31,7 +31,12 @@ class UserController implements Controller {
             `${this.path}`,
             authenticatedMiddleware,
             this.getUser
-        )
+        );
+        this.router.put(
+            `${this.path}/titles`, 
+            authenticatedMiddleware,
+            this.postTitle 
+        );
     }
 
     private register = async(
@@ -76,10 +81,6 @@ class UserController implements Controller {
         res:Response,
         next: NextFunction
     ): Response | void => {
-
-        // @ts-ignore
-        console.log("req.user", req.user);
-        
         // @ts-ignore
         if (!req.user) {
             return next(new HttpException(404, "Not Logged In User"));
@@ -88,6 +89,39 @@ class UserController implements Controller {
         // @ts-ignore
         res.status(200).json({ user: req.user })
     }
+
+    private postTitle = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<Response | void> => {
+        try {
+            const { title } = req.body;
+
+            // @ts-ignore
+            const userId = req.user._id;
+
+            const user = await this.UserService.findUserById(userId);
+            
+            if (!user) {
+                return next(new HttpException(404, "User not found"));
+            }
+
+            user.titles.push(title);
+            
+            try {
+                await user.save()
+                return res.status(201).json({ message: "Title added successfully", title });
+            } catch (saveError) {
+                console.log("Error in post title:", saveError);
+                
+                return next(new HttpException(500, (saveError as Error).message));
+            }
+
+        } catch (error) {
+            next(new HttpException(400, (error as Error).message));
+        }
+    };
 }
 
 export default UserController;

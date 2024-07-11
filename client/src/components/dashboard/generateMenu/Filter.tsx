@@ -31,7 +31,7 @@ export default function Filter({
           <p className="text-black dark:text-white font-semibold text-xl">Select File:</p>
           <input className="mt-1 dark:text-white" onChange={handlePdf} type="file" name="pdf" id="pdf" accept="application/pdf" />
           </div>
-          <div className="flex md:flex-row flex-col mt-6 lg:mt-1 gap-2">
+          <div className="flex flex-col mt-6 lg:mt-1 gap-2">
             <input required onChange={(e) => setModule(e.target.value)} value={module} className="shadow p-2 rounded-lg" placeholder="Module Name" type="text" name="module" id="module" />
             <input required onChange={(e) => setSubject(e.target.value)} value={subject} className="shadow p-2 rounded-lg" placeholder="Lesson Name" type="text" name="subject" id="subject" />
             <input required onChange={(e) => setN(parseInt(e.target.value))} value={n} className="shadow p-2 rounded-lg" placeholder="Questions" type="number" max={20} name="number" id="number" />

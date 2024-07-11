@@ -1,31 +1,33 @@
+import { jwtDecode } from "jwt-decode";
 import { User } from "../types/User"
 import { getTheme } from "../utils/theme"
 
 type AppState = {
-    user: User,
-    theme: string
+    user: User | string,
+    theme: string,
+    titles: string[]
 }
 
-const user = localStorage.getItem('userInfo')
-? JSON.parse(localStorage.getItem('userInfo')!).user
+const user = localStorage.getItem('token')
+? jwtDecode(localStorage.getItem('token')!)
 : "null"
-
-console.log(user);
-
 
 const theme = localStorage.getItem('theme')
 ? localStorage.getItem('theme')!
 : getTheme()
 
 export const initialState: AppState = {
-    user: user ? user : "null",
-    theme: theme ? theme : "light"
+    user: user ? user as unknown as User : "null",
+    theme: theme ? theme : "light",
+    titles: []
 }
 
 export type Action = 
     | { type: 'USER_SIGNIN'; payload: User }
     | { type: 'USER_SIGNOUT' }
     | { type: 'CHANGE_THEME', payload: string }
+    | { type: 'ADD_TITLE', payload: string }
+    | { type: 'SET_TITLES', payload: string[] }
 
 export function reducer(state: AppState, action: Action): AppState {
     switch (action.type) {
@@ -34,9 +36,12 @@ export function reducer(state: AppState, action: Action): AppState {
         case 'USER_SIGNOUT': 
             return { ...state }
         case 'CHANGE_THEME':
-            console.log(action.payload);
             localStorage.setItem('theme', action.payload)
             return { ...state, theme: action.payload }
+        case 'ADD_TITLE':
+            return { ...state, titles: [ ...state.titles, action.payload ] }
+        case 'SET_TITLES':
+            return { ...state, titles: action.payload }
         default:
             return state
     }
