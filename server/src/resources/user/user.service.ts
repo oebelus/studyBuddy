@@ -1,4 +1,5 @@
 import userModel from "@/resources/user/user.model";
+import HttpException from "@/utils/exceptions/http.exception";
 import token from "@/utils/token";
 
 class UserService {
@@ -15,14 +16,13 @@ class UserService {
         role: string
     ): Promise<string | Error>{
         try {
-            console.log(username, email, password, role);
             const user = await this.user.create({ username, email, password, role });
             
             const accessToken = token.createToken(user);
 
             return accessToken;
         } catch (error) {
-            throw new Error('Unable to create user')
+            throw new HttpException(400, (error as Error).message)
         }
     }
 

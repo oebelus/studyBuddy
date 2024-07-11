@@ -56,7 +56,7 @@ export default function Quiz({quiz, type, flashcards, extractedText} : QuizProps
     }
     
     return (
-        <div className="mx-auto mt-4">
+        <div className="mx-auto xs:max-w-[60%] max-w-[90%] mt-4">
             {quiz.length > 0 && type == "quiz" && <p className="p-4 text-white">Number of questions: {quiz.length}</p>}
             {flashcards.length > 0 && type =="flashcard" && <p className="p-4 text-white">Number of questions: {flashcards.length}</p>}
             <div className="overflow-auto max-h-[400px] md:max-h-[600px]">
@@ -79,7 +79,7 @@ export default function Quiz({quiz, type, flashcards, extractedText} : QuizProps
                     </button>
                     ))}
                 </div>
-                <button onClick={() => handleCorrections(index)} type="button" className="mx-auto flex px-5 py-3 font-semibold text-white bg-white rounded">Correction</button>
+                <button onClick={() => handleCorrections(index)} type="button" className="mx-auto flex px-5 py-3 font-semibold dark:text-black bg-white rounded">Correction</button>
                 </div>
             ))}
             </div>

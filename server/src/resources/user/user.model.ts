@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, Types, model, ObjectId } from "mongoose";
 import bcrypt from 'bcrypt';
 import User from "@/resources/user/user.interface";
 
@@ -22,7 +22,13 @@ const userSchema = new Schema(
         role: {
             type: String,
             required: true
-        }
+        },
+        mcqs: [{
+            type: Types.ObjectId, ref: 'Mcqs'
+        }],
+        flashcards: [{
+            type: Types.ObjectId, ref: 'Flashcards'
+        }] 
     },
     { timestamps: true }
 )

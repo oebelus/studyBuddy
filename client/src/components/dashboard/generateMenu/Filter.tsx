@@ -25,7 +25,7 @@ export default function Filter({
     extractedText,
     setExtractedText}: FilterProps) {
   return (
-    <div className="bg-white dark:bg-[#2F2F2F] border-zinc-300 border-2 w-fit h-fit p-3 shadow-lg rounded-lg mx-auto mt-4">
+    <div className="mx-auto max-w-[95%] bg-white dark:bg-[#2F2F2F] dark:border-transparent border-zinc-300 border-2 w-fit h-fit p-3 shadow-lg rounded-lg mt-4">
       <div className="lg:flex lg:justify-between lg:items-center">
           <div className="flex flex-row gap-4">
           <p className="text-black dark:text-white font-semibold text-xl">Select File:</p>

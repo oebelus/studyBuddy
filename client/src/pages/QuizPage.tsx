@@ -20,12 +20,11 @@ function QuizPage() {
   
 
   async function handlePdf(e: React.ChangeEvent<HTMLInputElement>) {
-    console.log("clicked")
     const selectedFile = e.target.files![0]
     const formData = new FormData()
     formData.append('pdf', selectedFile, selectedFile!.name)
 
-    await axios.post(`http://localhost:3000/upload-pdf`, formData)
+    await axios.post(`http://localhost:3000/api/upload-pdf`, formData)
       .then((response) => {
         setExtractedText(response.data.extractedText)
         setPDFName(response.data.pdfName)
@@ -38,7 +37,7 @@ function QuizPage() {
     setLoading(true);
     setType(types)
     console.log(type)
-    axios.get(`http://localhost:3000/api/questions?lesson=${encodeURIComponent(extractedText!)}&module=${encodeURIComponent(module)}&subject=${encodeURIComponent(subject)}&type=${encodeURIComponent(type)}&n=${encodeURIComponent(n)}`)
+    axios.get(`http://localhost:3000/api/quiz?lesson=${encodeURIComponent(extractedText!)}&module=${encodeURIComponent(module)}&subject=${encodeURIComponent(subject)}&type=${encodeURIComponent(type)}&n=${encodeURIComponent(n)}`)
       .then((response) => {
         try {
           setLoading(false)
