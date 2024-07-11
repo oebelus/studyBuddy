@@ -38,9 +38,19 @@ class QuizController implements Controller {
             this.postMcq
         )
 
+        this.router.get(
+            `${this.path}/quiz/:title`,
+            this.getMcq
+        )
+
         this.router.post(
             `${this.path}/flashcard`,
             this.postFlashcard
+        )
+
+        this.router.get(
+            `${this.path}/flashcard`,
+            this.getFlashcard
         )
     }
 
@@ -102,6 +112,36 @@ class QuizController implements Controller {
             await this.FlashcardService.save(title, question, answer)
         
             res.status(201).json({message: "Flashcards Created Successfully"})
+        } catch (err) {
+            next(new HttpException(400, (err as Error).message))
+        }
+    }
+
+    private getMcq = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ) => {
+        try {
+            const title = req.params.title
+            const mcq = await this.McqService.get(title);
+
+            res.status(200).json({mcq})
+        } catch (err) {
+            next(new HttpException(400, (err as Error).message))
+        }
+    }
+
+    private getFlashcard = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ) => {
+        try {
+            const title = req.params.title
+            const flashcard = await this.FlashcardService.get(title);
+
+            res.status(200).json({flashcard})
         } catch (err) {
             next(new HttpException(400, (err as Error).message))
         }

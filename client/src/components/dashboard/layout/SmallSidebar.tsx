@@ -15,7 +15,7 @@ export default function SmallSidebar({clicked, setClicked}: SmallSidebarProps) {
             {
                 sidebar.map((element) => (
                     <a onClick={(e) => handleClick(e, element.link)} title={element.link[0].toUpperCase() + element.link.slice(1, element.link.length)} href={`/${element.link}`} key={element.id} className={`${clicked === element.link ? "dark:bg-zinc-700 bg-gray-300" : ""} flex items-center justify-center flex-shrink-0 w-10 h-10 mt-4 rounded hover:bg-gray-300 dark:hover:bg-zinc-700`}>
-                        <span className="material-symbols-outlined dark:text-white">
+                        <span className="navigation material-symbols-outlined dark:text-white">
                             {element.icon}
                         </span>
                     </a>

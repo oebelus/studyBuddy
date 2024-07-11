@@ -21,3 +21,11 @@
 .button-span {
     color: #B5CCFD;
 }
+
+.navigation {
+    transition: transform 0.3s ease;
+}
+
+.navigation:hover {
+    transform: rotate(10deg);
+}
