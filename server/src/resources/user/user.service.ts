@@ -1,6 +1,7 @@
 import userModel from "@/resources/user/user.model";
 import HttpException from "@/utils/exceptions/http.exception";
 import token from "@/utils/token";
+import { Request } from "express";
 
 class UserService {
     private user = userModel;
@@ -32,18 +33,24 @@ class UserService {
 
     public async login(
         email: string, 
-        password: string
+        password: string,
+        req: Request
     ): Promise<string | Error> {
         try {
             const user = await this.user.findOne({ email: email })
+            console.log("user", user);
             
             if (!user) 
                 throw new Error('Unable to find a user with that email');
 
-            if (await user.isValidPassword(password))
+            if (await user.isValidPassword(password)) {
+                // @ts-ignore
+                req.user = user
                 return token.createToken(user);
+            }
             else
                 throw new Error('Incorrect Password')
+
         } catch(error) {
             throw new Error('Unable to login user')
         }

@@ -1,10 +1,11 @@
 import User from "@/resources/user/user.interface";
-import * as express from "express"
+import { Request, Response } from "express"
 
-declare global {
-    namespace Express {
-        export interface Request {
-            user: User;
-        }
+declare namespace Express {
+    interface Request {
+        user?: User;
+    }
+    interface Response {
+        user?: User;
     }
 }

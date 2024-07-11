@@ -62,7 +62,7 @@ class UserController implements Controller {
     ): Promise<Response | void> => {
         try {
             const { email, password } = req.body;
-            const token = await this.UserService.login(email, password)
+            const token = await this.UserService.login(email, password, req)
 
             res.status(200).json({token});
         } catch (error) {
@@ -76,6 +76,10 @@ class UserController implements Controller {
         res:Response,
         next: NextFunction
     ): Response | void => {
+
+        // @ts-ignore
+        console.log("req.user", req.user);
+        
         // @ts-ignore
         if (!req.user) {
             return next(new HttpException(404, "Not Logged In User"));

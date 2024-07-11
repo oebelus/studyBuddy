@@ -1,4 +1,3 @@
-import axios from "axios"
 import { useReducer, useState } from "react"
 import { toast } from "react-toastify"
 import { getError } from "../../utils/api"
@@ -6,6 +5,7 @@ import { ApiError } from "../../types/ApiError"
 import { initialState, reducer } from "../../reducer/store"
 import { jwtDecode } from 'jwt-decode'
 import { User } from "../../types/User"
+import axiosInstance from "../../api/instances"
 
 export default function Register() {
     const [username, setUsername] = useState("") 
@@ -22,7 +22,7 @@ export default function Register() {
             toast.error("Passwords Don't match")
             return
         }
-        await axios.post('http://localhost:3000/api/users/register/', {
+        await axiosInstance.post('/users/register', {
             username,
             email,
             password,

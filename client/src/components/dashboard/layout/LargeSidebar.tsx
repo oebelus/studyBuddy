@@ -3,12 +3,21 @@ import { items } from "../../../utils/constants";
 import axios from "axios";
 
 export default function LargeSidebar() {
-    const [lesson, setLesson] = useState("")
+    const [lessons, setLessons] = useState("")
 
     useEffect(() => {
-        axios.get()
-    }, )
-    
+        const token = JSON.stringify(localStorage.getItem('token')!.trim());
+        axios.get("http://localhost:3000/api/quiz/titles", { 
+            headers: {"Authorization" : `Bearer ${token}`} 
+        })
+        .then((response) => setLessons(response.data))
+        .catch((err) => console.log(err.message))
+    }, [])
+
+    useEffect(() => {
+        console.log(lessons);
+    }, [lessons])
+
     return (
         <div className="hidden sm:flex dark:text-white dark:bg-[#1F1F1F] flex-col w-56 border-r border-gray-300">
             <button className="relative text-sm focus:outline-none group">

@@ -10,6 +10,9 @@ const user = localStorage.getItem('userInfo')
 ? JSON.parse(localStorage.getItem('userInfo')!).user
 : "null"
 
+console.log(user);
+
+
 const theme = localStorage.getItem('theme')
 ? localStorage.getItem('theme')!
 : getTheme()

@@ -14,7 +14,7 @@ export default function Dashboard() {
         <SmallSidebar clicked={clicked} setClicked={setClicked} />
         <LargeSidebar />
         <div className="flex flex-col flex-grow">
-          <InnerNavbar title={clicked[0].toUpperCase() + clicked.slice(1, clicked.length)} />
+          <InnerNavbar title={clicked ? clicked[0].toUpperCase() + clicked.slice(1, clicked.length) : "Dashboard"} />
         </div>
       </div>
     </div>

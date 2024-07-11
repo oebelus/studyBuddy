@@ -28,7 +28,10 @@ const userSchema = new Schema(
         }],
         flashcards: [{
             type: Types.ObjectId, ref: 'Flashcards'
-        }] 
+        }],
+        titles: [{
+            type: String,
+        }]
     },
     { timestamps: true }
 )

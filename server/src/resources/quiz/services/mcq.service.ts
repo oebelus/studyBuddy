@@ -1,5 +1,6 @@
 import { MCQ } from "../interfaces/mcq.interface";
 import mcqModel from "../models/mcq.model";
+import { Request } from "express";
 
 export default class McqService {
     private mcq = mcqModel;
@@ -19,6 +20,22 @@ export default class McqService {
             return mcq as unknown as MCQ;
         } catch (err) {
             throw new Error('MCQ not found')
+        }
+    }
+
+    public async getMcqsTitles(
+        req: Request
+    ): Promise<string[] | Error> {
+        try {
+            const mcqs = await mcqModel.find();
+            
+            const mcqsTitles: string[] = [];
+
+            mcqs.forEach((mcq: MCQ) => mcqsTitles.push(mcq.title))
+
+            return mcqsTitles;
+        } catch (err) {
+            throw new Error('MCQs not found')
         }
     }
 }

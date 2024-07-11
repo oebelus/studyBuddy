@@ -1,11 +1,11 @@
 import { useReducer, useState } from "react";
 import { initialState, reducer } from "../../reducer/store";
-import axios from "axios";
 import { getError } from "../../utils/api";
 import { ApiError } from "../../types/ApiError";
 import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
 import { User } from "../../types/User";
+import axiosInstance from "../../api/instances";
 
 export default function Login() {
     const [email, setEmail] = useState("")
@@ -15,25 +15,26 @@ export default function Login() {
 
     const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault();
-        await axios.post("http://localhost:3000/api/users/login", {
-            email,
-            password
-        })
-        .then(response => {
-            dispatch({type: "USER_SIGNIN", payload: response.data})
+        try {
+            const response = await axiosInstance.post("/users/login", {
+                email,
+                password
+            })
+
+            console.log(response.headers);
+
             const token = response.data.token;
-            const user: User = jwtDecode(token)
-            console.log(user);
-            
+
             localStorage.setItem('token', token);
-            dispatch({type: 'USER_SIGNIN', payload: user})
+
+            const user: User = jwtDecode(token)
+            dispatch({type: "USER_SIGNIN", payload: user})
             
-            window.location.href = `dashboard`;
-        })
-        .catch(err => {
+             window.location.href = `dashboard`;
+        } catch (err) {
             console.log(getError(err as ApiError))
             toast.error(getError(err as ApiError))
-        })
+        }
     }
 
     return (
