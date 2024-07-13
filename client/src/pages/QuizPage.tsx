@@ -17,7 +17,6 @@ function QuizPage() {
   const [type, setType] = useState<Output>("quiz")
   const [n, setN] = useState<number>(20)
   const [loading, setLoading] = useState(false);
-  
 
   async function handlePdf(e: React.ChangeEvent<HTMLInputElement>) {
     const selectedFile = e.target.files![0]

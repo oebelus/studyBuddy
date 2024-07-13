@@ -34,17 +34,17 @@ class QuizController implements Controller {
         )
 
         this.router.post(
-            `${this.path}/quiz`,
+            `${this.path}/mcq`,
             this.postMcq
         )
 
         this.router.get(
-            `${this.path}/quiz/:title`,
+            `${this.path}/mcq/:title`,
             this.getMcq
         )
 
         this.router.post(
-            `${this.path}/flashcard/:title`,
+            `${this.path}/flashcard`,
             this.postFlashcard
         )
 
@@ -96,9 +96,11 @@ class QuizController implements Controller {
         next: NextFunction
     ) => {
         try {
-            const { title, question, options, answers }= req.body;
+            const mcqs: Array<{ title: string; question: string; options: string[]; answers: number[] }> = req.body;
 
-            await this.McqService.save(title, question, options, answers)
+            for (const mcq of mcqs) {
+                await this.McqService.save(mcq.title, mcq.question, mcq.options, mcq.answers);
+            }
         
             res.status(201).json({message: "MCQs Created Successfully"})
         } catch (err) {
@@ -112,9 +114,11 @@ class QuizController implements Controller {
         next: NextFunction
     ) => {
         try {
-            const { title, question, answer }= req.body;
+            const flashcards: Array<{ title: string; question: string; answer: string }> = req.body;
 
-            await this.FlashcardService.save(title, question, answer)
+            for (const flashcard of flashcards) {
+                await this.FlashcardService.save(flashcard.title, flashcard.question, flashcard.answer);
+            }
         
             res.status(201).json({message: "Flashcards Created Successfully"})
         } catch (err) {
@@ -129,6 +133,8 @@ class QuizController implements Controller {
     ) => {
         try {
             const title = req.params.title
+            console.log(title);
+            
             const mcq = await this.McqService.get(title);
 
             res.status(200).json({mcq})
@@ -170,8 +176,6 @@ class QuizController implements Controller {
     }
 
     private postPDF = async (req: Request, res: Response, next: NextFunction) => {
-        console.log("HERE");
-        
         if (!req.file) {
             res.status(400).json({ error: "No file uploaded" });
             return;

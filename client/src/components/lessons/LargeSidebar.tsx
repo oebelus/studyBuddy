@@ -1,12 +1,19 @@
 import { useEffect, useReducer, useState } from "react";
 import axios from "axios";
-import Create from "../../modals/Create";
-import { initialState, reducer } from "../../../reducer/store";
-export default function LargeSidebar() {
+import Create from "../modals/Create";
+import { initialState, reducer } from "../../reducer/store";
+
+type LargeSidebarProps = {
+    clicked: string;
+    setClicked: (el: string) => void;
+}
+
+export default function LargeSidebar({clicked, setClicked}: LargeSidebarProps) {
     const [lessons, setLessons] = useState<string[]>([])
     const [modalIsOpen, setIsOpen] = useState(false);
 
     const [state, dispatch] = useReducer(reducer, initialState)
+   
 
     useEffect(() => {
         const token = JSON.stringify(localStorage.getItem('token')!.trim());
@@ -26,7 +33,9 @@ export default function LargeSidebar() {
 
     useEffect(() => {
         console.log(lessons);
-    }, [lessons])
+        console.log(clicked);
+        
+    }, [clicked, lessons])
 
     function openModal() {
         setIsOpen(true);
@@ -53,7 +62,7 @@ export default function LargeSidebar() {
             <div className="flex flex-col flex-grow p-4 overflow-auto">
                 {
                     lessons && lessons.length > 0 && lessons.map((lesson, key) => (
-                        <a key={key} className="flex items-center flex-shrink-0 h-10 px-2 text-sm font-medium rounded hover:bg-gray-300 dark:hover:bg-zinc-700" href="#">
+                        <a onClick={() => setClicked(lesson)} key={key} className={`${clicked == lesson ? "bg-gray-300 dark:bg-zinc-700 " : ''} flex items-center flex-shrink-0 h-10 px-2 text-sm font-medium rounded hover:bg-gray-300 dark:hover:bg-zinc-700`} href="#">
                             <span className="leading-none">{lesson}</span>
                         </a>
                     ))

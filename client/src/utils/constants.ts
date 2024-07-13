@@ -101,14 +101,9 @@ export const sidebar = [
         link: "dashboard"
     },
     {
-        id: "question_mark",
-        icon: "question_mark",
-        link: "quiz"
-    },
-    {
         id: "description",
         icon: "description",
-        link: "flashcards"
+        link: "lessons"
     },
     {
         id: "generate",
