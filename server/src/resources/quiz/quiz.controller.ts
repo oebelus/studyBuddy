@@ -96,11 +96,9 @@ class QuizController implements Controller {
         next: NextFunction
     ) => {
         try {
-            const mcqs: Array<{ title: string; question: string; options: string[]; answers: number[] }> = req.body;
-
-            for (const mcq of mcqs) {
-                await this.McqService.save(mcq.title, mcq.question, mcq.options, mcq.answers);
-            }
+            const { title, mcqs }: { title: string, mcqs: any[] } = req.body;
+            
+            await this.McqService.save(title, mcqs);
         
             res.status(201).json({message: "MCQs Created Successfully"})
         } catch (err) {
@@ -114,11 +112,9 @@ class QuizController implements Controller {
         next: NextFunction
     ) => {
         try {
-            const flashcards: Array<{ title: string; question: string; answer: string }> = req.body;
-
-            for (const flashcard of flashcards) {
-                await this.FlashcardService.save(flashcard.title, flashcard.question, flashcard.answer);
-            }
+            const { title, flashcards }: { title: string, flashcards: any[] } = req.body;
+            
+            await this.FlashcardService.save(title, flashcards);
         
             res.status(201).json({message: "Flashcards Created Successfully"})
         } catch (err) {

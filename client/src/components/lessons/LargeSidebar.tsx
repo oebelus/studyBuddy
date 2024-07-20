@@ -1,35 +1,14 @@
-import { useEffect, useReducer, useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
 import Create from "../modals/Create";
-import { initialState, reducer } from "../../reducer/store";
 
 type LargeSidebarProps = {
     clicked: string;
     setClicked: (el: string) => void;
+    lessons: string[]
 }
 
-export default function LargeSidebar({clicked, setClicked}: LargeSidebarProps) {
-    const [lessons, setLessons] = useState<string[]>([])
+export default function LargeSidebar({clicked, setClicked, lessons}: LargeSidebarProps) {
     const [modalIsOpen, setIsOpen] = useState(false);
-
-    const [state, dispatch] = useReducer(reducer, initialState)
-   
-
-    useEffect(() => {
-        const token = JSON.stringify(localStorage.getItem('token')!.trim());
-        
-        axios.get("http://localhost:3000/api/users", { 
-            headers: {"Authorization" : `Bearer ${token.trim().slice(1, token.length - 1)}`} 
-        })
-        .then((response) => {
-            dispatch({type: 'SET_TITLES', payload: response.data.user.titles})
-            console.log(state.titles);
-            
-            setLessons(response.data.user.titles)
-        })
-        .catch((err) => console.log(err.message))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
 
     useEffect(() => {
         console.log(lessons);

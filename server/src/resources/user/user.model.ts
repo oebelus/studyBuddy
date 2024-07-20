@@ -1,4 +1,4 @@
-import { Schema, Types, model, ObjectId } from "mongoose";
+import { Schema, Types, model } from "mongoose";
 import bcrypt from 'bcrypt';
 import User from "@/resources/user/user.interface";
 
@@ -31,6 +31,9 @@ const userSchema = new Schema(
         }],
         titles: [{
             type: String,
+        }],
+        page: [{
+            type: Types.ObjectId, ref: 'Page'
         }]
     },
     { timestamps: true }

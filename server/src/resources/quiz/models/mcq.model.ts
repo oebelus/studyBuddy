@@ -1,24 +1,18 @@
 import { model, Schema } from "mongoose";
-import { MCQ } from "../interfaces/mcq.interface";
+import { MCQ, MCQItem } from "../interfaces/mcq.interface";
+
+const mcqItemSchema = new Schema<MCQItem>({
+  question: { type: String, required: true },
+  options: { type: [String], required: true },
+  answers: { type: [Number], required: true }
+});
 
 const mcqSchema = new Schema(
     {
-        title: {
-            type: String,
-            required: true
-        },
-        question: { 
-            type: String,
-            required: true,
-        },
-        options: [{
-            option: String,
-        }],
-        answers: [{
-            answer: Number,
-        }]
+        title: { type: String, required: true },
+        mcqs: { type: [mcqItemSchema], required: true }
     },
     { timestamps: true }
-)
+);
 
-export default model<MCQ>('Mcqs', mcqSchema); 
+export default model<MCQ>('Mcqs', mcqSchema);

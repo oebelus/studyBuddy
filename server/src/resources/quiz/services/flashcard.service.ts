@@ -5,9 +5,9 @@ import { Request } from "express";
 export default class FlashcardService {
     private flashcard = flashcardModel;
 
-    public async save(title: string, question: string, answer: string): Promise<String | Error> {
+    public async save(title: string, flashcards: any): Promise<String | Error> {
         try {
-            await this.flashcard.create({title, question, answer})
+            await this.flashcard.create({title, flashcards})
             return "Flashcard created successfully";
         } catch (err) {
             throw new Error('Unable to create user')

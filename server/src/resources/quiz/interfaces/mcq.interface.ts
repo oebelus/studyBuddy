@@ -1,8 +1,12 @@
-import { Document } from "mongoose"
+import { Document } from "mongoose";
+
+export interface MCQItem {
+  question: string;
+  options: string[];
+  answers: number[];
+}
 
 export interface MCQ extends Document {
-  title: string,
-  answers: number[],
-  question: string,
-  options: string[],
+  title: string;
+  mcqs: MCQItem[];
 }

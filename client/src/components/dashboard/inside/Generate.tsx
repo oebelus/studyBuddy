@@ -1,29 +1,28 @@
-import Modal from 'react-modal';
-import { customStyles } from './modalUtils/styles';
-import { Dispatch, SetStateAction, useState } from 'react';
-import { Flashcard, MCQ, Output } from '../../types/output';
-import axiosInstance from '../../api/instances';
-import { formatJson } from '../../utils/format';
+import axiosInstance from "../../../api/instances";
+import { formatJson } from "../../../utils/format";
+import { Flashcard, MCQ, Output } from "../../../types/output";
+import { useEffect, useState } from "react";
 
-interface GenerateType {
-    modalIsOpen: boolean;
-    setIsOpen: (el:boolean) => void;
-    titles: string[],
-    setQuiz: Dispatch<SetStateAction<MCQ[]>>
-    quiz: MCQ[];
-    setFlashcards: Dispatch<SetStateAction<Flashcard[]>>
-    flashcards: Flashcard[];
-    type: string; 
-    setType: Dispatch<SetStateAction<Output>>;
-    setLoading: (b: boolean) => void
-}
-
-export default function Generate({setLoading, modalIsOpen, setIsOpen, titles, setQuiz, quiz, setFlashcards, flashcards, type, setType}: GenerateType) {
+export default function Generate() {
+    const [type, setType] = useState<Output>("quiz")
     const [n, setN] = useState<number>(20)
+    const [loading, setLoading] = useState(false);
     const [extractedText, setExtractedText] = useState<string | undefined>('')
     const [pdfName, setPDFName] = useState<string | undefined>('')
-    
+    const [quiz, setQuiz] = useState<MCQ[]>([])
+    const [flashcards, setFlashcards] = useState<Flashcard[]>([])
     const [subject, setSubject] = useState<string>("")
+    const [titles, setTitles] = useState([])
+
+    useEffect(() => {
+        axiosInstance.get("/users")
+            .then((response) => {
+                console.log(response.data.user);
+                
+                setTitles(response.data.user.titles)})
+            .catch((err) => console.log(err))
+        
+    }, [pdfName])
 
     function generateMcq(types: Output) {
     setLoading(true);
@@ -66,21 +65,8 @@ export default function Generate({setLoading, modalIsOpen, setIsOpen, titles, se
             })
         .catch((error) => console.log(error))
     }
-
-    function closeModal() {
-        setIsOpen(false);
-    }
-    
     return (
-        <Modal
-            isOpen={modalIsOpen}
-            onRequestClose={closeModal}
-            style={customStyles}
-            contentLabel="Example Modal"
-        >
-            <span onClick={closeModal} className="cursor-pointer material-symbols-outlined">
-                close
-            </span>
+        <div>
             <div className="mx-auto bg-white h-fit p-3 rounded-lg">
                 <div className="flex flex-col justify-between items-center">
                     <div>
@@ -114,11 +100,12 @@ export default function Generate({setLoading, modalIsOpen, setIsOpen, titles, se
                         </div>
                     </div>
                     <div className="flex gap-4">
-                        <button onClick={() => {generateMcq("quiz"), setIsOpen(false)}} type="button" className=" border-zinc-300 border-2 mt-4 px-5 py-3 font-semibold text-zinc-900 rounded bg-white hover:bg-zinc-200 transition">MCQs</button>
-                        <button onClick={() => {generateMcq("flashcard"), setIsOpen(false)}} type="button" className=" border-zinc-300 border-2 mt-4 px-5 py-3 font-semibold text-zinc-900 rounded bg-white hover:bg-zinc-200 transition">Flashcards</button>
+                        <button onClick={() => generateMcq("quiz")} type="button" className=" border-zinc-300 border-2 mt-4 px-5 py-3 font-semibold text-zinc-900 rounded bg-white hover:bg-zinc-200 transition">MCQs</button>
+                        <button onClick={() => generateMcq("flashcard")} type="button" className=" border-zinc-300 border-2 mt-4 px-5 py-3 font-semibold text-zinc-900 rounded bg-white hover:bg-zinc-200 transition">Flashcards</button>
                     </div>
                 </div>
+                <button className={`${loading ? "" : "hidden"}`} type="submit">{loading ? <div className="w-16 h-16 mx-auto mt-5 border-4 border-dashed rounded-full animate-spin border-white"></div> : "<>Search</>"}</button>
             </div>
-        </Modal>
-    )
+        </div>
+  )
 }

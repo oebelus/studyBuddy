@@ -5,11 +5,11 @@ import { Request } from "express";
 export default class McqService {
     private mcq = mcqModel;
 
-    public async save(title: string, question: string, options: string[], answers: number[]): Promise<String | Error> {
+    public async save(title: string, mcqs: any): Promise<String | Error> {
         try {
-            console.log("HERE", title, question);
-
-            await this.mcq.create({title, question, options, answers})
+            console.log("HERE", title, mcqs);
+            
+            await this.mcq.create({title, mcqs})
             return "MCQ created successfully";
         } catch (err) {
             throw new Error('Unable to create user')

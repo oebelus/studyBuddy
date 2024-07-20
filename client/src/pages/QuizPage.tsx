@@ -13,7 +13,6 @@ function QuizPage() {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([])
   const [module, setModule] = useState<string>("")
   const [subject, setSubject] = useState<string>("")
-  
   const [type, setType] = useState<Output>("quiz")
   const [n, setN] = useState<number>(20)
   const [loading, setLoading] = useState(false);
