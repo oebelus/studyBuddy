@@ -40,7 +40,7 @@ export default class PageService {
 
     public async deletePage(title: string) {
         try  {
-            const note = await this.pages.findOneAndDelete({title});
+            await this.pages.findOneAndDelete({title});
             
         } catch (err) {
             throw new Error('Unable to delete page')

@@ -41,9 +41,14 @@ export default function LargeSidebar({clicked, setClicked, lessons}: LargeSideba
             <div className="flex flex-col flex-grow p-4 overflow-auto">
                 {
                     lessons && lessons.length > 0 && lessons.map((lesson, key) => (
-                        <a onClick={() => setClicked(lesson)} key={key} className={`${clicked == lesson ? "bg-gray-300 dark:bg-zinc-700 " : ''} flex items-center flex-shrink-0 h-10 px-2 text-sm font-medium rounded hover:bg-gray-300 dark:hover:bg-zinc-700`} href="#">
-                            <span className="leading-none">{lesson}</span>
-                        </a>
+                        <div key={key} className="flex justify-between">
+                            <a onClick={() => setClicked(lesson)}className={`${clicked == lesson ? "bg-gray-300 dark:bg-zinc-700 " : ''} flex items-center flex-shrink-0 h-10 px-2 text-sm font-medium rounded hover:bg-gray-300 dark:hover:bg-zinc-700`} href="#">
+                                <span className="leading-none">{lesson}</span>
+                            </a>
+                            <span className="cursor-pointer material-symbols-outlined text-red-300 w-5 h-5 mt-2">
+                                delete
+                            </span>
+                        </div>
                     ))
                 }
                 <button onClick={openModal} className="mt-4 flex items-center flex-shrink-0 h-10 px-3 text-sm font-medium bg-gray-200 rounded dark:bg-[#303030] transition-[200ms] dark:hover:bg-fuchsia-800 hover:bg-gray-300">

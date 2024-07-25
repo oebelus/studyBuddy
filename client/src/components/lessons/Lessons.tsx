@@ -3,7 +3,6 @@ import axiosInstance from "../../api/instances";
 import { Flashcard, MCQ, Output } from "../../types/output";
 import Generate from "../modals/Generate";
 import Quiz from "../Quiz";
-import Note from "./notes/Note";
 
 interface LessonsType {
     lessons: string[];
@@ -71,11 +70,6 @@ export default function Lessons({ clicked, lessons }: LessonsType) {
                     { /* @ts-ignore */ }
                     <Generate setLoading={setLoading} type={type} setType={setType} setQuiz={setQuiz} setFlashcards={setFlashcards} quiz={quiz} flashcards={flashcards} titles={lessons} modalIsOpen={modalIsOpen} setIsOpen={setIsOpen} />
                     
-                </div>
-                <div>
-                    <Note id={""} content={""} onDelete={function (): void {
-                        throw new Error("Function not implemented.");
-                    } } />
                 </div>
             </div>
         </div>
