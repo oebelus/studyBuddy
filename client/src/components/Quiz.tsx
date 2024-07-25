@@ -56,7 +56,7 @@ export default function Quiz({ quiz, type, flashcards }: QuizProps) {
     }
 
     return (
-        <div className="mx-auto xs:max-w-[60%] max-w-[90%] mt-4">
+        <div className="mx-auto xs:max-w-[60%] max-w-[90%] mt-4 min-h-screen">
             {quiz.length > 0 && type === "quiz" && <p className="p-4 text-white">Number of questions: {quiz.length}</p>}
             {flashcards.length > 0 && type === "flashcard" && <p className="p-4 text-white">Number of questions: {flashcards.length}</p>}
             <div className="overflow-auto max-h-[400px] md:max-h-[600px]">

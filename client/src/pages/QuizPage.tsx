@@ -24,6 +24,7 @@ function QuizPage() {
 
     await axios.post(`http://localhost:3000/api/upload-pdf`, formData)
       .then((response) => {
+        console.log("posted")
         setExtractedText(response.data.extractedText)
         setPDFName(response.data.pdfName)
         console.log(extractedText ? "is there" : "no text", pdfName)
@@ -77,7 +78,7 @@ function QuizPage() {
         
         <div className="flex justify-center flex-col lg:flex-row">
           {pdfName && <PDFSection extractedText={extractedText} pdfName={pdfName} />}
-          <Quiz quiz={quiz} flashcards={flashcards} extractedText={extractedText} type={type} />
+          <Quiz quiz={quiz} flashcards={flashcards} type={type} />
         </div>
       </div>
 
