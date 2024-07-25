@@ -11,8 +11,7 @@ class QuizController implements Controller {
     public path = '/quiz';
     public pdfPath = '/upload-pdf'
     public router = Router();
-    private storage = multer.memoryStorage();
-    private upload = multer({ storage: this.storage })
+    private upload = multer({ dest: '/pdfs' })
     private GEMINI_API_KEY = process.env.GEMINI_API_KEY
     private McqService = new McqService();
     private FlashcardService = new FlashcardService();
@@ -173,6 +172,7 @@ class QuizController implements Controller {
 
     private postPDF = async (req: Request, res: Response, next: NextFunction) => {
         if (!req.file) {
+            console.log("error")
             res.status(400).json({ error: "No file uploaded" });
             return;
         }
