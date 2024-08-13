@@ -4,7 +4,12 @@ import { useEffect, useReducer, useState } from "react";
 import { getTheme } from "../../utils/theme";
 import { initialState, reducer } from "../../reducer/store";
 
-export default function Navbar() {
+interface NavbarProps {
+    isSidebarOpen: boolean,
+    toggleSidebar: () => void
+}
+
+export default function Navbar({isSidebarOpen, toggleSidebar}: NavbarProps) {
     const [theme, setTheme] = useState<string>(getTheme())
     
     const checked = getTheme() === "light";
@@ -28,8 +33,17 @@ export default function Navbar() {
     }, [theme])
 
     return (
-        <div className="flex justify-between items-center w-full dark:bg-[#1F1F1F] bg-white p-4 shadow-lg">
+        <div className="min-w-screen flex justify-between items-center dark:bg-[#1F1F1F] bg-white p-4 shadow-lg">
             <div className="flex items-center">
+            <button
+                className="p-1 mr-4 rounded-md text-white bg-[#2F2F2F]"
+                onClick={toggleSidebar}
+            >
+                <span className={`material-symbols-outlined`}>
+                    {isSidebarOpen ? "close" : "menu_open"}
+                </span>
+                
+            </button>
             <h1 className="text-2xl font-semibold dark:text-white text-zinc-800 font-serif">StudyBuddy,</h1>
             <span className="text-zinc-600 dark:text-gray-200 mt-1 ml-4 hidden md:block">Generates MCQs and Flashcards, Previews PDFs</span>
             </div>

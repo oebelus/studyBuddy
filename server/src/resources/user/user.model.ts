@@ -30,7 +30,9 @@ const userSchema = new Schema(
             type: Types.ObjectId, ref: 'Flashcards'
         }],
         titles: [{
-            type: String,
+            title: String,
+            category: String,
+            numberOfQuestions: Number
         }],
         page: [{
             type: Types.ObjectId, ref: 'Page'

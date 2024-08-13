@@ -1,7 +1,11 @@
 import { Document } from "mongoose"
 
-export interface Flashcard extends Document {
+export interface Flashcards extends Document {
     title: string,
-    question: string,
-    answer: string
+    category: string,
+    flashcards: Flashcard[]
+}
+export interface Flashcard extends Document {
+    question: string;
+    answer: string;
 }

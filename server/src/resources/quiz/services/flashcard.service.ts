@@ -1,22 +1,31 @@
+import { Types } from "mongoose";
 import { Flashcard } from "../interfaces/flashcard.interface";
-import flashcardModel from "../models/flashcard.model";
+import flashcardsModel from "../models/flashcard.model";
 import { Request } from "express";
 
 export default class FlashcardService {
-    private flashcard = flashcardModel;
+    private flashcard = flashcardsModel;
 
-    public async save(title: string, flashcards: any): Promise<String | Error> {
+    public async save(title: string, category: string, flashcards: Flashcard[], user: Types.ObjectId): Promise<String | Error> {
         try {
-            await this.flashcard.create({title, flashcards})
+            const newFlashcard: Flashcard = new this.flashcard({
+                title,
+                category,
+                flashcards,
+                user
+            });
+
+            //await this.flashcard.create({title, flashcards})
+            await newFlashcard.save();
             return "Flashcard created successfully";
         } catch (err) {
             throw new Error('Unable to create user')
         }
     }
 
-    public async get(title: string): Promise<Flashcard | Error> {
+    public async get(userId: Types.ObjectId): Promise<Flashcard | Error> {
         try {
-            const mcq = this.flashcard.findOne({title})
+            const mcq = this.flashcard.find({user: userId}).exec()
             return mcq as unknown as Flashcard;
         } catch (err) {
             throw new Error('MCQ not found')
@@ -27,10 +36,10 @@ export default class FlashcardService {
         req: Request
     ): Promise<string[] | Error> {
         try {
-            const flashcards = await flashcardModel.find();
+            const flashcards = await flashcardsModel.find();
             const flashcardsTitles: string[] = [];
 
-            flashcards.forEach((flashcard: Flashcard) => flashcardsTitles.push(flashcard.title))
+            //flashcards..forEach((flashcard: Flashcard) => flashcardsTitles.push(flashcard.title))
 
             return flashcardsTitles;
         } catch (err) {

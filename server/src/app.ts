@@ -6,7 +6,6 @@ import morgan from "morgan";
 import Controller from '@/utils/interfaces/controller.interface';
 import ErrorMiddleware from "@/middleware/error.middleware";
 import helmet from "helmet";
-import authenticatedMiddleware from "./middleware/authenticated.middleware";
 
 class App {
     public express!: Application;

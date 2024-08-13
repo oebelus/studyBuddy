@@ -7,8 +7,6 @@ export default class McqService {
 
     public async save(title: string, mcqs: any): Promise<String | Error> {
         try {
-            console.log("HERE", title, mcqs);
-            
             await this.mcq.create({title, mcqs})
             return "MCQ created successfully";
         } catch (err) {

@@ -60,7 +60,7 @@ function QuizPage() {
   }
 
   return (
-    <div className={`bg-white dark:bg-[#121212] ${quiz.length > 0 || pdfName != "" ? "h-full" : "h-screen"}`}>
+    <div className="bg-white dark:bg-[#121212] min-h-screen">
       <div className="flex flex-col justify-center">
         <GenerateMenu 
           extractedText={extractedText} 

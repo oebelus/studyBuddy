@@ -91,33 +91,80 @@ export const feedback =[
 
 export const sidebar = [
     {
-        id: "deployed_code",
-        icon: "deployed_code",
-        link: "deployed"
+        id: "dashboard",
+        icon: "dashboard",
+        link: "dashboard",
+        name: "Dashboard"
     },
     {
-        id: "house",
-        icon: "house",
-        link: "dashboard"
-    },
-    {
-        id: "description",
+        id: "flashcards",
         icon: "description",
-        link: "lessons"
+        link: "flashcards",
+        name: "Flashcards"
     },
     {
-        id: "generate",
-        icon: "cycle",
-        link: "generate"
-    },
-    {
-        id: "bar_chart",
-        icon: "bar_chart",
-        link: "statistics"
+        id: "quiz",
+        icon: "quiz",
+        link: "quiz",
+        name: "Quiz"
     },
     {
         id: "settings",
         icon: "settings",
-        link: "settings"
+        link: "settings",
+        name: "Settings"
+    },
+]
+
+export const topics = [
+    {
+        name: "Topic",
+        category: "This is a short description.",
+        number: 15,
+    },
+    {
+        name: "Topic",
+        category: "This is a short description.",
+        number: 15,
+    },
+    {
+        name: "Topic",
+        category: "This is a short description.",
+        number: 15,
+    },
+    {
+        name: "Topic",
+        category: "This is a short description.",
+        number: 15,
+    },
+    {
+        name: "Topic",
+        category: "This is a short description.",
+        number: 15,
+    },
+    {
+        name: "Topic",
+        category: "This is a short description.",
+        number: 15,
+    },
+    {
+        name: "Topic",
+        category: "This is a short description.",
+        number: 15,
+    },
+    {
+        name: "Topic",
+        category: "This is a short description.",
+        number: 15,
+    },
+    {
+        name: "Topic",
+        category: "This is a short description.",
+        number: 15,
+    },
+    {
+        name: "Topic",
+        category: "This is a short description.",
+        number: 15,
     },
 ]
