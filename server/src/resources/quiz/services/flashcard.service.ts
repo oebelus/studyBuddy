@@ -28,7 +28,20 @@ export default class FlashcardService {
             const mcq = this.flashcard.find({user: userId}).exec()
             return mcq as unknown as Flashcard;
         } catch (err) {
-            throw new Error('MCQ not found')
+            throw new Error('Flashcards not found')
+        }
+    }
+
+    public async delete(flashcardId: string){
+        try {
+            const result = await this.flashcard.findByIdAndDelete(flashcardId).exec()
+
+            if (!result) {
+                throw new Error('Flashcard not found');
+            }
+            
+        } catch (err) {
+            throw new Error(`Error deleting flashcard: ${(err as Error).message}`);
         }
     }
 

@@ -51,8 +51,8 @@ export default function Generate({type, setQuiz, setLoading, setTitle, setCatego
         e.preventDefault()
         setLoading(true);
 
-        setTitle(form.topicName)
-        setCategory(form.category)
+        setTitle(form.topicName);
+        setCategory(form.category);
 
         axios.get(`http://localhost:3000/api/quiz?language=${language}&lesson=${encodeURIComponent(extractedText!)}&module=${encodeURIComponent(form.category)}&subject=${encodeURIComponent(form.topicName)}&type=${encodeURIComponent(type)}&n=${encodeURIComponent(form.numberOfQuestions)}`)
         .then((response) => {
@@ -76,7 +76,7 @@ export default function Generate({type, setQuiz, setLoading, setTitle, setCatego
     }
 
     return (
-        <form onSubmit={(e)=>generate(e)} className="h-fit min-w-[50%] container mx-5 mt-4 p-4 bg-gray-100 dark:bg-[#1F1F1F] rounded-lg">
+        <form onSubmit={(e)=>generate(e)} className="h-fit min-w-[50%] container mx-5 p-4 bg-gray-100 dark:bg-[#1F1F1F] rounded-lg">
             
             <div className="flex flex-col gap-4">
                 <div>
@@ -142,7 +142,7 @@ export default function Generate({type, setQuiz, setLoading, setTitle, setCatego
                     type="submit"
                     className="mt-4 p-2 dark:bg-[#474646] dark:hover:bg-[#302f2f] bg-blue-500 text-white rounded-lg hover:bg-blue-600"
                 >
-                    Generate Flashcards
+                    Generate {type == "quiz" ? "Quiz" : "Flashcards"}
                 </button>
             </div>
         </form>

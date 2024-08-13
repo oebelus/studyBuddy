@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { MCQ } from "../interfaces/mcq.interface";
 import mcqModel from "../models/mcq.model";
 import { Request } from "express";
@@ -5,38 +6,43 @@ import { Request } from "express";
 export default class McqService {
     private mcq = mcqModel;
 
-    public async save(title: string, mcqs: any): Promise<String | Error> {
+    public async save(title: string, mcqs: MCQ[], user: Types.ObjectId, category: string): Promise<String | Error> {
         try {
-            await this.mcq.create({title, mcqs})
+            const newMcq = new this.mcq({
+                title,
+                category,
+                mcqs,
+                user
+            });
+
+            await newMcq.save();
+
             return "MCQ created successfully";
         } catch (err) {
             throw new Error('Unable to create user')
         }
     }
 
-    public async get(title: string): Promise<MCQ | Error> {
+    public async get(userId: Types.ObjectId): Promise<MCQ | Error> {
         try {
-            const mcq = this.mcq.findOne({title})
+            const mcq = this.mcq.findOne({user: userId}).exec()
             
             return mcq as unknown as MCQ;
         } catch (err) {
-            throw new Error('MCQ not found')
+            throw new Error('MCQs not found')
         }
     }
 
-    public async getMcqsTitles(
-        req: Request
-    ): Promise<string[] | Error> {
+    public async delete(mcqId: string){
         try {
-            const mcqs = await mcqModel.find();
+            const result = await this.mcq.findByIdAndDelete(mcqId).exec()
+
+            if (!result) {
+                throw new Error('Flashcard not found');
+            }
             
-            const mcqsTitles: string[] = [];
-
-            mcqs.forEach((mcq: MCQ) => mcqsTitles.push(mcq.title))
-
-            return mcqsTitles;
         } catch (err) {
-            throw new Error('MCQs not found')
+            throw new Error(`Error deleting flashcard: ${(err as Error).message}`);
         }
     }
 }

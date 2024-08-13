@@ -8,6 +8,7 @@ import McqService from "./services/mcq.service";
 import FlashcardService from "./services/flashcard.service";
 import { Flashcard } from "./interfaces/flashcard.interface";
 import authenticatedMiddleware from "@/middleware/authenticated.middleware";
+import { MCQ } from "./interfaces/mcq.interface";
 
 class QuizController implements Controller {
     public path = '/quiz';
@@ -62,9 +63,10 @@ class QuizController implements Controller {
             this.getFlashcard
         )
 
-        this.router.get(
-            `${this.path}/titles`,
-            this.getTitles
+        this.router.delete(
+            `${this.path}/flashcard/:id`,
+            authenticatedMiddleware,
+            this.deleteFlashcard
         )
     }
 
@@ -117,9 +119,15 @@ class QuizController implements Controller {
         next: NextFunction
     ) => {
         try {
-            const { title, mcqs }: { title: string, mcqs: any[] } = req.body;
+            const { title, category, mcqs }: { title: string, category:string, mcqs: MCQ[] } = req.body;
             
-            await this.McqService.save(title, mcqs);
+            const userId = req.user?.id;
+
+            if (!userId) {
+                return res.status(401).json({ message: 'User not authenticated' });
+            }
+
+            await this.McqService.save(title, mcqs, userId, category);
         
             res.status(201).json({message: "MCQs Created Successfully"})
         } catch (err) {
@@ -141,15 +149,7 @@ class QuizController implements Controller {
                 return res.status(401).json({ message: 'User not authenticated' });
             }
 
-            await Promise.all(flashcards.map(async () => {
-                await this.FlashcardService.save(
-                        title,
-                        category,
-                        flashcards,
-                        userId
-                    );
-                }
-            ));
+            await this.FlashcardService.save(title, category, flashcards, userId);
 
             res.status(201).json({ message: "Flashcards Created Successfully" });
 
@@ -164,10 +164,13 @@ class QuizController implements Controller {
         next: NextFunction
     ) => {
         try {
-            const title = req.params.title
-            console.log(title);
+            const userId = req.user?.id;
+
+            if (!userId) {
+                return res.status(401).json({ message: 'User not authenticated' });
+            }
             
-            const mcq = await this.McqService.get(title);
+            const mcq = await this.McqService.get(userId);
 
             res.status(200).json({mcq})
         } catch (err) {
@@ -197,20 +200,21 @@ class QuizController implements Controller {
         }
     }
 
-    private getTitles = async (
+    private deleteFlashcard = async (
         req: Request,
         res: Response,
         next: NextFunction
     ) => {
         try {
-            const mcqsTitles = await this.McqService.getMcqsTitles(req);
-            const flashcardTitles = await this.FlashcardService.getFlashcardsTitles(req);
+            const flashcardId = req.params.id;
+            console.log("here")
+            await this.FlashcardService.delete(flashcardId);
 
-            const titles = [...new Set([...mcqsTitles as string[], ...flashcardTitles as string[]])]
-            
-            res.status(200).json({ titles: titles })
+            res.status(200).json("Flashcard Deleted Successfully")
         } catch (err) {
+            console.log(err)
             next(new HttpException(400, (err as Error).message))
+            console.log(err)
         }
     }
 

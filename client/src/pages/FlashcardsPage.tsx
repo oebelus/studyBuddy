@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../components/dashboard/Sidebar";
 import Navbar from "../components/dashboard/Navbar";
-import Topics from "../components/Topics";
 import Generate from "../components/Generate";
-import FlipCard from "../components/FlipCard";
 import axios from "axios";
 import { Topic } from "../types/Topic";
 import { Flashcard, Flashcards } from "../types/flashcard";
+import Topics from "../components/topic/Topics";
+import FlipCard from "../components/topic/FlipCard";
 
 export default function FlashcardsPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -25,18 +25,18 @@ export default function FlashcardsPage() {
     axios.get(`http://localhost:3000/api/quiz/flashcard`,
       {
         headers: {
-            Authorization: `Bearer ${token}` // Add the token to headers
+            Authorization: `Bearer ${token}`
         }
       }
     ).then((response) => {
-      console.log(response.data.flashcard)
+      console.log(response.data)
       const flashcards = response.data.flashcard
 
       const userTopics: Topic[] = flashcards.map((flashcard: Flashcards) => ({
         name: flashcard.title,
         category: flashcard.category,
         numberOfQuestions: flashcard.flashcards.length - 1,
-        id: flashcard.id
+        id: flashcard._id
       }))
 
       setTopics(userTopics);
@@ -74,7 +74,6 @@ export default function FlashcardsPage() {
             </div>
 
             <div className="flex">
-              {}
               {isGenerateOpen && (
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 /* @ts-expect-error */
@@ -83,7 +82,6 @@ export default function FlashcardsPage() {
                 {
                   flashcards && flashcards.length > 0 && <FlipCard category={category} title={title} flashcards={flashcards} />
                 }
-
             </div>
           </div>
 

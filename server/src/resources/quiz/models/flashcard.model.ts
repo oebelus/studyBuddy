@@ -32,7 +32,7 @@ const flashcardsSchema = new Schema(
             type: Types.ObjectId,
             ref: 'User',
             required: true
-        }
+        },
     },
     { timestamps: true }
 );
