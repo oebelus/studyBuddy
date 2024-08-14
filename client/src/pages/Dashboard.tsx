@@ -1,7 +1,6 @@
 import { useState } from "react";
 import Navbar from "../components/dashboard/Navbar";
 import Sidebar from "../components/dashboard/Sidebar";
-import QuizPage from "./QuizPage";
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -17,7 +16,7 @@ export default function Dashboard() {
         <Sidebar isSidebarOpen={isSidebarOpen} />
 
         <div className="flex flex-col flex-grow min-h-screen">
-          <QuizPage />
+
         </div>
       </div>
     </div>

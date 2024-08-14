@@ -35,7 +35,7 @@ export default function QuizPage() {
           <p className="text-xl mt-4 ml-4">Your topics:</p>
           <Topics topics={topics} setSelectedTopic={setSelectedTopic} />
           <div className="flex rounded-lg cursor-pointer gap-4 p-2 w-fit mt-2" onClick={() => setIsOpen(true)}>
-            <p className="mt-1">{isOpen ? "▼" : "►"} Generate a Quiz</p>
+            <p className="mt-1">Generate a Quiz</p>
           </div>
           <GenerateModal
             type="quiz"

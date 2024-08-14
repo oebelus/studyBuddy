@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../components/dashboard/Sidebar";
 import Navbar from "../components/dashboard/Navbar";
-import Generate from "../components/Generate";
 import axios from "axios";
 import { Topic } from "../types/Topic";
 import { Flashcard, Flashcards } from "../types/flashcard";
 import Topics from "../components/topic/Topics";
 import FlipCard from "../components/topic/FlipCard";
+import GenerateModal from "../components/GenerateModal";
 
 export default function FlashcardsPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -16,8 +16,7 @@ export default function FlashcardsPage() {
   const [title, setTitle] = useState("")
   const [category, setCategory] = useState("")
   const [topics, setTopics] = useState<Topic[]>([])
-
-  const [isGenerateOpen, setIsGenerateOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -48,10 +47,6 @@ export default function FlashcardsPage() {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const toggleGenerateDropdown = () => {
-    setIsGenerateOpen(!isGenerateOpen);
-  };
-
   useEffect(() => {
     console.log(flashcards)
   }, [flashcards])
@@ -68,23 +63,24 @@ export default function FlashcardsPage() {
       
           <Topics topics={topics} setSelectedTopic={setSelectedTopic} />
           
-          <div>
-            <div className="flex rounded-lg cursor-pointer gap-4 p-2 w-fit mt-2" onClick={toggleGenerateDropdown}>
-              <p className="mt-1">{isGenerateOpen ? "▼" : "►"} Generate Flashcards:</p> 
+            <div className="flex rounded-lg cursor-pointer gap-4 p-2 w-fit mt-2" onClick={() => setIsOpen(true)}>
+              <p className="mt-1">Generate Flashcards:</p> 
             </div>
-
-            <div className="flex">
-              {isGenerateOpen && (
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                /* @ts-expect-error */
-                <Generate setTitle={setTitle} setCategory={setCategory} setQuiz={setFlashcards} setLoading={setLoading} type="flashcard" />
-              )}
-                {
-                  flashcards && flashcards.length > 0 && <FlipCard category={category} title={title} flashcards={flashcards} />
-                }
-            </div>
-          </div>
-
+            <GenerateModal
+              type="flashcard"
+              setCategory={setCategory}
+              setTitle={setTitle}
+              setLoading={setLoading}
+              setQuiz={setFlashcards}
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+              isGenerateOpen={true}
+              quiz={flashcards}
+            />
+              
+          {
+            flashcards && flashcards.length > 0 && <FlipCard category={category} title={title} flashcards={flashcards} />
+          }
           <button className={`${loading ? "" : "hidden"}`} type="submit">{loading ? <div className="w-16 h-16 mx-auto mt-5 border-4 border-dashed rounded-full animate-spin border-black dark:border-white"></div> : "<>Search</>"}</button>
           
           <div>

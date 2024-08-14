@@ -13,7 +13,7 @@ interface GenerateModalProps {
   setTitle: (e: string) => void;
   setLoading: (e: boolean) => void;
   setQuiz: (f: Flashcard[] | MCQ[]) => void;
-  quiz: MCQ[] | undefined;
+  quiz: MCQ[] | Flashcard[] | undefined;
   type: string;
 }
 

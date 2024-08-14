@@ -74,7 +74,6 @@ const MCQSection: React.FC<MCQSectionProps> = ({ mode, mcq }) => {
   };
 
   const handleStartOver = () => {
-    // Reset all states to their initial values to start the quiz over
     setSelectedOptions({});
     setIsSubmitted(false);
     setCurrentQuestionIndex(0);

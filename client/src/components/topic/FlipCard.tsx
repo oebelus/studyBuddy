@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Flashcard } from "../types/flashcard";
+import { Flashcard } from "../../types/flashcard";
 
 interface FlashcardProps {
     flashcards: Flashcard[] | undefined;
