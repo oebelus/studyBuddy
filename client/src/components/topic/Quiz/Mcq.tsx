@@ -202,9 +202,6 @@ const MCQSection: React.FC<MCQSectionProps> = ({ mode, mcq }) => {
                 >
                   Start Over
                 </button>
-                <button className="bg-yellow-400 px-4 py-2 rounded-lg">
-                  Save Quiz
-                </button>
               </div>
             </div>
           )}

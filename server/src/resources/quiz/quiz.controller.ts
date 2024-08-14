@@ -46,11 +46,6 @@ class QuizController implements Controller {
             this.postMcq
         )
 
-        this.router.get(
-            `${this.path}/mcq/:title`,
-            this.getMcq
-        )
-
         this.router.post(
             `${this.path}/flashcard`,
             authenticatedMiddleware,
@@ -61,6 +56,16 @@ class QuizController implements Controller {
             `${this.path}/flashcard`,
             authenticatedMiddleware,
             this.getFlashcard
+        )
+
+        this.router.get(
+            `${this.path}/flashcard/:id`,
+            this.getFlashcardTopic
+        )
+
+        this.router.get(
+            `${this.path}/mcq/:id`,
+            this.getMcqTopic
         )
 
         this.router.delete(
@@ -179,6 +184,23 @@ class QuizController implements Controller {
         }
     }
 
+    private getMcqTopic = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ) => {
+        try {
+            const mcqId = req.params.id;
+
+            const mcq = await this.McqService.getMcqTopic(mcqId);
+
+            res.status(200).json({mcq})
+        } catch (err) {
+            console.log(err)
+            next(new HttpException(400, (err as Error).message))
+        }
+    }
+
     private getFlashcard = async (
         req: Request,
         res: Response,
@@ -192,6 +214,23 @@ class QuizController implements Controller {
             }
 
             const flashcard = await this.FlashcardService.get(userId);
+
+            res.status(200).json({flashcard})
+        } catch (err) {
+            console.log(err)
+            next(new HttpException(400, (err as Error).message))
+        }
+    }
+
+    private getFlashcardTopic = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ) => {
+        try {
+            const flashcardId = req.params.id;
+
+            const flashcard = await this.FlashcardService.getFlashcardTopic(flashcardId);
 
             res.status(200).json({flashcard})
         } catch (err) {

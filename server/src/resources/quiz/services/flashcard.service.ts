@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { Flashcard } from "../interfaces/flashcard.interface";
 import flashcardsModel from "../models/flashcard.model";
 import { Request } from "express";
@@ -45,18 +45,24 @@ export default class FlashcardService {
         }
     }
 
-    public async getFlashcardsTitles(
-        req: Request
-    ): Promise<string[] | Error> {
+    public async getFlashcardTopic(flashcardId: string) {
         try {
-            const flashcards = await flashcardsModel.find();
-            const flashcardsTitles: string[] = [];
+            console.log("Flashcard ID received: ", flashcardId);
 
-            //flashcards..forEach((flashcard: Flashcard) => flashcardsTitles.push(flashcard.title))
+            if (!flashcardId || !mongoose.Types.ObjectId.isValid(flashcardId)) {
+                throw new Error('Invalid Flashcard ID');
+            }
 
-            return flashcardsTitles;
+            const flashcard = await this.flashcard.findById(flashcardId).exec();
+
+            if (!flashcard) {
+                throw new Error('Flashcard not found');
+            }
+
+            return flashcard;
+
         } catch (err) {
-            throw new Error('MCQs not found')
+            throw new Error(`Error Getting flashcard: ${(err as Error).message}`);
         }
     }
 }

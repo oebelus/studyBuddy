@@ -101,7 +101,7 @@ export default function GenerateModal({
 
   return (
     <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-title" aria-describedby="modal-description">
-      <div className="dark:text-white flex items-center justify-center h-full p-4">
+      <div className="dark:text-white flex items-center justify-center p-4">
         <div className="w-full max-w-4xl rounded-lg shadow-lg p-6">
           <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center space-y-6 lg:space-y-0 lg:space-x-8">
             {isGenerateOpen && (

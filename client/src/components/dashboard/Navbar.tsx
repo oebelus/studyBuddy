@@ -33,7 +33,7 @@ export default function Navbar({isSidebarOpen, toggleSidebar}: NavbarProps) {
     }, [theme])
 
     return (
-        <div className="min-w-screen flex justify-between items-center dark:bg-[#1F1F1F] bg-white p-4 shadow-lg">
+        <div className="w-screen flex justify-between items-center fixed dark:bg-[#1F1F1F] z-[100] bg-white p-4 shadow-lg">
             <div className="flex items-center">
             <button
                 className="p-1 mr-4 rounded-md text-white bg-[#2F2F2F]"

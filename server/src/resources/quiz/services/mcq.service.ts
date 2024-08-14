@@ -45,4 +45,20 @@ export default class McqService {
             throw new Error(`Error deleting flashcard: ${(err as Error).message}`);
         }
     }
+
+    public async getMcqTopic(mcqId: string) {
+         try {
+            const mcq = await this.mcq.findById(mcqId).exec()
+            
+            if (!mcq) {
+                console.log("MCQ Not Found.")
+                throw new Error('Flashcard not found');
+            }
+
+            return mcq as MCQ;
+            
+        } catch (err) {
+            throw new Error(`Error deleting flashcard: ${(err as Error).message}`);
+        }
+    }
 }

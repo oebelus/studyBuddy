@@ -1,10 +1,11 @@
 import axios from "axios";
 import { useState } from "react";
-import { Flashcard, MCQ, Output } from "../types/output";
+import { MCQ, Output } from "../types/output";
 import { formatJson } from "../utils/format";
 import GenerateMenu from "../components/dashboard/generateMenu/GenerateMenu";
 import PDFSection from "../components/dashboard/pdf/PDFSection";
 import Quiz from "../components/Quiz";
+import { Flashcard } from "../types/flashcard";
 
 function QuizPage() {
   const [extractedText, setExtractedText] = useState<string | undefined>('')

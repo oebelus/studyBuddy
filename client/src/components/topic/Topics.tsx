@@ -4,10 +4,11 @@ import DeleteTopic from "./DeleteTopic";
 
 interface TopicsProps {
   topics: Topic[],
-  setSelectedTopic: (name: string) => void
+  setSelectedTopic: (name: string) => void,
+  setQuizId: (id: string) => void
 }
 
-export default function Topics({topics, setSelectedTopic}: TopicsProps) {
+export default function Topics({topics, setSelectedTopic, setQuizId}: TopicsProps) {
   const [del, setDel] = useState<boolean>(false)
   const [topicId, setTopicId] = useState("")
 
@@ -16,7 +17,7 @@ export default function Topics({topics, setSelectedTopic}: TopicsProps) {
         {topics.map((topic, key) => (
           <div
             key={key}
-            onClick={() => setSelectedTopic(topic.name)}
+            onClick={() => {setSelectedTopic(topic.name); setQuizId(topic.id)}}
             className="flex cursor-pointer hover:scale-105 min-w-[200px] p-4 dark:text-white rounded-lg dark:bg-[#1F1F1F] bg-yellow-100 h-fit transition-transform"
           >
             <div>
