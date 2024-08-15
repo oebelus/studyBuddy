@@ -3,11 +3,11 @@ import Sidebar from "../components/dashboard/Sidebar";
 import Navbar from "../components/dashboard/Navbar";
 import Topics from "../components/topic/Topics";
 import { Topic } from "../types/Topic";
-import { MCQ } from "../types/output";
 import GenerateModal from "../components/GenerateModal";
 import axios from "axios";
-import Mcq from "../components/topic/Quiz/Mcq";
-import Save from "../components/topic/Flashcard/Save";
+import Mcq, { MCQ } from "../components/topic/Quiz/Mcq";
+import { MCQs } from "../types/mcq";
+import SaveQuiz from "../components/topic/Quiz/SaveQuiz";
 
 export default function QuizPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -18,9 +18,8 @@ export default function QuizPage() {
   const [category, setCategory] = useState("");
   const [topics, setTopics] = useState<Topic[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [generated, setGenerated] = useState(false);
   const [quizId, setQuizId] = useState("")
-  const [clickedTopic, setClickedTopic] = useState();
-  const [mcqId, setMcqId] = useState("")
   const [mcq, setMcq] = useState<MCQ[]>();
 
   const toggleSidebar = () => {
@@ -28,11 +27,28 @@ export default function QuizPage() {
   };
 
   useEffect(() => {
-    console.log(quizId)
-    axios.get(`http://localhost:3000/api/quiz/mcq/${quizId}`)
-    .then((response) => setClickedTopic(response.data.topic))
-    .catch((err) => console.log(err))
-  }, [quizId]);
+    const token = localStorage.getItem("token");
+
+    axios.get(`http://localhost:3000/api/quiz/mcq`,
+      {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+      }
+    ).then((response) => {
+      const mcqs = response.data.mcq
+
+      const userTopics: Topic[] = mcqs.map((mcq: MCQs) => ({
+        name: mcq.title,
+        category: mcq.category,
+        numberOfQuestions: mcq.mcqs?.length - 1,
+        id: mcq._id
+      }))
+
+      setTopics(userTopics);
+      
+    }).catch((err) => console.log(err))
+  }, [])
 
   useEffect(() => {
     axios.get(`http://localhost:3000/api/quiz/mcq/${quizId}`)
@@ -42,9 +58,8 @@ export default function QuizPage() {
     .catch((err) => console.log(err))
   }, [quizId]);
 
-
   return (
-    <div className="font-mono dark:bg-[#111111] bg-white min-h-screen">
+    <div className="font-mono dark:bg-[#111111] bg-white min-h-screen overflow-x-hidden">
 
       <Navbar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
@@ -60,7 +75,7 @@ export default function QuizPage() {
         >
           <h1 className="text-5xl mt-4 ml-4">Quiz</h1>
           <p className="text-xl mt-4 ml-4">Your topics:</p>
-          <Topics setQuizId={setQuizId} topics={topics} setSelectedTopic={setSelectedTopic} />
+          <Topics type='quiz' setGenerated={setGenerated} setQuizId={setQuizId} topics={topics} setSelectedTopic={setSelectedTopic} />
           <div className="flex rounded-lg cursor-pointer gap-4 p-2 w-fit mt-2" onClick={() => setIsOpen(true)}>
             <div className="flex gap-2">
               <span className="text-2xl bg-pink-100 hover:bg-pink-200 transition px-2 dark:bg-[#3b3939] dark:hover:bg-[#2b2929] rounded-md material-symbols-outlined">
@@ -80,11 +95,12 @@ export default function QuizPage() {
             setIsOpen={setIsOpen}
             isGenerateOpen={true}
             quiz={quiz}
+            setGenerated={setGenerated}
           />
 
-          {quiz && (
+          {generated && quiz && (
               <div className="flex flex-col">
-                <Save category={category} title={title} type="quiz" items={mcq}/>
+                <SaveQuiz category={category} title={title} mcqs={quiz}/>
                 <Mcq mode="training" mcq={quiz} />
               </div>
           )}
@@ -92,9 +108,14 @@ export default function QuizPage() {
           <button className={`${loading ? "" : "hidden"}`} type="submit">
             {loading ? <div className="w-16 h-16 mx-auto mt-5 border-4 border-dashed rounded-full animate-spin border-black dark:border-white"></div> : "<>Search</>"}
           </button>
-          <div>
+          
+          {!generated && 
+          <div className="flex flex-col">
             <h3 className="text-3xl mt-8 ml-4 font-mono dark:text-white">{selectedTopic}</h3>
+            <Mcq mode="training" mcq={mcq} />
           </div>
+          }
+
         </div>
       </div>
     </div>

@@ -1,9 +1,9 @@
 import { Modal } from "@mui/material";
 import { Flashcard } from "../types/flashcard";
-import { MCQ } from "./topic/Mcq";
 import axios from "axios";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { formatJson } from "../utils/format";
+import { MCQ } from "../types/mcq";
 
 interface GenerateModalProps {
   isOpen: boolean;
@@ -12,9 +12,11 @@ interface GenerateModalProps {
   setCategory: (e: string) => void;
   setTitle: (e: string) => void;
   setLoading: (e: boolean) => void;
-  setQuiz: (f: Flashcard[] | MCQ[]) => void;
+  setQuiz?: (f: MCQ[] | Flashcard[]) => void;
+  setFlashcard?: (f: Flashcard[]) => void;
   quiz: MCQ[] | Flashcard[] | undefined;
   type: string;
+  setGenerated: (e: boolean) => void
 }
 
 export default function GenerateModal({
@@ -25,6 +27,8 @@ export default function GenerateModal({
   setTitle,
   setLoading,
   setQuiz,
+  setFlashcard,
+  setGenerated,
   type,
 }: GenerateModalProps) {
   const [form, setForm] = useState({
@@ -68,6 +72,8 @@ export default function GenerateModal({
     setTitle(form.topicName);
     setCategory(form.category);
 
+    console.log(language)
+
     axios
       .get(
         `http://localhost:3000/api/quiz?language=${language}&lesson=${encodeURIComponent(
@@ -82,9 +88,13 @@ export default function GenerateModal({
           const ans = response.data.aiResponse.trim();
           const formattedJson = formatJson(ans);
           const parsedData = JSON.parse(formattedJson);
-          setQuiz(parsedData.questions);
+
+          if (type == 'quiz' && setQuiz) setQuiz(parsedData.questions);
+          else if (type == "flashcard" && setFlashcard) setFlashcard(parsedData.questions)
+
           setIsGenerating(false);
           setIsGenerated(true);
+          setGenerated(true);
           setIsOpen(false)
         } catch (error) {
           setLoading(false);
@@ -98,6 +108,15 @@ export default function GenerateModal({
         console.log(error);
       });
   }
+
+  const handleCancel = () => {
+    setIsOpen(false)
+    setIsGenerated(false)
+  }
+
+  useEffect(() => {
+    if (isGenerated) setIsOpen(false)
+  }, [isGenerated, setIsOpen])
 
   return (
     <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-title" aria-describedby="modal-description">
@@ -169,7 +188,7 @@ export default function GenerateModal({
                       />
                     </div>
                     <div className="flex gap-8">
-                      <button className="dark:text-black bg-gray-200 mt-4 p-2 flex-1 rounded-lg hover:bg-gray-300 transition" onClick={() => setIsOpen(false)}>
+                      <button className="dark:text-black bg-gray-200 mt-4 p-2 flex-1 rounded-lg hover:bg-gray-300 transition" onClick={handleCancel}>
                         Cancel
                       </button>
                       <button

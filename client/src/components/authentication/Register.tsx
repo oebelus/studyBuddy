@@ -6,6 +6,7 @@ import { initialState, reducer } from "../../reducer/store"
 import { jwtDecode } from 'jwt-decode'
 import { User } from "../../types/User"
 import axiosInstance from "../../api/instances"
+import { Navigate } from "react-router-dom"
 
 export default function Register() {
     const [username, setUsername] = useState("") 
@@ -13,7 +14,11 @@ export default function Register() {
     const [password, setPassword] = useState("") 
     const [confirmPassword, setConfirmPassword] = useState("") 
 
-    const [, dispatch] = useReducer(reducer, initialState)
+    const [state, dispatch] = useReducer(reducer, initialState)
+
+    if (state.user) {
+        return <Navigate to="/dashboard" />;
+    }
 
     const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault()

@@ -7,7 +7,7 @@ import { Flashcard, Flashcards } from "../types/flashcard";
 import Topics from "../components/topic/Topics";
 import GenerateModal from "../components/GenerateModal";
 import FlipCard from "../components/topic/Flashcard/FlipCard";
-import Save from "../components/topic/Flashcard/Save";
+import SaveFlashcards from "../components/topic/Flashcard/SaveFlashcards";
 
 export default function FlashcardsPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -18,6 +18,7 @@ export default function FlashcardsPage() {
   const [category, setCategory] = useState("")
   const [topics, setTopics] = useState<Topic[]>([])
   const [isOpen, setIsOpen] = useState(false);
+  const [generated, setGenerated] = useState(false);
   const [flashcardId, setFlashcardId] = useState("")
   const [flashcard, setFlashcard] = useState<Flashcard[]>()
 
@@ -56,10 +57,6 @@ export default function FlashcardsPage() {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-
-  useEffect(() => {
-    console.log("flashcard", flashcard)
-  }, [flashcard])
   
   return (
     <div className="font-mono dark:bg-[#111111] bg-white min-h-screen overflow-y-hidden">
@@ -78,7 +75,7 @@ export default function FlashcardsPage() {
           <h1 className="text-5xl mt-4 ml-4">Flashcards</h1>
           <p className="text-xl mt-4 ml-4">Your topics:</p>
       
-          <Topics setQuizId={setFlashcardId} topics={topics} setSelectedTopic={setSelectedTopic} />
+          <Topics type="flashcard" setGenerated={setGenerated} setQuizId={setFlashcardId} topics={topics} setSelectedTopic={setSelectedTopic} />
           
             <div className="flex rounded-lg cursor-pointer gap-4 p-2 w-fit mt-2" onClick={() => setIsOpen(true)}>
               <div className="flex gap-2">
@@ -94,28 +91,29 @@ export default function FlashcardsPage() {
               setCategory={setCategory}
               setTitle={setTitle}
               setLoading={setLoading}
-              setQuiz={setFlashcards}
+              setFlashcard={setFlashcards}
               isOpen={isOpen}
               setIsOpen={setIsOpen}
               isGenerateOpen={true}
               quiz={flashcards}
+              setGenerated={setGenerated}
             />
               
-          {
-            flashcards && flashcards.length > 0 && 
-              <div className="flex flex-col">
-                <Save category={category} title={title} type="flashcard" items={flashcards}/>
-                <FlipCard flashcards={flashcards} />
-              </div>
+          {generated && flashcards && flashcards.length > 0 && 
+            <div>
+              <SaveFlashcards category={category} title={title} flashcards={flashcards}/>
+              <FlipCard flashcards={flashcards} />
+            </div>
           }
+
           <button className={`${loading ? "" : "hidden"}`} type="submit">{loading ? <div className="w-16 h-16 mx-auto mt-5 border-4 border-dashed rounded-full animate-spin border-black dark:border-white"></div> : "<>Search</>"}</button>
           
-          <div>
+          {!generated && 
+          <div className="flex flex-col">
             <h3 className="text-3xl mt-8 ml-4 font-mono dark:text-white">{selectedTopic}</h3>
-            <div>
-              <FlipCard flashcards={flashcard} />
-            </div>
+            <FlipCard flashcards={flashcard} />
           </div>
+          }
         </div>
       </div>
     </div>

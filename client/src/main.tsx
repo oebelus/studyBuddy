@@ -11,11 +11,11 @@ const router = createBrowserRouter(
       <Route path='/' element={<Home/>} />
       <Route path='login' element={<LoginPage/>} />
       <Route path='register' element={<RegisterPage/>} />
-      <Route path='dashboard' element={<Dashboard/>} />
       <Route path='' element={<ProtectedRoute/>}>
-        <Route path='/quiz' element={<QuizPage/>} />
-        <Route path='/flashcards' element={<FlashcardsPage/>} />
-        <Route path='/settings' element={<Settings/>} />
+        <Route path='dashboard' element={<Dashboard/>} />
+        <Route path='quiz' element={<QuizPage/>} />
+        <Route path='flashcards' element={<FlashcardsPage/>} />
+        <Route path='settings' element={<Settings/>} />
       </Route>
     </Route>
   )

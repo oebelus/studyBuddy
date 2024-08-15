@@ -1,17 +1,19 @@
 import { Modal } from "@mui/material";
 import axios from "axios";
+import { Output } from "../../types/output";
 
 interface DeleteTopicProps {
     del: boolean;
     setDel: (e: boolean) => void,
-    topicId: string
+    topicId: string,
+    type: Output
 }
 
-export default function DeleteTopic({del, topicId, setDel}: DeleteTopicProps) {
+export default function DeleteTopic({del, topicId, type, setDel}: DeleteTopicProps) {
     const handleDelete = () => {
         const token = localStorage.getItem("token");
         
-        axios.delete(`http://localhost:3000/api/quiz/flashcard/${topicId}`,
+        axios.delete(`http://localhost:3000/api/quiz/${type == 'quiz' ? 'mcq' : 'flashcard'}/${topicId}`,
             {
             headers: {
                 Authorization: `Bearer ${token}` // Add the token to headers

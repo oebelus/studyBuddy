@@ -6,7 +6,7 @@ interface FlashcardProps {
 
 export default function FlipCard({ flashcards }: FlashcardProps) {
     return (
-        <div className="flex h-[22%] flex-wrap gap-6 justify-center mt-10 px-8 overflow-y-scroll">
+        <div className="flex flex-wrap gap-6 justify-center mt-10 px-8 overflow-y-scroll">
             {flashcards && flashcards.map((flashcard, key) => (
                 <div
                     key={key}

@@ -6,12 +6,17 @@ import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
 import { User } from "../../types/User";
 import axiosInstance from "../../api/instances";
+import { Navigate } from "react-router-dom";
 
 export default function Login() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
 
-    const [, dispatch] = useReducer(reducer, initialState)
+    const [state, dispatch] = useReducer(reducer, initialState)
+
+    if (state.user) {
+        return <Navigate to="/dashboard" />;
+    }
 
     const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault();

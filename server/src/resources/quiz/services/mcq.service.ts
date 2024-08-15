@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { MCQ } from "../interfaces/mcq.interface";
+import { MCQ, MCQs } from "../interfaces/mcq.interface";
 import mcqModel from "../models/mcq.model";
 import { Request } from "express";
 
@@ -23,11 +23,10 @@ export default class McqService {
         }
     }
 
-    public async get(userId: Types.ObjectId): Promise<MCQ | Error> {
+    public async get(userId: Types.ObjectId): Promise<MCQs | Error> {
         try {
-            const mcq = this.mcq.findOne({user: userId}).exec()
-            
-            return mcq as unknown as MCQ;
+            const mcq = this.mcq.find({user: userId}).exec()
+            return mcq as unknown as MCQs;
         } catch (err) {
             throw new Error('MCQs not found')
         }

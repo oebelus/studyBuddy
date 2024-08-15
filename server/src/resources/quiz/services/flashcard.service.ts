@@ -1,5 +1,5 @@
 import mongoose, { Types } from "mongoose";
-import { Flashcard } from "../interfaces/flashcard.interface";
+import { Flashcard, Flashcards } from "../interfaces/flashcard.interface";
 import flashcardsModel from "../models/flashcard.model";
 import { Request } from "express";
 
@@ -8,25 +8,27 @@ export default class FlashcardService {
 
     public async save(title: string, category: string, flashcards: Flashcard[], user: Types.ObjectId): Promise<String | Error> {
         try {
+            console.log(flashcards)
             const newFlashcard: Flashcard = new this.flashcard({
                 title,
                 category,
                 flashcards,
                 user
             });
+            console.log(newFlashcard)
 
-            //await this.flashcard.create({title, flashcards})
             await newFlashcard.save();
             return "Flashcard created successfully";
         } catch (err) {
-            throw new Error('Unable to create user')
+            console.log(err);
+            throw new Error('Unable to create flashcards')
         }
     }
 
-    public async get(userId: Types.ObjectId): Promise<Flashcard | Error> {
+    public async get(userId: Types.ObjectId): Promise<Flashcards | Error> {
         try {
-            const mcq = this.flashcard.find({user: userId}).exec()
-            return mcq as unknown as Flashcard;
+            const flashcard = this.flashcard.find({user: userId}).exec()
+            return flashcard as unknown as Flashcards;
         } catch (err) {
             throw new Error('Flashcards not found')
         }
@@ -41,6 +43,7 @@ export default class FlashcardService {
             }
             
         } catch (err) {
+            console.log(err)
             throw new Error(`Error deleting flashcard: ${(err as Error).message}`);
         }
     }

@@ -1,26 +1,23 @@
 import axios from "axios";
-import { Flashcard } from "../../../types/flashcard";
-import { MCQ, Output } from "../../../types/output";
+import { MCQ } from "../../../types/mcq";
 
 interface SaveProps {
-    items: Flashcard[] | MCQ[] | undefined;
+    mcqs: MCQ[] | undefined;
     title: string,
     category: string,
-    type: Output
 }
 
-
-export default function save({title, category, type, items}: SaveProps) {
+export default function SaveQuiz({title, category, mcqs}: SaveProps) {
     const save = async () => {
         const token = localStorage.getItem("token");
 
         try {
             const response = await axios.post(
-                `http://localhost:3000/api/quiz/${type=="quiz"?"mcq":"flashcard"}`, 
+                `http://localhost:3000/api/quiz/mcq`, 
                 {
                     title,
                     category,
-                    items
+                    mcqs
                 },
                 {
                     headers: {
@@ -42,7 +39,7 @@ export default function save({title, category, type, items}: SaveProps) {
         
         <div className="flex justify-end mr-32">
             <button onClick={save} className="hover:bg-[#333] dark:hover:bg-gray-200 transition py-4 px-8 rounded-lg dark:bg-white bg-[#2D2D2D] text-white dark:text-black w-fit">
-                Save {type == "quiz" ? "Quiz" : "Flashcards"}
+                Save Quiz
             </button>
         </div>
     )

@@ -1,8 +1,9 @@
 import axios from "axios";
 import { FormEvent, useState } from "react";
-import { MCQ, Output } from "../types/output";
+import { Output } from "../types/output";
 import { formatJson } from "../utils/format";
 import { Flashcard } from "../types/flashcard";
+import { MCQ } from "../types/mcq";
 
 interface GenerateProps {
     type: Output,
