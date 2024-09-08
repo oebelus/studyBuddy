@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import Sidebar from "../components/dashboard/Sidebar";
 import Navbar from "../components/dashboard/Navbar";
 import Topics from "../components/topic/Topics";
@@ -8,6 +8,7 @@ import axios from "axios";
 import Mcq, { MCQ } from "../components/topic/Quiz/Mcq";
 import { MCQs } from "../types/mcq";
 import SaveQuiz from "../components/topic/Quiz/SaveQuiz";
+import { initialState, reducer } from "../reducer/store";
 
 export default function QuizPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -16,11 +17,11 @@ export default function QuizPage() {
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
-  const [topics, setTopics] = useState<Topic[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [generated, setGenerated] = useState(false);
   const [quizId, setQuizId] = useState("")
   const [mcq, setMcq] = useState<MCQ[]>();
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -45,7 +46,8 @@ export default function QuizPage() {
         id: mcq._id
       }))
 
-      setTopics(userTopics);
+      dispatch({type: "GET_MCQS", payload: mcqs})
+      dispatch({type: 'GET_MCQS_TOPIC', payload: userTopics})
       
     }).catch((err) => console.log(err))
   }, [])
@@ -75,7 +77,7 @@ export default function QuizPage() {
         >
           <h1 className="text-5xl mt-4 ml-4">Quiz</h1>
           <p className="text-xl mt-4 ml-4">Your topics:</p>
-          <Topics type='quiz' setGenerated={setGenerated} setQuizId={setQuizId} topics={topics} setSelectedTopic={setSelectedTopic} />
+          {state.mcqsTopics && <Topics type='quiz' setGenerated={setGenerated} setQuizId={setQuizId} topics={state.mcqsTopics} setSelectedTopic={setSelectedTopic} />}
           <div className="flex rounded-lg cursor-pointer gap-4 p-2 w-fit mt-2" onClick={() => setIsOpen(true)}>
             <div className="flex gap-2">
               <span className="text-2xl bg-pink-100 hover:bg-pink-200 transition px-2 dark:bg-[#3b3939] dark:hover:bg-[#2b2929] rounded-md material-symbols-outlined">

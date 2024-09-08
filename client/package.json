@@ -23,6 +23,7 @@
     "@reduxjs/toolkit": "^2.2.6",
     "@types/pdfjs-dist": "^2.10.378",
     "axios": "^1.7.3",
+    "client": "file:",
     "jwt-decode": "^4.0.0",
     "pdf-ts": "^0.0.2",
     "pdfjs-dist": "^3.4.120",

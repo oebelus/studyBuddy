@@ -8,5 +8,5 @@ export type MCQs = {
     mcqs: MCQ[];
     title: string;
     category: string
-    _id: string
+    _id?: string
 }

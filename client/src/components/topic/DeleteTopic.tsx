@@ -1,6 +1,8 @@
 import { Modal } from "@mui/material";
 import axios from "axios";
 import { Output } from "../../types/output";
+import { useReducer } from "react";
+import { initialState, reducer } from "../../reducer/store";
 
 interface DeleteTopicProps {
     del: boolean;
@@ -10,6 +12,8 @@ interface DeleteTopicProps {
 }
 
 export default function DeleteTopic({del, topicId, type, setDel}: DeleteTopicProps) {
+    const [, dispatch] = useReducer(reducer, initialState)
+
     const handleDelete = () => {
         const token = localStorage.getItem("token");
         
@@ -23,6 +27,7 @@ export default function DeleteTopic({del, topicId, type, setDel}: DeleteTopicPro
         .then(() => {
             console.log("Topic Deleted Successfully!")
             setDel(false);
+            dispatch({type: "DELETE_MCQS_TOPIC", payload: topicId})
         })
         .catch((err) => console.log(err));
     }

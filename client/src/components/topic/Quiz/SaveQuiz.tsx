@@ -1,9 +1,10 @@
 import axios from "axios";
 import { MCQ } from "../../../types/mcq";
-import { useState } from "react";
+import { useReducer, useState } from "react";
+import { initialState, reducer } from "../../../reducer/store";
 
 interface SaveProps {
-    mcqs: MCQ[] | undefined;
+    mcqs: MCQ[];
     title: string,
     category: string,
 }
@@ -12,6 +13,7 @@ export default function SaveQuiz({title, category, mcqs}: SaveProps) {
     const [saved, setSaved] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
+    const [, dispatch] = useReducer(reducer, initialState)
 
     const save = async () => {
         const token = localStorage.getItem("token");
@@ -31,6 +33,7 @@ export default function SaveQuiz({title, category, mcqs}: SaveProps) {
                     }
                 });
             setSaved(true);
+            dispatch({type: "ADD_MCQS", payload: {title, category, mcqs}})
         } catch (error) {
             setLoading(false)
             if (axios.isAxiosError(error) && error.response) {
