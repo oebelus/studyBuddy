@@ -15,6 +15,8 @@ export default function Topics({type, topics, setSelectedTopic, setGenerated, se
   const [del, setDel] = useState<boolean>(false)
   const [topicId, setTopicId] = useState("")
 
+  
+
   return (
     <div className="w-[90%] flex p-4 gap-6 justify-start relative overflow-x-scroll">
         {topics.map((topic, key) => (

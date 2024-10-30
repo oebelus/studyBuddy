@@ -4,11 +4,11 @@ import HttpException from "@/utils/exceptions/http.exception";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import pdfParser from 'pdf-parse'
 import multer from 'multer';
-import McqService from "./services/mcq.service";
-import FlashcardService from "./services/flashcard.service";
-import { Flashcard } from "./interfaces/flashcard.interface";
 import authenticatedMiddleware from "@/middleware/authenticated.middleware";
-import { MCQ } from "./interfaces/mcq.interface";
+import McqService from "../services/mcq.service";
+import FlashcardService from "../services/flashcard.service";
+import { MCQ } from "../interfaces/mcq.interface";
+import { Flashcard } from "../interfaces/flashcard.interface";
 
 class QuizController implements Controller {
     public path = '/quiz';

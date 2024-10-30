@@ -5,8 +5,8 @@ import Topics from "../components/topic/Topics";
 import { Topic } from "../types/Topic";
 import GenerateModal from "../components/GenerateModal";
 import axios from "axios";
-import Mcq, { MCQ } from "../components/topic/Quiz/Mcq";
-import { MCQs } from "../types/mcq";
+import Mcq from "../components/topic/Quiz/Mcq";
+import { MCQ, MCQs } from "../types/mcq";
 import SaveQuiz from "../components/topic/Quiz/SaveQuiz";
 import { initialState, reducer } from "../reducer/store";
 
@@ -20,13 +20,13 @@ export default function QuizPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [generated, setGenerated] = useState(false);
   const [quizId, setQuizId] = useState("")
-  const [mcq, setMcq] = useState<MCQ[]>();
+  const [mcq, setMcq] = useState<MCQs>();
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-
+  
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -38,7 +38,6 @@ export default function QuizPage() {
       }
     ).then((response) => {
       const mcqs = response.data.mcq
-
       const userTopics: Topic[] = mcqs.map((mcq: MCQs) => ({
         name: mcq.title,
         category: mcq.category,
@@ -46,11 +45,14 @@ export default function QuizPage() {
         id: mcq._id
       }))
 
+      const selectMcq: MCQs = mcqs.find((mcq: MCQs) => mcq._id === quizId)
+      setMcq(selectMcq)
+
       dispatch({type: "GET_MCQS", payload: mcqs})
       dispatch({type: 'GET_MCQS_TOPIC', payload: userTopics})
       
     }).catch((err) => console.log(err))
-  }, [])
+  }, [quizId])
 
   useEffect(() => {
     axios.get(`http://localhost:3000/api/quiz/mcq/${quizId}`)
@@ -92,6 +94,8 @@ export default function QuizPage() {
             setCategory={setCategory}
             setTitle={setTitle}
             setLoading={setLoading}
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             setQuiz={setQuiz}
             isOpen={isOpen}
             setIsOpen={setIsOpen}
@@ -103,7 +107,7 @@ export default function QuizPage() {
           {generated && quiz && (
               <div className="flex flex-col">
                 <SaveQuiz category={category} title={title} mcqs={quiz}/>
-                <Mcq mode="training" mcq={quiz} />
+                <Mcq mode="training" mcq={mcq} />
               </div>
           )}
 
