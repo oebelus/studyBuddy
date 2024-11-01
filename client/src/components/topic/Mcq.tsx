@@ -1,57 +1,27 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { MCQs } from "../../../types/mcq";
-import { uuid } from 'uuidv4';
+import React, { useState } from "react";
+
+export type MCQ = {
+  id: number;
+  answers: number[];
+  question: string;
+  options: string[];
+};
 
 type MCQSectionProps = {
   mode: "training" | "exam";
-  mcq: MCQs | undefined;
+  mcq: MCQ[] | undefined;
 };
 
 const MCQSection: React.FC<MCQSectionProps> = ({ mode, mcq }) => {
-  // Move all hooks to the top level
   const [selectedOptions, setSelectedOptions] = useState<{ [key: number]: number[] }>({});
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [isQuizStarted, setIsQuizStarted] = useState<boolean>(false);
   const [score, setScore] = useState<number>(0);
   const [showScore, setShowScore] = useState<boolean>(false);
-  const [userId, setUserId] = useState<string>("");
-  const [answers, setAnswers] = useState<Array<{
-    questionIndex: number;
-    selectedAnswer: number;
-    isCorrect: boolean;
-  }>>([]);
-
-  useEffect(() => {
-    const fetchUserId = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        if (!token) {
-          throw new Error("No authentication token found");
-        }
-        
-        const response = await axios.get("http://localhost:3000/api/users", {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        setUserId(response.data.user._id);
-      } catch (error) {
-        console.error("Failed to fetch user ID:", error);
-      }
-    };
-
-    fetchUserId();
-  }, []);
-
-  useEffect(() => {
-    console.log(userId);
-  }, [userId]);
 
   const handleOptionChange = (index: number) => {
-    if (!mcq) return;
-    const currentQuestionId = mcq.mcqs[currentQuestionIndex].id;
+    const currentQuestionId = mcq ? mcq[currentQuestionIndex].id : -1;
     setSelectedOptions((prev) => {
       const selectedForThisQuestion = prev[currentQuestionId] || [];
       if (selectedForThisQuestion.includes(index)) {
@@ -69,36 +39,27 @@ const MCQSection: React.FC<MCQSectionProps> = ({ mode, mcq }) => {
   };
 
   const handleSubmit = () => {
-    if (!mcq) return;
     setIsSubmitted(true);
-    const currentQuestion = mcq.mcqs[currentQuestionIndex];
-    const selectedForThisQuestion = selectedOptions[currentQuestion.id] || [];
-    const isCorrect = selectedForThisQuestion.sort().toString() === currentQuestion.answers.sort().toString();
-
-    if (isCorrect) {
-      setScore((prev) => prev + 1);
+    const currentQuestion = mcq ? mcq[currentQuestionIndex] : null;
+    if (currentQuestion) {
+      const selectedForThisQuestion = selectedOptions[currentQuestion.id] || [];
+      if (
+        selectedForThisQuestion.sort().toString() === currentQuestion.answers.sort().toString()
+      ) {
+        setScore((prev) => prev + 1);
+      }
     }
-
-    setAnswers((prev) => [
-      ...prev,
-      {
-        questionIndex: currentQuestionIndex,
-        selectedAnswer: selectedForThisQuestion[0] || 0,
-        isCorrect,
-      },
-    ]);
   };
 
   const handleNext = () => {
-    if (!mcq) return;
-    if (currentQuestionIndex < mcq.mcqs.length - 1) {
+    if (mcq && currentQuestionIndex < mcq.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       setIsSubmitted(false);
     }
   };
 
   const handlePrevious = () => {
-    if (currentQuestionIndex > 0) {
+    if (mcq && currentQuestionIndex > 0) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
       setIsSubmitted(false);
     }
@@ -108,27 +69,8 @@ const MCQSection: React.FC<MCQSectionProps> = ({ mode, mcq }) => {
     setIsQuizStarted(true);
   };
 
-  const handleShowScore = async () => {
-    if (!mcq) return;
+  const handleShowScore = () => {
     setShowScore(true);
-
-    const mcqAttempt = {
-      mcqAttempts: {
-        mcqSetId: mcq._id || uuid(),
-        userId,
-        answers,
-        score,
-        category: mcq.category,
-        timestamp: new Date()
-      }
-    };
-    
-    try {
-        const response = await axios.post("http://localhost:3000/api/attempt/mcq", mcqAttempt);
-        console.log("MCQ attempt saved successfully:", response.data);
-      } catch (error) {
-        console.error("Failed to save MCQ attempt:", error);
-      }
   };
 
   const handleStartOver = () => {
@@ -141,46 +83,23 @@ const MCQSection: React.FC<MCQSectionProps> = ({ mode, mcq }) => {
   };
 
   const isCorrectAnswer = (index: number) => {
-    if (!mcq) return false;
-    return mcq.mcqs[currentQuestionIndex].answers.includes(index);
+    return mcq ? mcq[currentQuestionIndex].answers.includes(index) : false;
   };
 
   const isOptionSelected = (questionId: number) => {
     return (selectedOptions[questionId] || []).length > 0;
   };
 
-  // Early return for loading state
-  if (!mcq) {
-    return (
-      <div className="p-8 bg-white dark:bg-[#1F1F1F] rounded-lg shadow-lg max-w-2xl mx-auto mt-8">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Loading Quiz...</h2>
-          <p>Please wait while we prepare your questions.</p>
-        </div>
-      </div>
-    );
-  }
+  if (!mcq || mcq.length === 0) return null;
 
-  // Check for empty quiz
-  if (!Array.isArray(mcq.mcqs) || mcq.mcqs.length === 0) {
-    return (
-      <div className="p-8 bg-white dark:bg-[#1F1F1F] rounded-lg shadow-lg max-w-2xl mx-auto mt-8">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">No Questions Available</h2>
-          <p>This quiz doesn't have any questions yet.</p>
-        </div>
-      </div>
-    );
-  }
-
-  const currentQuestion = mcq.mcqs[currentQuestionIndex];
+  const currentQuestion = mcq[currentQuestionIndex];
 
   return (
     <div className="p-8 bg-white dark:bg-[#1F1F1F] rounded-lg shadow-lg max-w-2xl mx-auto mt-8">
       {!isQuizStarted ? (
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4">Ready to Start the Quiz?</h2>
-          <p className="mb-8">You will answer {mcq.mcqs.length} questions.</p>
+          <p className="mb-8">You will answer {mcq.length} questions.</p>
           <button
             onClick={handleStartQuiz}
             className="bg-green-500 text-white py-3 px-6 rounded-lg hover:bg-green-600 text-lg"
@@ -193,7 +112,7 @@ const MCQSection: React.FC<MCQSectionProps> = ({ mode, mcq }) => {
           {!showScore ? (
             <div>
               <h3 className="text-xl font-semibold mb-6">
-                Question {currentQuestionIndex + 1} of {mcq.mcqs.length}
+                Question {currentQuestionIndex + 1} of {mcq.length}
               </h3>
               <p className="text-lg mb-4">{currentQuestion.question}</p>
               <div className="space-y-4 mb-6">
@@ -234,10 +153,8 @@ const MCQSection: React.FC<MCQSectionProps> = ({ mode, mcq }) => {
               <button
                 onClick={handleSubmit}
                 disabled={!isOptionSelected(currentQuestion.id) || isSubmitted}
-                className={`mt-4 bg-blue-500 text-white dark:bg-[#111111] dark:hover:bg-[#0f0f0f] py-3 px-6 rounded-lg w-full text-lg ${
-                  isSubmitted || !isOptionSelected(currentQuestion.id)
-                    ? "bg-gray-200 cursor-not-allowed"
-                    : "hover:bg-blue-600"
+                className={`mt-4 bg-blue-500 text-white dark:bg-[#111111] dark:hover:bg-[#0f0f0f] py-3 px-6 rounded-lg  w-full text-lg ${
+                  isSubmitted ? "bg-gray-200 text cursor-not-allowed" : "hover:bg-blue-600"
                 }`}
               >
                 {mode === "exam" ? "Submit" : "Check Answer"}
@@ -246,20 +163,16 @@ const MCQSection: React.FC<MCQSectionProps> = ({ mode, mcq }) => {
                 <button
                   onClick={handlePrevious}
                   disabled={currentQuestionIndex === 0 || !isSubmitted}
-                  className={`bg-gray-500 text-white py-2 px-4 rounded-lg ${
-                    currentQuestionIndex === 0 || !isSubmitted
-                      ? "bg-gray-300 cursor-not-allowed"
-                      : "hover:bg-gray-600"
-                  }`}
+                  className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600"
                 >
                   Previous
                 </button>
-                {currentQuestionIndex + 1 === mcq.mcqs.length && isSubmitted ? (
+                {currentQuestionIndex + 1 === mcq.length && isSubmitted ? (
                   <button
                     onClick={handleShowScore}
                     disabled={!isSubmitted}
-                    className={`bg-gray-500 text-white py-2 px-4 rounded-lg ${
-                      isSubmitted ? "bg-green-500 hover:bg-green-600" : "cursor-not-allowed"
+                    className={`cursor-pointer bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 ${
+                      isSubmitted ? "bg-green-500" : "dark:text-black bg-gray-600 cursor-not-allowed"
                     }`}
                   >
                     Check Your Score
@@ -268,8 +181,8 @@ const MCQSection: React.FC<MCQSectionProps> = ({ mode, mcq }) => {
                   <button
                     onClick={handleNext}
                     disabled={!isSubmitted}
-                    className={`bg-gray-500 text-white py-2 px-4 rounded-lg ${
-                      isSubmitted ? "bg-green-500 hover:bg-green-600" : "cursor-not-allowed"
+                    className={`bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 ${
+                      isSubmitted ? "bg-green-500" : "bg-gray-600 cursor-not-allowed"
                     }`}
                   >
                     Next
@@ -280,14 +193,17 @@ const MCQSection: React.FC<MCQSectionProps> = ({ mode, mcq }) => {
           ) : (
             <div className="mt-6 text-center">
               <div className="text-lg font-semibold">
-                Your score: {score}/{mcq.mcqs.length}
+                Your score: {score}/{mcq.length}
               </div>
               <div className="flex gap-4 justify-center mt-4">
                 <button
                   onClick={handleStartOver}
-                  className="bg-green-400 hover:bg-green-500 text-white px-4 py-2 rounded-lg"
+                  className="bg-green-400 px-4 py-2 rounded-lg"
                 >
                   Start Over
+                </button>
+                <button className="bg-yellow-400 px-4 py-2 rounded-lg">
+                  Save Quiz
                 </button>
               </div>
             </div>

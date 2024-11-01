@@ -16,7 +16,7 @@ export default function SaveQuiz({title, category, mcqs}: SaveProps) {
     const [, dispatch] = useReducer(reducer, initialState)
 
     const save = async () => {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("accessToken");
         setLoading(true)
 
         try {

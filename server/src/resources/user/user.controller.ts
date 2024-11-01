@@ -6,6 +6,7 @@ import validate from '@/resources/user/user.validation'
 import { NextFunction } from "express-serve-static-core";
 import HttpException from "@/utils/exceptions/http.exception";
 import authenticatedMiddleware from "@/middleware/authenticated.middleware";
+import jwt from "jsonwebtoken";
 
 class UserController implements Controller {
     public path = '/users';
@@ -37,6 +38,10 @@ class UserController implements Controller {
             authenticatedMiddleware,
             this.postTitle 
         );
+        this.router.post(
+            `${this.path}/refresh`,
+            this.refreshToken
+        )
     }
 
     private register = async(
@@ -55,6 +60,34 @@ class UserController implements Controller {
             );
         
             res.status(201).json({token});
+        } catch (error) {
+            next(new HttpException(400, (error as Error).message))
+        }
+    }
+
+    private refreshToken = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<Response | void> => {
+        try {
+            const { refreshToken } = req.body;
+            
+            if (!refreshToken) {
+                throw new HttpException(400, 'Refresh token is required');
+            }
+            
+            const newAccessToken = await this.UserService.refreshToken(refreshToken);
+            const newRefreshToken = jwt.sign(
+                { id: req.user.id, type: 'refresh' },
+                process.env.REFRESH_TOKEN_SECRET as jwt.Secret,
+                { expiresIn: '7d' }
+            );
+            
+            res.status(200).json({
+                accessToken: newAccessToken,
+                refreshToken: newRefreshToken
+            });
         } catch (error) {
             next(new HttpException(400, (error as Error).message))
         }

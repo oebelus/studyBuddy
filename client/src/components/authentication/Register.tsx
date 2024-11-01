@@ -38,7 +38,7 @@ export default function Register() {
             const user: User = jwtDecode(token)
             console.log(user);
             
-            localStorage.setItem('token', token);
+            localStorage.setItem('accessToken', token);
             dispatch({type: 'USER_SIGNIN', payload: user})
             
             window.location.href = `/dashboard`;

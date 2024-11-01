@@ -9,7 +9,7 @@ interface SaveProps {
 
 export default function SaveFlashcard({title, category, flashcards}: SaveProps) {
     const save = async () => {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("accessToken");
 
         try {
             const response = await axios.post(

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from "react-router-dom";
-import { App, Dashboard, FlashcardsPage, Home, LoginPage, ProtectedRoute, QuizPage, RegisterPage, Settings } from "./imports";
+import { App, Dashboard, FlashcardsPage, Home, LoginPage, ProtectedRoute, Quiz, QuizPage, RegisterPage, Settings } from "./imports";
 import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
 
@@ -14,6 +14,7 @@ const router = createBrowserRouter(
       <Route element={<ProtectedRoute />}>
         <Route path='dashboard' element={<Dashboard />} />
         <Route path='quiz' element={<QuizPage />} />
+        <Route path='quiz/:id' element={<Quiz />} />
         <Route path='flashcards' element={<FlashcardsPage />} />
         <Route path='settings' element={<Settings />} />
       </Route>

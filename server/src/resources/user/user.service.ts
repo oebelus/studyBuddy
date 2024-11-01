@@ -1,6 +1,6 @@
 import userModel from "@/resources/user/user.model";
 import HttpException from "@/utils/exceptions/http.exception";
-import token from "@/utils/token";
+import token, { TokenResponse } from "@/utils/token";
 import { Request } from "express";
 import User from "./user.interface";
 
@@ -16,7 +16,7 @@ class UserService {
         email: string, 
         password:string, 
         role: string
-    ): Promise<string | Error>{
+    ): Promise<TokenResponse | Error>{
         try {
             const user = await this.user.create({ username, email, password, role });
             
@@ -36,17 +36,18 @@ class UserService {
         email: string, 
         password: string,
         req: Request
-    ): Promise<string | Error> {
+    ): Promise<TokenResponse | Error> {
         try {
             const user = await this.user.findOne({ email: email })
-            
+        
             if (!user) 
                 throw new Error('Unable to find a user with that email');
 
             if (await user.isValidPassword(password)) {
                 // @ts-ignore
                 req.user = user
-                return token.createToken(user);
+                const tokens: TokenResponse = token.createToken(user); 
+                return tokens;
             }
             else
                 throw new Error('Incorrect Password')
@@ -59,6 +60,16 @@ class UserService {
     public async findUserById(userId: string): Promise<User | null> {
         try {
             return await this.user.findById(userId).exec();
+        } catch (error) {
+            throw new HttpException(400, (error as Error).message);
+        }
+    }
+
+    public async refreshToken(
+        refreshToken: string
+    ): Promise<string | Error> {
+        try {
+            return token.refreshAccessToken(refreshToken);
         } catch (error) {
             throw new HttpException(400, (error as Error).message);
         }

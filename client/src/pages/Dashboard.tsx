@@ -23,7 +23,7 @@ export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [questionsCount, setQuestionsCount] = useState<number>();
 
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("accessToken");
 
   useEffect(() => {
     axios.get(`http://localhost:3000/api/quiz/mcq`,

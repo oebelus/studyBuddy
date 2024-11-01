@@ -1,11 +1,10 @@
 import { Navigate, Outlet } from "react-router-dom"
-import { initialState, reducer } from "../reducer/store";
-import { useReducer } from "react";
+import { useAuth } from "../hooks/useAuth";
 
 export default function ProtectedRoute() {
-    const [state, ] = useReducer(reducer, initialState)
-console.log(state.user)
-    if (state.user != null) {
+    const { isAuthenticated } = useAuth();
+    
+    if (isAuthenticated) {
         return <Outlet/> 
     } else {
         return <Navigate to="/login"/>

@@ -3,7 +3,7 @@ import { FlashcardAttempt, MCQAttempt } from "../types/Attempts";
 export class AttemptService {
   static async saveMCQAttempt(attempt: MCQAttempt) {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("accessToken");
       const response = await fetch("http://localhost:3000/api/attempts/mcq", {
         method: "POST",
         headers: {
@@ -26,7 +26,7 @@ export class AttemptService {
 
   static async saveFlashcardAttempt(attempt: FlashcardAttempt) {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("accessToken");
       const response = await fetch(
         "http://localhost:3000/api/attempts/flashcard",
         {

@@ -5,18 +5,17 @@ import Topics from "../components/topic/Topics";
 import { Topic } from "../types/Topic";
 import GenerateModal from "../components/GenerateModal";
 import axios from "axios";
-import Mcq from "../components/topic/Quiz/Mcq";
 import { MCQ, MCQs } from "../types/mcq";
-import SaveQuiz from "../components/topic/Quiz/SaveQuiz";
 import { initialState, reducer } from "../reducer/store";
+import MCQSection from "../components/topic/Quiz/MCQSection";
 
 export default function QuizPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
   const [quiz, setQuiz] = useState<MCQ[]>();
   const [loading, setLoading] = useState(false);
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
+  const [, setTitle] = useState("");
+  const [, setCategory] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [generated, setGenerated] = useState(false);
   const [quizId, setQuizId] = useState("")
@@ -28,7 +27,7 @@ export default function QuizPage() {
   };
   
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("accessToken");
 
     axios.get(`http://localhost:3000/api/quiz/mcq`,
       {
@@ -55,7 +54,12 @@ export default function QuizPage() {
   }, [quizId])
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/api/quiz/mcq/${quizId}`)
+    axios.get(`http://localhost:3000/api/quiz/mcq/${quizId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+        }
+    })
     .then((response) => {
       setMcq(response.data.mcq.mcqs)
     })
@@ -104,12 +108,12 @@ export default function QuizPage() {
             setGenerated={setGenerated}
           />
 
-          {generated && quiz && (
+          {/* {generated && quiz && (
               <div className="flex flex-col">
                 <SaveQuiz category={category} title={title} mcqs={quiz}/>
                 <Mcq mode="training" mcq={mcq} />
               </div>
-          )}
+          )} */}
 
           <button className={`${loading ? "" : "hidden"}`} type="submit">
             {loading ? <div className="w-16 h-16 mx-auto mt-5 border-4 border-dashed rounded-full animate-spin border-black dark:border-white"></div> : "<>Search</>"}
@@ -118,7 +122,7 @@ export default function QuizPage() {
           {!generated && 
           <div className="flex flex-col">
             <h3 className="text-3xl mt-8 ml-4 font-mono dark:text-white">{selectedTopic}</h3>
-            <Mcq mode="training" mcq={mcq} />
+            <MCQSection mode="training" mcq={mcq} />
           </div>
           }
 

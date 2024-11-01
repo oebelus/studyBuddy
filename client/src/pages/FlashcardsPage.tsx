@@ -23,12 +23,11 @@ export default function FlashcardsPage() {
   const [flashcard, setFlashcard] = useState<Flashcard[]>()
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
 
     axios.get(`http://localhost:3000/api/quiz/flashcard`,
       {
         headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`
         }
       }
     ).then((response) => {
@@ -47,7 +46,12 @@ export default function FlashcardsPage() {
   }, [])
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/api/quiz/flashcard/${flashcardId}`)
+    axios.get(`http://localhost:3000/api/quiz/flashcard/${flashcardId}`, 
+      {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+        }
+    })
     .then((response) => {
       setFlashcard(response.data.flashcard.flashcards)
     })

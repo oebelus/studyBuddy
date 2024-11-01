@@ -15,7 +15,7 @@ export default function DeleteTopic({del, topicId, type, setDel}: DeleteTopicPro
     const [, dispatch] = useReducer(reducer, initialState)
 
     const handleDelete = () => {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("accessToken");
         
         axios.delete(`http://localhost:3000/api/quiz/${type == 'quiz' ? 'mcq' : 'flashcard'}/${topicId}`,
             {
