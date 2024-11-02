@@ -23,6 +23,7 @@ export default function Quiz() {
                     throw new Error("No authentication token found");
                 }
 
+                setIsLoading(true);
                 // Fetch user data
                 const userResponse = await axios.get("http://localhost:3000/api/users", {
                     headers: {
@@ -37,6 +38,8 @@ export default function Quiz() {
                         Authorization: `Bearer ${token}`
                     }
                 });
+
+                setIsLoading(false);
                 
                 if (!mcqResponse.data.mcq) {
                     throw new Error("No MCQ data found");

@@ -35,7 +35,8 @@ class analyticsController {
         next: NextFunction
     ): Promise<void> => {
         try {
-            const userId = req.params.userId;
+            const userId = req.params.id;
+            console.log(userId);
             const userStats = await this.AnalyticsService.getUserStats(userId);
             res.status(200).json(userStats);
         } catch (err) {

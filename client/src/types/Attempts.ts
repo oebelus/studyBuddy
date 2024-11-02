@@ -14,6 +14,12 @@ export interface MCQAttempt {
   timestamp: Date;
 }
 
+export interface Stat {
+  name: string;
+  avgScore: number;
+  attempts: number;
+}
+
 export interface FlashcardAttempt {
   userId: string;
   deckId: string;

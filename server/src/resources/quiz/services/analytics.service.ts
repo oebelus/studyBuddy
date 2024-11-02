@@ -13,10 +13,26 @@ export class AnalyticsService {
         try {
             const [
                 mcqsAttempts,
+                questionsAnswered,
                 recentMCQs,
-                categoryStats
+                categoryStats,
+                answersStats
             ] = await Promise.all([
                 MCQAttemptModel.countDocuments({ userId }),
+                MCQAttemptModel.aggregate([
+                    { $match: { userId } },
+                    {
+                        $project: {
+                            questionCount: { $size: { $objectToArray: '$answers' } }
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            total: { $sum: '$questionCount' }
+                        }
+                    }
+                ]),
                 MCQAttemptModel.find({ userId })
                     .sort({ timestamp: -1 })
                     .limit(7),
@@ -29,6 +45,26 @@ export class AnalyticsService {
                             totalAttempts: { $sum: 1 }
                         }
                     }
+                ]),
+                MCQAttemptModel.aggregate([
+                    { $match: { userId } },
+                    {
+                        $project: {
+                            answers: { $objectToArray: '$answers' }
+                        }
+                    },
+                    { $unwind: '$answers' },
+                    {
+                        $group: {
+                            _id: null,
+                            correctAnswers: {
+                                $sum: { $cond: [{ $eq: ['$answers.v', true] }, 1, 0] }
+                            },
+                            wrongAnswers: {
+                                $sum: { $cond: [{ $eq: ['$answers.v', false] }, 1, 0] }
+                            }
+                        }
+                    }
                 ])
             ]);
 
@@ -36,7 +72,8 @@ export class AnalyticsService {
                 timestamp: mcq.timestamp,
                 score: mcq.score,
                 questionsAttempted: Object.keys(mcq.answers).length,
-                correctAnswers: Object.values(mcq.answers).filter((answer) => answer).length
+                correctAnswers: Object.values(mcq.answers).filter((key) => key == true).length,
+                wrongAnswers: Object.values(mcq.answers).filter((key) => key == false).length
             }));
 
             const categoryData: CategoryStat[] = categoryStats.map((stat) => ({
@@ -45,10 +82,17 @@ export class AnalyticsService {
                 attempts: stat.totalAttempts
             }));
 
+            const answered: number =  questionsAnswered.length;
+            const totalCorrectAnswers: number = answersStats[0].correctAnswers;
+            const totalWrongAnswers: number = answersStats[0].wrongAnswers;
+
             return {
                 totalAttempts: mcqsAttempts,
                 weeklyData,
-                categoryData
+                categoryData,
+                answered,
+                totalCorrectAnswers,
+                totalWrongAnswers
             };
         } catch (error) {
             console.error('Error fetching user stats:', error);

@@ -17,11 +17,7 @@ export default function Questions({ mcq, userId }: QuestionsProps) {
     const [selectedOptions, setSelectedOptions] = useState<{ [key: number]: number[] }>({});
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
     
-    const [answers, setAnswers] = useState<Array<{
-        questionIndex: number;
-        selectedAnswer: number;
-        isCorrect: boolean;
-    }>>([]);
+    const [answers, setAnswers] = useState<{[key: number]: boolean}>({});
 
     const handleSubmit = () => {
         const currentQuestion = mcq.mcqs[currentQuestionIndex];
@@ -33,15 +29,6 @@ export default function Questions({ mcq, userId }: QuestionsProps) {
         if (isCorrect) {
             setScore((prev) => prev + 1);
         }
-
-        setAnswers((prev) => [
-            ...prev,
-            {
-                questionIndex: currentQuestionIndex,
-                selectedAnswer: selectedForThisQuestion[0] || 0,
-                isCorrect,
-            },
-        ]);
     };
 
     const handleNext = () => {
@@ -96,17 +83,36 @@ export default function Questions({ mcq, userId }: QuestionsProps) {
         });
     };
 
+    useEffect(() => {
+        console.log("answers", answers)
+    }, [answers])
+
     const handleSaveAttempt = async () => {
+        const answers: { [key: number]: boolean } = {};
+        const length = Object.keys(selectedOptions).length;
+
+        if (length == 0) setAnswers({});
+
+        for (let i = 0; i < length; i++) {
+            console.log(selectedOptions[i], answers[i], i)
+            answers[i] = mcq.mcqs[i].answers === selectedOptions[i];
+        }
+
+        setAnswers(answers);
+
         const mcqAttempt = {
             mcqAttempts: {
-                mcqSetId: mcq._id || uuid(),
                 userId,
-                answers,
+                mcqSetId: mcq._id || uuid(),
+                title: mcq.title,
+                numberOfQuestions: mcq.mcqs.length,
                 score,
-                category: mcq.category,
+                answers,
                 timestamp: new Date(),
             },
         }
+
+        console.log(mcqAttempt)
         try {
             const response = await axiosInstance.post("/attempt/mcq", mcqAttempt);
             console.log("MCQ attempt saved successfully:", response.data);

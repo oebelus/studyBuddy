@@ -34,6 +34,7 @@ export interface WeeklyData {
     score: number;
     questionsAttempted: number;
     correctAnswers: number;
+    wrongAnswers: number;
 }
 
 export interface UserStats {
@@ -41,4 +42,7 @@ export interface UserStats {
     // flashcardsAttempts: number;
     weeklyData: WeeklyData[];
     categoryData: CategoryStat[];
+    answered: number;
+    totalCorrectAnswers: number;
+    totalWrongAnswers: number;
 }

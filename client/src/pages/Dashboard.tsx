@@ -16,30 +16,54 @@ import {
   Pie,
   Cell
 } from 'recharts';
-import axios from "axios";
 import { MCQs } from "../types/mcq";
 import { axiosInstance } from "../services/auth.service";
+import { jwtDecode } from "jwt-decode";
+import { Stat } from "../types/Attempts";
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [questionsCount, setQuestionsCount] = useState<number>();
+  const [decksCount, setDecksCount] = useState<number>();
+  const [answeredQuestionsCount, setAnsweredQuestionsCount] = useState<number>();
+  const [averageScore, setAverageScore] = useState<number>();
+  const [correctAnswersCount, setCorrectAnswersCount] = useState<number>();
+  const [incorrectAnswersCount, setIncorrectAnswersCount] = useState<number>();
+  const [currentStreak, setCurrentStreak] = useState<number>();
+  const [streakMessage, setStreakMessage] = useState<string>();
+  const [flashcardsCreated, setFlashcardsCreated] = useState<number>();
 
   useEffect(() => {
-    axiosInstance.get(`http://localhost:3000/api/quiz/mcq`)
+    axiosInstance.get(`/quiz/mcq`)
       .then((response) => { 
-        console.log(response.data.mcq)
         const count = response.data.mcq.reduce((acc: number, mcq: MCQs) => mcq.mcqs.length + acc, 0);
         setQuestionsCount(count);
+        setDecksCount(response.data.mcq.length);
     })
       .catch((error) => { console.error(error); });
   }, []);
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/api/attempt/user`)
+    const refreshToken = JSON.stringify(localStorage.getItem('refreshToken'));
+    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const userId = jwtDecode(refreshToken).id;
+    axiosInstance.get(`/attempt/user/${userId}`)
       .then((response) => {
         console.log(response.data)
+        
+        if (questionsCount && questionsCount > 0) {
+          const averageScore = response.data.categoryData.reduce((acc: number, stat: Stat) => stat.avgScore + acc, 0) / questionsCount;
+          setAverageScore(averageScore);
+        }
+        
+        setAnsweredQuestionsCount(response.data.answered);
+        setCorrectAnswersCount(response.data.totalCorrectAnswers);
+        setIncorrectAnswersCount(response.data.totalWrongAnswers);
+        
     }).catch((error) => { console.error(error); });
-  }, []);
+  }, [questionsCount]);
  
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -48,10 +72,11 @@ export default function Dashboard() {
   // Sample data
   const stats = {
     totalQuestions: questionsCount,
-    questionsAnswered: 876,
-    correctAnswers: 654,
+    questionsAnswered: answeredQuestionsCount || 0,
+    correctAnswers: correctAnswersCount || 0,
+    incorrectAnswers: incorrectAnswersCount || 0,
     flashcardsCreated: 320,
-    averageScore: 75,
+    averageScore: averageScore,
     streak: 12
   };
 
@@ -99,7 +124,8 @@ export default function Dashboard() {
                   <BarChart className="h-4 w-4 text-blue-500" />
                 </div>
                 <p className="text-2xl font-bold dark:text-gray-100">{stats.totalQuestions}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{stats.questionsAnswered} answered</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{decksCount} decks created</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{stats.questionsAnswered} {stats.questionsAnswered === 1 ? 'question' : 'questions'} answered</p>
               </div>
 
               <div className="dark:bg-[#1F2937] bg-white p-6 rounded-lg shadow-lg">
@@ -108,7 +134,8 @@ export default function Dashboard() {
                   <TrendingUp className="h-4 w-4 text-green-500" />
                 </div>
                 <p className="text-2xl font-bold dark:text-gray-100">{stats.averageScore}%</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{stats.correctAnswers} correct answers</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{stats.correctAnswers} {stats.correctAnswers === 1 ? 'correct answer' : 'correct answers'}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{stats.incorrectAnswers} {stats.incorrectAnswers === 1 ? 'incorrect answer' : 'incorrect answers'}</p>
               </div>
 
               <div className="dark:bg-[#1F2937] bg-white p-6 rounded-lg shadow-lg">
