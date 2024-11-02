@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../components/dashboard/Sidebar";
 import Navbar from "../components/dashboard/Navbar";
-import axios from "axios";
 import { Topic } from "../types/Topic";
 import { Flashcard, Flashcards } from "../types/flashcard";
 import Topics from "../components/topic/Topics";
 import GenerateModal from "../components/GenerateModal";
 import FlipCard from "../components/topic/Flashcard/FlipCard";
 import SaveFlashcards from "../components/topic/Flashcard/SaveFlashcards";
+import { axiosInstance } from "../services/auth.service";
 
 export default function FlashcardsPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -24,7 +24,7 @@ export default function FlashcardsPage() {
 
   useEffect(() => {
 
-    axios.get(`http://localhost:3000/api/quiz/flashcard`,
+    axiosInstance.get(`/quiz/flashcard`,
       {
         headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`
@@ -46,7 +46,7 @@ export default function FlashcardsPage() {
   }, [])
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/api/quiz/flashcard/${flashcardId}`, 
+    axiosInstance.get(`/quiz/flashcard/${flashcardId}`, 
       {
         headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`
@@ -55,7 +55,13 @@ export default function FlashcardsPage() {
     .then((response) => {
       setFlashcard(response.data.flashcard.flashcards)
     })
-    .catch((err) => console.log(err))
+    .catch((err) => {
+      console.error("Error fetching flashcard:", err);
+      if (err.response) {
+        console.error("Response data:", err.response.data);
+        console.error("Response status:", err.response.status);
+      }
+    })
   }, [flashcardId]);
 
   const toggleSidebar = () => {

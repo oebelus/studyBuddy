@@ -1,7 +1,9 @@
-import axiosInstance from "../../../api/instances";
 import { formatJson } from "../../../utils/format";
-import { Flashcard, MCQ, Output } from "../../../types/output";
+import { Output } from "../../../types/output";
 import { useEffect, useState } from "react";
+import { MCQ } from "../../topic/Mcq";
+import { Flashcard } from "../../../types/flashcard";
+import { axiosInstance } from "../../../services/auth.service";
 
 export default function Generate() {
     const [type, setType] = useState<Output>("quiz")

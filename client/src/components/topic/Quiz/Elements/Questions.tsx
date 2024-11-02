@@ -1,8 +1,8 @@
-import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { uuid } from "uuidv4";
 import { MCQs } from "../../../../types/mcq";
 import SaveQuiz from "../SaveQuiz";
+import { axiosInstance } from "../../../../services/auth.service";
 
 interface QuestionsProps {
     mcq: MCQs;
@@ -76,24 +76,6 @@ export default function Questions({ mcq, userId }: QuestionsProps) {
 
     const handleShowScore = async () => {
         setShowScore(true);
-
-        const mcqAttempt = {
-            mcqAttempts: {
-                mcqSetId: mcq._id || uuid(),
-                userId,
-                answers,
-                score,
-                category: mcq.category,
-                timestamp: new Date(),   
-            }
-        };
-        
-        try {
-            const response = await axios.post("http://localhost:3000/api/attempt/mcq", mcqAttempt);
-            console.log("MCQ attempt saved successfully:", response.data);
-        } catch (error) {
-            console.error("Failed to save MCQ attempt:", error);
-        }
     };
 
     const handleOptionChange = (index: number) => {
@@ -113,6 +95,34 @@ export default function Questions({ mcq, userId }: QuestionsProps) {
             }
         });
     };
+
+    const handleSaveAttempt = async () => {
+        const mcqAttempt = {
+            mcqAttempts: {
+                mcqSetId: mcq._id || uuid(),
+                userId,
+                answers,
+                score,
+                category: mcq.category,
+                timestamp: new Date(),
+            },
+        }
+        try {
+            const response = await axiosInstance.post("/attempt/mcq", mcqAttempt);
+            console.log("MCQ attempt saved successfully:", response.data);
+        } catch (error) {
+            console.error("Failed to save MCQ attempt:", error);
+        }
+    };
+
+    useEffect(() => {
+        axiosInstance.get("/users").then((response) => {
+            axiosInstance.get(`/attempt/user/${response.data.user._id}$`).then((response) => {
+                console.log(response.data);
+            })
+        })
+        
+    }, []);
 
     const currentQuestion = mcq.mcqs[currentQuestionIndex];
 
@@ -190,13 +200,21 @@ export default function Questions({ mcq, userId }: QuestionsProps) {
                                 Check Your Score
                             </button>
                         ) : (
-                            <button
-                                onClick={handleNext}
-                                disabled={currentQuestionIndex === mcq.mcqs.length - 1}
-                                className={`text-white py-2 px-4 rounded-lg cursor-pointer ${currentQuestionIndex === mcq.mcqs.length - 1 ? "Display Score bg-blue-500 hover:bg-blue-600" : "Next bg-green-500 hover:bg-green-600"}`}
-                            >
-                                {currentQuestionIndex === mcq.mcqs.length - 1 ? "Display Score" : "Next"}
-                            </button>
+                            <div className="flex gap-4">
+                                <button
+                                    onClick={handleNext}
+                                    disabled={currentQuestionIndex === mcq.mcqs.length - 1}
+                                    className={`text-white py-2 px-4 rounded-lg cursor-pointer ${currentQuestionIndex === mcq.mcqs.length - 1 ? "cursor-not-allowed bg-gray-500 text-white" : "Next bg-green-500 hover:bg-green-600"}`}
+                                >
+                                    Next
+                                </button>
+                                    <button
+                                    onClick={handleShowScore}
+                                    className="text-white py-2 px-4 rounded-lg cursor-pointer bg-blue-500 hover:bg-blue-600"
+                                >
+                                    Display Score
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -211,6 +229,12 @@ export default function Questions({ mcq, userId }: QuestionsProps) {
                             className="bg-green-400 hover:bg-green-500 text-white px-4 py-2 rounded-lg"
                         >
                             Start Over
+                        </button>
+                        <button
+                            onClick={handleSaveAttempt}
+                            className="bg-green-400 hover:bg-green-500 text-white px-4 py-2 rounded-lg"
+                        >
+                            Save Attempt
                         </button>
                     </div>
                 </div>

@@ -202,6 +202,12 @@ const MCQSection: React.FC<MCQSectionProps> = ({ mode, mcq }) => {
                 >
                   Start Over
                 </button>
+                <button
+                  onClick={handleStartOver}
+                  className="bg-green-400 px-4 py-2 rounded-lg"
+                >
+                  Save Attempt
+                </button>
                 <button className="bg-yellow-400 px-4 py-2 rounded-lg">
                   Save Quiz
                 </button>

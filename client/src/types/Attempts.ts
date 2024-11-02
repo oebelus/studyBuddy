@@ -6,9 +6,11 @@ export interface MCQAnswer {
 
 export interface MCQAttempt {
   userId: string;
-  quizId: string;
-  category: string;
+  mcqSetId: string;
+  title: string;
+  numberOfQuestions: number;
   score: number;
+  answers: { [key: number]: boolean };
   timestamp: Date;
 }
 

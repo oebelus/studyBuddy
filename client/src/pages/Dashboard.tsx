@@ -18,21 +18,15 @@ import {
 } from 'recharts';
 import axios from "axios";
 import { MCQs } from "../types/mcq";
+import { axiosInstance } from "../services/auth.service";
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [questionsCount, setQuestionsCount] = useState<number>();
 
-  const token = localStorage.getItem("accessToken");
-
   useEffect(() => {
-    axios.get(`http://localhost:3000/api/quiz/mcq`,
-      {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-      }
-    ).then((response) => { 
+    axiosInstance.get(`http://localhost:3000/api/quiz/mcq`)
+      .then((response) => { 
         console.log(response.data.mcq)
         const count = response.data.mcq.reduce((acc: number, mcq: MCQs) => mcq.mcqs.length + acc, 0);
         setQuestionsCount(count);

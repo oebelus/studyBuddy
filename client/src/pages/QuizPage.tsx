@@ -4,10 +4,10 @@ import Navbar from "../components/dashboard/Navbar";
 import Topics from "../components/topic/Topics";
 import { Topic } from "../types/Topic";
 import GenerateModal from "../components/GenerateModal";
-import axios from "axios";
 import { MCQ, MCQs } from "../types/mcq";
 import { initialState, reducer } from "../reducer/store";
 import MCQSection from "../components/topic/Quiz/MCQSection";
+import { axiosInstance } from "../services/auth.service";
 
 export default function QuizPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -27,39 +27,27 @@ export default function QuizPage() {
   };
   
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
+    axiosInstance.get(`/quiz/mcq`)
+      .then((response) => {
+        const mcqs = response.data.mcq
+        const userTopics: Topic[] = mcqs.map((mcq: MCQs) => ({
+          name: mcq.title,
+          category: mcq.category,
+          numberOfQuestions: mcq.mcqs?.length - 1,
+          id: mcq._id
+        }))
 
-    axios.get(`http://localhost:3000/api/quiz/mcq`,
-      {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-      }
-    ).then((response) => {
-      const mcqs = response.data.mcq
-      const userTopics: Topic[] = mcqs.map((mcq: MCQs) => ({
-        name: mcq.title,
-        category: mcq.category,
-        numberOfQuestions: mcq.mcqs?.length - 1,
-        id: mcq._id
-      }))
+        const selectMcq: MCQs = mcqs.find((mcq: MCQs) => mcq._id === quizId)
+        setMcq(selectMcq)
 
-      const selectMcq: MCQs = mcqs.find((mcq: MCQs) => mcq._id === quizId)
-      setMcq(selectMcq)
-
-      dispatch({type: "GET_MCQS", payload: mcqs})
-      dispatch({type: 'GET_MCQS_TOPIC', payload: userTopics})
-      
-    }).catch((err) => console.log(err))
+        dispatch({type: "GET_MCQS", payload: mcqs})
+        dispatch({type: 'GET_MCQS_TOPIC', payload: userTopics})
+        
+      }).catch((err) => console.log(err))
   }, [quizId])
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/api/quiz/mcq/${quizId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`
-        }
-    })
+    axiosInstance.get(`/quiz/mcq/${quizId}`)
     .then((response) => {
       setMcq(response.data.mcq.mcqs)
     })

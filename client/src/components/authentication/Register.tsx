@@ -5,8 +5,8 @@ import { ApiError } from "../../types/ApiError"
 import { initialState, reducer } from "../../reducer/store"
 import { jwtDecode } from 'jwt-decode'
 import { User } from "../../types/User"
-import axiosInstance from "../../api/instances"
 import { Navigate } from "react-router-dom"
+import { axiosInstance } from "../../services/auth.service"
 
 export default function Register() {
     const [username, setUsername] = useState("") 

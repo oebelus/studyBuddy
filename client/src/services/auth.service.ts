@@ -1,6 +1,7 @@
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
-const API_URL = "http://localhost:3000/api/users";
+const API_URL = "http://localhost:3000/api";
 
 interface TokenResponse {
   token: TokenResponse;
@@ -8,7 +9,7 @@ interface TokenResponse {
   refreshToken: string;
 }
 
-const axiosInstance = axios.create({
+export const axiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
@@ -25,7 +26,15 @@ class AuthService {
         const accessToken = this.getAccessToken();
         if (accessToken) {
           request.headers["Authorization"] = `Bearer ${accessToken}`;
+
+          if (this.isTokenExpired(accessToken)) {
+            return this.refreshToken().then((newAccessToken) => {
+              request.headers["Authorization"] = `Bearer ${newAccessToken}`;
+              return request;
+            });
+          }
         }
+
         return request;
       },
       (error) => {
@@ -33,25 +42,26 @@ class AuthService {
       }
     );
 
-    axios.interceptors.response.use(
+    axiosInstance.interceptors.response.use(
       (response) => response, // Directly return successful responses.
       async (error) => {
         const originalRequest = error.config;
+
         if (!error.response) {
           return Promise.reject(error);
         }
-        console.log(error.response.status);
+
         if (error.response.status === 401 && !originalRequest._retry) {
-          // const originalRequest._retry = true;
+          originalRequest._retry = true;
+
           try {
             const refreshToken = this.getRefreshToken();
             console.log("refresh", refreshToken);
             const response = await axios.post<TokenResponse>(
-              `${API_URL}/refresh`,
+              `${API_URL}/users/refresh`,
               { refreshToken: refreshToken }
             );
 
-            console.log("response" + response);
             const { accessToken, refreshToken: newRefreshToken } =
               response.data;
             console.log(accessToken, newRefreshToken);
@@ -94,9 +104,14 @@ class AuthService {
         throw new Error("No refresh token found.");
       }
 
-      const response = await axios.post<TokenResponse>(`${API_URL}/refresh`, {
-        refreshToken,
-      });
+      const response = await axios.post<TokenResponse>(
+        `${API_URL}/users/refresh`,
+        {
+          refreshToken,
+        }
+      );
+
+      console.log(response.data.accessToken);
 
       this.setAccessToken(response.data.accessToken);
       return response.data.accessToken;
@@ -107,10 +122,13 @@ class AuthService {
 
   public async login(email: string, password: string): Promise<void> {
     try {
-      const response = await axios.post<TokenResponse>(`${API_URL}/login`, {
-        email,
-        password,
-      });
+      const response = await axios.post<TokenResponse>(
+        `${API_URL}/users/login`,
+        {
+          email,
+          password,
+        }
+      );
 
       this.setTokens(response.data.token as TokenResponse);
     } catch (error) {
@@ -142,6 +160,11 @@ class AuthService {
 
   private getRefreshToken(): string | null {
     return localStorage.getItem("refreshToken");
+  }
+
+  private isTokenExpired(accessToken: string) {
+    const { exp } = jwtDecode<{ exp: number }>(accessToken);
+    return Date.now() >= exp * 1000;
   }
 }
 

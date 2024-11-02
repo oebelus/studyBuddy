@@ -1,6 +1,7 @@
 import { NextFunction, Router, Request, Response } from "express";
 import { AnalyticsService } from "../services/analytics.service";
 import HttpException from "@/utils/exceptions/http.exception";
+import authenticatedMiddleware from "@/middleware/authenticated.middleware";
 
 class analyticsController {
     public path = '/attempt';
@@ -14,7 +15,8 @@ class analyticsController {
 
     private initializeRoutes(): void {
         this.router.get(
-            `${this.path}/user`,
+            `${this.path}/user/:id`,
+            authenticatedMiddleware,
             this.getUserStats
         );
         this.router.get(
