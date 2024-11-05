@@ -45,4 +45,5 @@ export interface UserStats {
     answered: number;
     totalCorrectAnswers: number;
     totalWrongAnswers: number;
+    currentStreak: number;
 }

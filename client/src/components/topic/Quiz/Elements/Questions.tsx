@@ -11,7 +11,7 @@ interface QuestionsProps {
 }
 
 export default function Questions({ mcq, userId }: QuestionsProps) {
-  const [showScore, setShowScore] = useState<boolean>(false);
+    const [showScore, setShowScore] = useState<boolean>(false);
     const [score, setScore] = useState<number>(0);
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
     const [selectedOptions, setSelectedOptions] = useState<{ [key: number]: number[] }>({});
@@ -25,6 +25,10 @@ export default function Questions({ mcq, userId }: QuestionsProps) {
         const isCorrect = selectedForThisQuestion.sort().toString() === currentQuestion.answers.sort().toString();
 
         setIsSubmitted(true);
+        setAnswers(prevAnswers => ({
+            ...prevAnswers,
+            [currentQuestionIndex]: isCorrect
+        }));
 
         if (isCorrect) {
             setScore((prev) => prev + 1);
@@ -51,6 +55,7 @@ export default function Questions({ mcq, userId }: QuestionsProps) {
         setCurrentQuestionIndex(0);
         setScore(0);
         setShowScore(false);
+        setAnswers({});
     };
 
     const isCorrectAnswer = (index: number) => {
@@ -88,16 +93,6 @@ export default function Questions({ mcq, userId }: QuestionsProps) {
     }, [answers])
 
     const handleSaveAttempt = async () => {
-        const answers: { [key: number]: boolean } = {};
-        const length = Object.keys(selectedOptions).length;
-
-        if (length == 0) setAnswers({});
-
-        for (let i = 0; i < length; i++) {
-            console.log(selectedOptions[i], answers[i], i)
-            answers[i] = mcq.mcqs[i].answers === selectedOptions[i];
-        }
-
         setAnswers(answers);
 
         const mcqAttempt = {

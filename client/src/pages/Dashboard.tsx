@@ -20,25 +20,60 @@ import { MCQs } from "../types/mcq";
 import { axiosInstance } from "../services/auth.service";
 import { jwtDecode } from "jwt-decode";
 import { Stat } from "../types/Attempts";
+import { Flashcards } from "../types/flashcard";
+
+interface WeeklyData {
+  timestamp: Date;
+  score: number;
+  questionsAttempted: number;
+  correctAnswers: number;
+  wrongAnswers: number;
+}
+
+interface CategoryStat {
+  name: string;
+  avgScore: number;
+  attempts: number;
+  correctAnswers: number;
+  wrongAnswers: number;
+}
+
+interface DifficultyStats {
+  easy: number;
+  medium: number;
+  hard: number;
+}
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [questionsCount, setQuestionsCount] = useState<number>();
-  const [decksCount, setDecksCount] = useState<number>();
-  const [answeredQuestionsCount, setAnsweredQuestionsCount] = useState<number>();
-  const [averageScore, setAverageScore] = useState<number>();
-  const [correctAnswersCount, setCorrectAnswersCount] = useState<number>();
-  const [incorrectAnswersCount, setIncorrectAnswersCount] = useState<number>();
-  const [currentStreak, setCurrentStreak] = useState<number>();
-  const [streakMessage, setStreakMessage] = useState<string>();
-  const [flashcardsCreated, setFlashcardsCreated] = useState<number>();
+  const [questionsCount, setQuestionsCount] = useState<number>(0);
+  const [decksCount, setDecksCount] = useState<number>(0);
+  const [answeredQuestionsCount, setAnsweredQuestionsCount] = useState<number>(0);
+  const [averageScore, setAverageScore] = useState<number>(0);
+  const [correctAnswersCount, setCorrectAnswersCount] = useState<number>(0);
+  const [incorrectAnswersCount, setIncorrectAnswersCount] = useState<number>(0);
+  const [currentStreak, setCurrentStreak] = useState<number>(0);
+  const [streakMessage, setStreakMessage] = useState<string>("");
+  const [flashcardsCreated, setFlashcardsCreated] = useState<number>(0);
+  const [weeklyData, setWeeklyData] = useState<WeeklyData[]>([]);
+  const [categoryData, setCategoryData] = useState<CategoryStat[]>([]);
+  const [difficultyStats, setDifficultyStats] = useState<DifficultyStats>({ easy: 0, medium: 0, hard: 0 });
 
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+    
   useEffect(() => {
     axiosInstance.get(`/quiz/mcq`)
       .then((response) => { 
         const count = response.data.mcq.reduce((acc: number, mcq: MCQs) => mcq.mcqs.length + acc, 0);
         setQuestionsCount(count);
         setDecksCount(response.data.mcq.length);
+    })
+      .catch((error) => { console.error(error); });
+
+    axiosInstance.get(`/quiz/flashcard`)
+      .then((response) => { 
+        const length = response.data.flashcard.reduce((acc: number, flashcard: Flashcards) => flashcard.flashcards.length + acc, 0);
+        setFlashcardsCreated(length);
     })
       .catch((error) => { console.error(error); });
   }, []);
@@ -52,18 +87,45 @@ export default function Dashboard() {
     axiosInstance.get(`/attempt/user/${userId}`)
       .then((response) => {
         console.log(response.data)
+        const { 
+          weeklyData,
+          categoryData,
+          answered,
+          totalCorrectAnswers,
+          totalWrongAnswers,
+          currentStreak
+        } = response.data;
         
         if (questionsCount && questionsCount > 0) {
           const averageScore = response.data.categoryData.reduce((acc: number, stat: Stat) => stat.avgScore + acc, 0) / questionsCount;
-          setAverageScore(averageScore);
+          setAverageScore(parseFloat(averageScore.toFixed(2)));
         }
         
-        setAnsweredQuestionsCount(response.data.answered);
-        setCorrectAnswersCount(response.data.totalCorrectAnswers);
-        setIncorrectAnswersCount(response.data.totalWrongAnswers);
+        setAnsweredQuestionsCount(answered);
+        setCorrectAnswersCount(totalCorrectAnswers);
+        setIncorrectAnswersCount(totalWrongAnswers);
+        setCurrentStreak(currentStreak);
+
+        const processedWeeklyData = weeklyData.map((data: WeeklyData) => ({
+          ...data,
+          timestamp: new Date(data.timestamp).toLocaleDateString(),
+        }));
+        
+        setWeeklyData(processedWeeklyData);
+        setCategoryData(categoryData);
+
+        if (categoryData.length > 0) {
+          const avgScore = categoryData.reduce(
+            (acc: number, stat: CategoryStat) => acc + (stat.avgScore * stat.attempts),
+            0
+          ) / categoryData.reduce((acc: number, stat: CategoryStat) => acc + stat.attempts, 0);
+          setAverageScore(parseFloat(avgScore.toFixed(2)));
+        }
+
+        setStreakMessage(currentStreak > 0 ? "Keep it up!" : "Restore your streak!");
         
     }).catch((error) => { console.error(error); });
-  }, [questionsCount]);
+  }, [currentStreak, questionsCount]);
  
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -75,34 +137,29 @@ export default function Dashboard() {
     questionsAnswered: answeredQuestionsCount || 0,
     correctAnswers: correctAnswersCount || 0,
     incorrectAnswers: incorrectAnswersCount || 0,
-    flashcardsCreated: 320,
+    flashcardsCreated: flashcardsCreated || 0,
     averageScore: averageScore,
-    streak: 12
+    streak: currentStreak
   };
 
-  const weeklyData = [
-    { name: 'Mon', questions: 45, correct: 32 },
-    { name: 'Tue', questions: 38, correct: 28 },
-    { name: 'Wed', questions: 52, correct: 41 },
-    { name: 'Thu', questions: 35, correct: 25 },
-    { name: 'Fri', questions: 43, correct: 38 },
-    { name: 'Sat', questions: 28, correct: 20 },
-    { name: 'Sun', questions: 48, correct: 42 }
-  ];
+  // Transform weekly data for the chart
+  const formattedWeeklyData = weeklyData.map(data => ({
+    name: new Date(data.timestamp).toLocaleDateString('en-US', { weekday: 'short' }),
+    questions: data.questionsAttempted,
+    correct: data.correctAnswers
+  }));
 
-  const categoryData = [
-    { name: 'Science', value: 35 },
-    { name: 'Math', value: 25 },
-    { name: 'History', value: 20 },
-    { name: 'Language', value: 20 }
-  ];
+  // Transform category data for the pie chart
+  const formattedCategoryData = categoryData.map(category => ({
+    name: category.name,
+    value: category.attempts
+  }));
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-  const difficultyData = [
-    { difficulty: 'Easy', count: 45 },
-    { difficulty: 'Medium', count: 35 },
-    { difficulty: 'Hard', count: 20 }
+  const formattedDifficultyData = [
+    { difficulty: 'Easy', count: difficultyStats.easy },
+    { difficulty: 'Medium', count: difficultyStats.medium },
+    { difficulty: 'Hard', count: difficultyStats.hard }
   ];
 
   return (
@@ -144,7 +201,7 @@ export default function Dashboard() {
                   <LineChart className="h-4 w-4 text-purple-500" />
                 </div>
                 <p className="text-2xl font-bold dark:text-gray-100">{stats.streak} days</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Keep it up!</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{streakMessage}</p>
               </div>
 
               <div className="dark:bg-[#1F2937] bg-white p-6 rounded-lg shadow-lg">
@@ -164,7 +221,7 @@ export default function Dashboard() {
                 <h3 className="text-lg font-medium mb-4 dark:text-gray-100">Weekly Performance</h3>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
-                    <RechartsLineChart data={weeklyData}>
+                    <RechartsLineChart data={formattedWeeklyData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                       <XAxis dataKey="name" stroke="#9CA3AF" />
                       <YAxis stroke="#9CA3AF" />
@@ -190,7 +247,7 @@ export default function Dashboard() {
                   <ResponsiveContainer width="100%" height="100%">
                     <RechartsPieChart>
                       <Pie
-                        data={categoryData}
+                        data={formattedCategoryData}
                         cx="50%"
                         cy="50%"
                         innerRadius={60}
@@ -199,7 +256,7 @@ export default function Dashboard() {
                         dataKey="value"
                         label
                       >
-                        {categoryData.map((entry, index) => (
+                        {formattedCategoryData.map((_entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
@@ -222,7 +279,7 @@ export default function Dashboard() {
               <h3 className="text-lg font-medium mb-4 dark:text-gray-100">Difficulty Distribution</h3>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RechartsBarChart data={difficultyData}>
+                  <RechartsBarChart data={formattedDifficultyData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis dataKey="difficulty" stroke="#9CA3AF" />
                     <YAxis stroke="#9CA3AF" />
@@ -235,7 +292,7 @@ export default function Dashboard() {
                       }}
                     />
                     <Bar dataKey="count">
-                      {difficultyData.map((_entry, index) => (
+                      {formattedDifficultyData.map((_entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Bar>

@@ -7,6 +7,7 @@ import {
     WeeklyData, 
     CategoryStat 
 } from '../interfaces/attempt.interface';
+import { startOfDay, differenceInDays } from 'date-fns';
 
 export class AnalyticsService {
     public async getUserStats(userId: string): Promise<UserStats> {
@@ -35,7 +36,7 @@ export class AnalyticsService {
                 ]),
                 MCQAttemptModel.find({ userId })
                     .sort({ timestamp: -1 })
-                    .limit(7),
+                    .limit(30),
                 MCQAttemptModel.aggregate([
                     { $match: { userId } },
                     {
@@ -73,18 +74,37 @@ export class AnalyticsService {
                 score: mcq.score,
                 questionsAttempted: Object.keys(mcq.answers).length,
                 correctAnswers: Object.values(mcq.answers).filter((key) => key == true).length,
-                wrongAnswers: Object.values(mcq.answers).filter((key) => key == false).length
+                wrongAnswers: Object.values(mcq.answers).filter((key) => key == false).length,
             }));
 
             const categoryData: CategoryStat[] = categoryStats.map((stat) => ({
-                name: stat._id,
+                name: stat.mcqSetId,
                 avgScore: Math.round(stat.avgScore * 100) / 100,
-                attempts: stat.totalAttempts
+                attempts: stat.totalAttempts,
+                correctAnswers: stat.correctAnswers,
+                wrongAnswers: stat.wrongAnswers
             }));
 
             const answered: number =  questionsAnswered.length;
             const totalCorrectAnswers: number = answersStats[0].correctAnswers;
             const totalWrongAnswers: number = answersStats[0].wrongAnswers;
+            
+            let currentStreak = 0;
+            if (recentMCQs.length > 0) {
+                const today = startOfDay(new Date());
+                let streakOngoing = true;
+
+                for (let i = 0; i < recentMCQs.length && streakOngoing; i++) {
+                    const attemptDate = startOfDay(recentMCQs[i].timestamp);
+                    const daysDifference = differenceInDays(today, attemptDate);
+
+                    if (daysDifference === currentStreak) {
+                        currentStreak++;
+                    } else if (daysDifference > currentStreak) {
+                        streakOngoing = false;
+                    }
+                }
+            }
 
             return {
                 totalAttempts: mcqsAttempts,
@@ -92,7 +112,8 @@ export class AnalyticsService {
                 categoryData,
                 answered,
                 totalCorrectAnswers,
-                totalWrongAnswers
+                totalWrongAnswers,
+                currentStreak
             };
         } catch (error) {
             console.error('Error fetching user stats:', error);
