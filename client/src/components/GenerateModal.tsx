@@ -16,7 +16,7 @@ interface GenerateModalProps {
   setFlashcard?: (f: Flashcard[]) => void;
   quiz: MCQ[] | Flashcard[] | undefined;
   type: string;
-  setGenerated: (e: boolean) => void
+  setGenerated: (e: boolean) => void;
 }
 
 export default function GenerateModal({
@@ -63,7 +63,7 @@ export default function GenerateModal({
     }
   }
 
-  function generate(e: FormEvent<HTMLFormElement>) {
+  async function generate(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setIsGenerating(true);
@@ -72,51 +72,52 @@ export default function GenerateModal({
     setTitle(form.topicName);
     setCategory(form.category);
 
-    console.log(language)
+    // Prepare the request data
+    const requestData = {
+      lesson: extractedText,
+      module: form.topicName,
+      subject: form.category,
+      type,
+      language,
+      n: form.numberOfQuestions,
+    };
 
-    axios
-      .get(
-        `http://localhost:3000/api/quiz?language=${language}&lesson=${encodeURIComponent(
-          extractedText!
-        )}&module=${encodeURIComponent(form.category)}&subject=${encodeURIComponent(
-          form.topicName
-        )}&type=${encodeURIComponent(type)}&n=${encodeURIComponent(form.numberOfQuestions)}`
-      )
-      .then((response) => {
-        try {
-          setLoading(false);
-          const ans = response.data.aiResponse.trim();
-          const formattedJson = formatJson(ans);
-          const parsedData = JSON.parse(formattedJson);
+    try {
+      const response = await axios.post("http://localhost:3000/api/quiz", requestData);
 
-          if (type == 'quiz' && setQuiz) setQuiz(parsedData.questions);
-          else if (type == "flashcard" && setFlashcard) setFlashcard(parsedData.questions)
+      console.log(response.data);
+      const aiResponse = response.data.aiResponse.trim();
+      const formattedJson = formatJson(aiResponse);
+      const parsedData = JSON.parse(formattedJson);
 
-          setIsGenerating(false);
-          setIsGenerated(true);
-          setGenerated(true);
-          setIsOpen(false)
-        } catch (error) {
-          setLoading(false);
-          setIsGenerating(false);
-          console.error("Error parsing JSON:", error);
-        }
-      })
-      .catch((error) => {
-        setLoading(false);
-        setIsGenerating(false);
-        console.log(error);
-      });
+      if (type === "quiz" && setQuiz) {
+        setQuiz(parsedData.questions);
+      } else if (type === "flashcard" && setFlashcard) {
+        setFlashcard(parsedData.questions);
+      }
+
+      setLoading(false);
+      setIsGenerating(false);
+      setIsGenerated(true);
+      setGenerated(true);
+      setIsOpen(false);
+    } catch (error) {
+      setLoading(false);
+      setIsGenerating(false);
+      console.error("Error generating quiz/flashcards:", error);
+    }
   }
 
   const handleCancel = () => {
-    setIsOpen(false)
-    setIsGenerated(false)
-  }
+    setIsOpen(false);
+    setIsGenerated(false);
+  };
 
   useEffect(() => {
-    if (isGenerated) setIsOpen(false)
-  }, [isGenerated, setIsOpen])
+    if (isGenerated) {
+      setIsOpen(false);
+    }
+  }, [isGenerated, setIsOpen]);
 
   return (
     <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-title" aria-describedby="modal-description">

@@ -97,7 +97,7 @@ export default function Dashboard() {
         } = response.data;
         
         if (questionsCount && questionsCount > 0) {
-          const averageScore = response.data.categoryData.reduce((acc: number, stat: Stat) => stat.avgScore + acc, 0) / questionsCount;
+          const averageScore = response.data.categoryData.reduce((acc: number, stat: Stat) => acc + (stat.avgScore * stat.attempts), 0) / response.data.categoryData.reduce((acc: number, stat: Stat) => acc + stat.attempts, 0);
           setAverageScore(parseFloat(averageScore.toFixed(2)));
         }
         
@@ -138,7 +138,7 @@ export default function Dashboard() {
     correctAnswers: correctAnswersCount || 0,
     incorrectAnswers: incorrectAnswersCount || 0,
     flashcardsCreated: flashcardsCreated || 0,
-    averageScore: averageScore,
+    averageScore: averageScore.toFixed(2),
     streak: currentStreak
   };
 
@@ -152,9 +152,8 @@ export default function Dashboard() {
   // Transform category data for the pie chart
   const formattedCategoryData = categoryData.map(category => ({
     name: category.name,
-    value: category.attempts
+    value: parseFloat(category.avgScore.toFixed(2)),
   }));
-
 
   const formattedDifficultyData = [
     { difficulty: 'Easy', count: difficultyStats.easy },
@@ -175,7 +174,7 @@ export default function Dashboard() {
           <div className="container mx-auto px-6 py-8">
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <div className="dark:bg-[#1F2937] bg-white p-6 rounded-lg shadow-lg">
+              <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-medium dark:text-gray-100">Total Questions</h3>
                   <BarChart className="h-4 w-4 text-blue-500" />
@@ -185,7 +184,7 @@ export default function Dashboard() {
                 <p className="text-xs text-gray-500 dark:text-gray-400">{stats.questionsAnswered} {stats.questionsAnswered === 1 ? 'question' : 'questions'} answered</p>
               </div>
 
-              <div className="dark:bg-[#1F2937] bg-white p-6 rounded-lg shadow-lg">
+              <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-medium dark:text-gray-100">Average Score</h3>
                   <TrendingUp className="h-4 w-4 text-green-500" />
@@ -195,7 +194,7 @@ export default function Dashboard() {
                 <p className="text-xs text-gray-500 dark:text-gray-400">{stats.incorrectAnswers} {stats.incorrectAnswers === 1 ? 'incorrect answer' : 'incorrect answers'}</p>
               </div>
 
-              <div className="dark:bg-[#1F2937] bg-white p-6 rounded-lg shadow-lg">
+              <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-medium dark:text-gray-100">Current Streak</h3>
                   <LineChart className="h-4 w-4 text-purple-500" />
@@ -204,7 +203,7 @@ export default function Dashboard() {
                 <p className="text-xs text-gray-500 dark:text-gray-400">{streakMessage}</p>
               </div>
 
-              <div className="dark:bg-[#1F2937] bg-white p-6 rounded-lg shadow-lg">
+              <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-medium dark:text-gray-100">Flashcards Created</h3>
                   <PieChart className="h-4 w-4 text-orange-500" />
@@ -217,7 +216,7 @@ export default function Dashboard() {
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
               {/* Performance Chart */}
-              <div className="dark:bg-[#1F2937] bg-white p-6 rounded-lg shadow-lg">
+              <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
                 <h3 className="text-lg font-medium mb-4 dark:text-gray-100">Weekly Performance</h3>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
@@ -241,7 +240,7 @@ export default function Dashboard() {
               </div>
 
               {/* Category Distribution */}
-              <div className="dark:bg-[#1F2937] bg-white p-6 rounded-lg shadow-lg">
+              <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
                 <h3 className="text-lg font-medium mb-4 dark:text-gray-100">Category Distribution</h3>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
@@ -275,7 +274,7 @@ export default function Dashboard() {
             </div>
 
             {/* Difficulty Distribution */}
-            <div className="dark:bg-[#1F2937] bg-white p-6 rounded-lg shadow-lg">
+            <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
               <h3 className="text-lg font-medium mb-4 dark:text-gray-100">Difficulty Distribution</h3>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">

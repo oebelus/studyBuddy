@@ -17,7 +17,7 @@ export class AnalyticsService {
                 questionsAnswered,
                 recentMCQs,
                 categoryStats,
-                answersStats
+                answersStats,
             ] = await Promise.all([
                 MCQAttemptModel.countDocuments({ userId }),
                 MCQAttemptModel.aggregate([
@@ -40,10 +40,28 @@ export class AnalyticsService {
                 MCQAttemptModel.aggregate([
                     { $match: { userId } },
                     {
+                        // Selects specific fields to process
+                        // 1: keep these fields as they are
+                        $project: {
+                            title: 1,
+                            category: 1,
+                            score: 1,
+                            answers: { $objectToArray: '$answers' }
+                        }
+                    },
+                    {
+                        // Creates a separate document for each array element (spreading out)
+                        // if 2 questions in an attempt -> 2 documents
+                        $unwind: '$answers'
+                    },
+                    {
+                        // Groups the documents by category and calculate various aggregations
                         $group: {
-                            _id: '$category',
+                            _id: '$title',
                             avgScore: { $avg: '$score' },
-                            totalAttempts: { $sum: 1 }
+                            totalAttempts: { $sum: 1 },
+                            correctAnswers: { $sum: { $cond: [{ $eq: ['$answers.v', true] }, 1, 0] } },
+                            wrongAnswers: { $sum: { $cond: [{ $eq: ['$answers.v', false] }, 1, 0] } },
                         }
                     }
                 ]),
@@ -66,23 +84,46 @@ export class AnalyticsService {
                             }
                         }
                     }
+                ]),
+                MCQAttemptModel.aggregate([
+                    { $match: { userId } },
+                    {
+                        $group: {
+                            _id: '$category',
+                            count: { $sum: 1 }
+                        }
+                    }
                 ])
             ]);
 
-            const weeklyData: WeeklyData[] = recentMCQs.map((mcq) => ({
-                timestamp: mcq.timestamp,
-                score: mcq.score,
-                questionsAttempted: Object.keys(mcq.answers).length,
-                correctAnswers: Object.values(mcq.answers).filter((key) => key == true).length,
-                wrongAnswers: Object.values(mcq.answers).filter((key) => key == false).length,
-            }));
+            const weeklyData: WeeklyData[] = recentMCQs.map((mcq) => {
+                const answers = mcq.answers;
+                let answersArray: [string, boolean][];
+                
+                 if (answers instanceof Map) {
+                    answersArray = Array.from(answers.entries());
+                } else {
+                    answersArray = Object.entries(answers);
+                }
+
+                const correctAnswers = answersArray.filter((answer) => answer[1]).length;
+                const wrongAnswers = answersArray.filter((answer) => !answer[1]).length;
+                
+                
+                return {
+                    timestamp: mcq.timestamp,
+                    score: mcq.score,
+                    questionsAttempted: Object.keys(mcq.answers).length,
+                    correctAnswers: correctAnswers || 0,
+                    wrongAnswers: wrongAnswers || 0
+            }});
 
             const categoryData: CategoryStat[] = categoryStats.map((stat) => ({
-                name: stat.mcqSetId,
-                avgScore: Math.round(stat.avgScore * 100) / 100,
+                name: stat._id,
+                avgScore: (stat.correctAnswers / stat.totalAttempts) * 100,
                 attempts: stat.totalAttempts,
-                correctAnswers: stat.correctAnswers,
-                wrongAnswers: stat.wrongAnswers
+                correctAnswers: stat.correctAnswers || 0,
+                wrongAnswers: stat.wrongAnswers || 0
             }));
 
             const answered: number =  questionsAnswered.length;
@@ -113,7 +154,7 @@ export class AnalyticsService {
                 answered,
                 totalCorrectAnswers,
                 totalWrongAnswers,
-                currentStreak
+                currentStreak,
             };
         } catch (error) {
             console.error('Error fetching user stats:', error);

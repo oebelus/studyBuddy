@@ -7,17 +7,16 @@ import { axiosInstance } from "../../../../services/auth.service";
 interface QuestionsProps {
     mcq: MCQs;
     userId: string;
-    topic: string;
+    answers: {[key: number]: boolean};
+    setAnswers: React.Dispatch<React.SetStateAction<{[key: number]: boolean}>>;
 }
 
-export default function Questions({ mcq, userId }: QuestionsProps) {
+export default function Questions({ mcq, userId, answers, setAnswers }: QuestionsProps) {
     const [showScore, setShowScore] = useState<boolean>(false);
     const [score, setScore] = useState<number>(0);
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
     const [selectedOptions, setSelectedOptions] = useState<{ [key: number]: number[] }>({});
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
-    
-    const [answers, setAnswers] = useState<{[key: number]: boolean}>({});
 
     const handleSubmit = () => {
         const currentQuestion = mcq.mcqs[currentQuestionIndex];
@@ -107,7 +106,7 @@ export default function Questions({ mcq, userId }: QuestionsProps) {
             },
         }
 
-        console.log(mcqAttempt)
+        // console.log(mcqAttempt)
         try {
             const response = await axiosInstance.post("/attempt/mcq", mcqAttempt);
             console.log("MCQ attempt saved successfully:", response.data);
@@ -115,15 +114,6 @@ export default function Questions({ mcq, userId }: QuestionsProps) {
             console.error("Failed to save MCQ attempt:", error);
         }
     };
-
-    useEffect(() => {
-        axiosInstance.get("/users").then((response) => {
-            axiosInstance.get(`/attempt/user/${response.data.user._id}$`).then((response) => {
-                console.log(response.data);
-            })
-        })
-        
-    }, []);
 
     const currentQuestion = mcq.mcqs[currentQuestionIndex];
 

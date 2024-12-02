@@ -25,6 +25,10 @@ export default function QuizPage() {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+
+  useEffect(() => {
+    console.log(quiz)
+  }, [quiz])
   
   useEffect(() => {
     axiosInstance.get(`/quiz/mcq`)
@@ -106,6 +110,11 @@ export default function QuizPage() {
           <button className={`${loading ? "" : "hidden"}`} type="submit">
             {loading ? <div className="w-16 h-16 mx-auto mt-5 border-4 border-dashed rounded-full animate-spin border-black dark:border-white"></div> : "<>Search</>"}
           </button>
+
+          {
+            quiz && quiz.length > 0 &&
+            <MCQSection mode="training" mcq={mcq} />
+          }
           
           {!generated && 
           <div className="flex flex-col">

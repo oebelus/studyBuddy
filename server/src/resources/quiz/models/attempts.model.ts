@@ -28,7 +28,7 @@ const mcqAttemptSchema  = new Schema<MCQAttempt>({
     timestamp: {
         type: Date,
         default: Date.now,
-    }
+    },
 })
 
 // const flashcardAttemptSchema  = new Schema<FlashcardAttempt>({

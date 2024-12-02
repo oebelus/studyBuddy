@@ -3,6 +3,7 @@ import axios from "axios";
 import { MCQs } from "../types/mcq";
 import Questions from "../components/topic/Quiz/Elements/Questions";
 import UtilityBox from "../components/topic/Quiz/Elements/UtilityBox";
+import { answerKind } from "../types/Answer";
 
 export default function Quiz() {
     const [mcq, setMcq] = useState<MCQs | null>(null);
@@ -10,6 +11,34 @@ export default function Quiz() {
     const [topic, setTopic] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>("");
+    const [correction, setCorrection] = useState<{answered: boolean, correct: answerKind}[]>(
+        mcq?.mcqs.map(() => ({answered: false, correct: "incorrect"})) || []
+    )
+    const [answers, setAnswers] = useState<{[key: number]: boolean}>({});
+
+    useEffect(() => {
+        if (!mcq?.mcqs) return;
+
+        // Initialize corrections with unanswered defaults
+        const corrections = mcq.mcqs.map(() => ({
+            answered: false,
+            correct: "not answered" as answerKind,
+        }));
+
+        // Update corrections with answered values
+        Object.entries(answers).forEach(([index, answer]) => {
+            const idx = parseInt(index, 10); // Convert string key to number
+            if (idx >= 0 && idx < corrections.length) {
+                corrections[idx] = {
+                    answered: true,
+                    correct: answer ? "correct" as answerKind : "incorrect" as answerKind,
+                };
+            }
+        });
+
+        setCorrection(corrections);
+    }, [answers, mcq]);
+
 
     const topicId = window.location.pathname.split("/")[2];
 
@@ -71,10 +100,21 @@ export default function Quiz() {
     }
 
     return (
-        <div className="max-w-3xl mx-auto p-6">
-            <h2 className="text-2xl font-bold mb-8">Quiz: {topic}</h2>
-            <Questions mcq={mcq} userId={userId} topic={topic} />
-            <UtilityBox />
+        <div>
+            <UtilityBox questions={correction} title={mcq.title} />
+            <div>
+                <nav>
+                    <div className="bg-[#333333] w-screen rounded-b-lg flex items-center justify-between max-w-3xl mx-auto p-6">
+                        <h1 
+                            onClick={() => window.location.href = "/"}
+                            className="cursor-pointer text-2xl text-white font-bold ">StudyBuddy</h1>
+                    </div>
+                </nav>
+                <div className="max-w-3xl mx-auto p-6">
+                    <h2 className="text-2xl font-bold mb-8">Quiz: {topic}</h2>
+                    <Questions mcq={mcq} userId={userId} answers={answers} setAnswers={setAnswers} />
+                </div>
+            </div>
         </div>
     );
 }
