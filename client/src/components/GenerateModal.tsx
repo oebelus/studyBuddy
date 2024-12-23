@@ -92,19 +92,16 @@ export default function GenerateModal({
       const formattedJson = formatJson(aiResponse);
       const parsedData = JSON.parse(formattedJson);
 
-      if (type === "quiz" && setQuiz) {
-        setQuiz(parsedData.questions);
-      } else if (type === "flashcard" && setFlashcard) {
-        setFlashcard(parsedData.questions);
-      }
-
       setLoading(false);
       setIsGenerating(false);
       setIsGenerated(true);
       setGenerated(true);
       setIsOpen(false);
 
-      const formattedData: MCQs = {
+      if (type === "quiz" && setQuiz) {
+        setQuiz(parsedData.questions);
+
+        const formattedData: MCQs = {
         mcqs: parsedData.questions.map((q: MCQ, index: number) => ({
             id: index + 1,
             question: q.question,
@@ -116,6 +113,10 @@ export default function GenerateModal({
       };
 
       navigate('/quiz-sample', { state: { locationQuiz: formattedData} })
+      } else if (type === "flashcard" && setFlashcard) {
+        setFlashcard(parsedData.questions);
+      }
+
     } catch (error) {
       setLoading(false);
       setIsGenerating(false);

@@ -137,7 +137,7 @@ export default function Questions({ mcq, userId, answers, setAnswers }: Question
                     </h3>
                     <p className="text-lg mb-4">{currentQuestion.question}</p>
                     <div className="space-y-4 mb-6">
-                        {currentQuestion.options.map((option, index) => (
+                        {currentQuestion && currentQuestion.options && currentQuestion.options.map((option, index) => (
                             <div
                                 key={index}
                                 className={`flex items-center p-3 rounded-lg border ${
