@@ -17,6 +17,7 @@ export default function Questions({ mcq, userId, answers, setAnswers }: Question
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
     const [selectedOptions, setSelectedOptions] = useState<{ [key: number]: number[] }>({});
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
+    const [attempt, setAttempt] = useState(0);
 
     const handleSubmit = () => {
         const currentQuestion = mcq.mcqs[currentQuestionIndex];
@@ -93,6 +94,7 @@ export default function Questions({ mcq, userId, answers, setAnswers }: Question
 
     const handleSaveAttempt = async () => {
         setAnswers(answers);
+        setAttempt(1)
 
         const mcqAttempt = {
             mcqAttempts: {
@@ -110,8 +112,16 @@ export default function Questions({ mcq, userId, answers, setAnswers }: Question
         try {
             const response = await axiosInstance.post("/attempt/mcq", mcqAttempt);
             console.log("MCQ attempt saved successfully:", response.data);
+            setAttempt(2);
+            setTimeout(() => {
+                setAttempt(0)
+            }, 3000);
         } catch (error) {
             console.error("Failed to save MCQ attempt:", error);
+            setAttempt(3);
+            setTimeout(() => {
+                setAttempt(0)
+            }, 3000);
         }
     };
 
@@ -148,7 +158,7 @@ export default function Questions({ mcq, userId, answers, setAnswers }: Question
                                 />
                                 <label
                                     htmlFor={`option-${index}`}
-                                    className={`text-lg dark:text-white ${
+                                    className={`text-lg ${
                                         isSubmitted
                                             ? isCorrectAnswer(index)
                                                 ? "text-green-600"
@@ -164,10 +174,10 @@ export default function Questions({ mcq, userId, answers, setAnswers }: Question
                     <button
                         onClick={handleSubmit}
                         disabled={!isOptionSelected(currentQuestion.id) || isSubmitted}
-                        className={`mt-4 bg-blue-500 text-white dark:bg-[#111111] dark:hover:bg-[#0f0f0f] py-3 px-6 rounded-lg w-full text-lg ${
+                        className={`mt-4 bg-blue-500 py-3 px-6 rounded-lg w-full text-lg ${
                             isSubmitted || !isOptionSelected(currentQuestion.id)
-                                ? "bg-gray-200 cursor-not-allowed"
-                                : "hover:bg-blue-600"
+                                ? "bg-gray-200 cursor-not-allowed text-black"
+                                : "hover:bg-blue-600 text-white"
                         }`}
                     >
                         Submit
@@ -225,7 +235,7 @@ export default function Questions({ mcq, userId, answers, setAnswers }: Question
                             onClick={handleSaveAttempt}
                             className="bg-green-400 hover:bg-green-500 text-white px-4 py-2 rounded-lg"
                         >
-                            Save Attempt
+                            {attempt === 0 ? "Save" : attempt === 1 ? "Saving..." : attempt === 2 ? "Saved" : "Error Saving Attempt"}
                         </button>
                     </div>
                 </div>

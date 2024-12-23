@@ -4,72 +4,67 @@ import { MCQs } from "../types/mcq";
 import Questions from "../components/topic/Quiz/Elements/Questions";
 import UtilityBox from "../components/topic/Quiz/Elements/UtilityBox";
 import { answerKind } from "../types/Answer";
+import { useLocation, useParams } from "react-router-dom";
 
 export default function Quiz() {
-    const [mcq, setMcq] = useState<MCQs | null>(null);
+    const { id: topicId } = useParams(); // Dynamic route parameter
+    const location = useLocation();
+    const { locationQuiz } = location.state || {};
+
+    const [mcq, setMcq] = useState<MCQs | null>(locationQuiz || null);
     const [userId, setUserId] = useState<string>("");
     const [topic, setTopic] = useState<string>("");
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isLoading, setIsLoading] = useState<boolean>(!locationQuiz);
     const [error, setError] = useState<string>("");
-    const [correction, setCorrection] = useState<{answered: boolean, correct: answerKind}[]>(
-        mcq?.mcqs.map(() => ({answered: false, correct: "incorrect"})) || []
-    )
-    const [answers, setAnswers] = useState<{[key: number]: boolean}>({});
+    const [correction, setCorrection] = useState<{ answered: boolean; correct: answerKind }[]>([]);
+    const [answers, setAnswers] = useState<{ [key: number]: boolean }>({});
 
+    console.log(locationQuiz)
     useEffect(() => {
-        if (!mcq?.mcqs) return;
+        if (mcq?.mcqs) {
+            const corrections = mcq.mcqs.map(() => ({
+                answered: false,
+                correct: "not answered" as answerKind,
+            }));
 
-        // Initialize corrections with unanswered defaults
-        const corrections = mcq.mcqs.map(() => ({
-            answered: false,
-            correct: "not answered" as answerKind,
-        }));
+            Object.entries(answers).forEach(([index, answer]) => {
+                const idx = parseInt(index, 10);
+                if (idx >= 0 && idx < corrections.length) {
+                    corrections[idx] = {
+                        answered: true,
+                        correct: answer ? "correct" : "incorrect",
+                    };
+                }
+            });
 
-        // Update corrections with answered values
-        Object.entries(answers).forEach(([index, answer]) => {
-            const idx = parseInt(index, 10); // Convert string key to number
-            if (idx >= 0 && idx < corrections.length) {
-                corrections[idx] = {
-                    answered: true,
-                    correct: answer ? "correct" as answerKind : "incorrect" as answerKind,
-                };
-            }
-        });
-
-        setCorrection(corrections);
+            setCorrection(corrections);
+        }
     }, [answers, mcq]);
 
-
-    const topicId = window.location.pathname.split("/")[2];
-
     useEffect(() => {
+        if ((mcq && mcq.mcqs.length > 0) || !topicId) return;
+
         const fetchData = async () => {
             setIsLoading(true);
             setError("");
+
             try {
                 const token = localStorage.getItem("accessToken");
                 if (!token) {
                     throw new Error("No authentication token found");
                 }
 
-                setIsLoading(true);
-                // Fetch user data
-                const userResponse = await axios.get("http://localhost:3000/api/users", {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
+                const [userResponse, mcqResponse] = await Promise.all([
+                    axios.get("http://localhost:3000/api/users", {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }),
+                    axios.get(`http://localhost:3000/api/quiz/${topicId}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }),
+                ]);
+
                 setUserId(userResponse.data.user._id);
 
-                // Fetch MCQ data
-                const mcqResponse = await axios.get(`http://localhost:3000/api/quiz/mcq/${topicId}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-
-                setIsLoading(false);
-                
                 if (!mcqResponse.data.mcq) {
                     throw new Error("No MCQ data found");
                 }
@@ -85,7 +80,7 @@ export default function Quiz() {
         };
 
         fetchData();
-    }, [topicId]);
+    }, [topicId, mcq]);
 
     if (isLoading) {
         return <div className="text-center py-8">Loading quiz...</div>;
@@ -105,9 +100,12 @@ export default function Quiz() {
             <div>
                 <nav>
                     <div className="bg-[#333333] w-screen rounded-b-lg flex items-center justify-between max-w-3xl mx-auto p-6">
-                        <h1 
+                        <h1
                             onClick={() => window.location.href = "/"}
-                            className="cursor-pointer text-2xl text-white font-bold ">StudyBuddy</h1>
+                            className="cursor-pointer text-2xl text-white font-bold"
+                        >
+                            StudyBuddy
+                        </h1>
                     </div>
                 </nav>
                 <div className="max-w-3xl mx-auto p-6">

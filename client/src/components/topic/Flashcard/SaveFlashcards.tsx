@@ -13,7 +13,7 @@ export default function SaveFlashcard({title, category, flashcards}: SaveProps) 
 
         try {
             const response = await axios.post(
-                `http://localhost:3000/api/quiz/flashcard`, 
+                `http://localhost:3000/api/flashcard`, 
                 {
                     title,
                     category,
@@ -21,16 +21,14 @@ export default function SaveFlashcard({title, category, flashcards}: SaveProps) 
                 },
                 {
                     headers: {
-                        Authorization: `Bearer ${token}` // Add the token to headers
+                        Authorization: `Bearer ${token}`
                     }
                 });
-            console.log(response.data.message); // Log the success message
+            console.log(response.data.message);
         } catch (error) {
             if (axios.isAxiosError(error) && error.response) {
-                // Handle known errors from the server
                 console.error('Error:', error.response.data.message || 'An error occurred');
             } else {
-                // Handle other errors (e.g., network issues)
                 console.error('Error:', (error as Error).message || 'An error occurred');
             }
         }

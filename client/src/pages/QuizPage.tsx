@@ -31,7 +31,7 @@ export default function QuizPage() {
   }, [quiz])
   
   useEffect(() => {
-    axiosInstance.get(`/quiz/mcq`)
+    axiosInstance.get(`/quiz`)
       .then((response) => {
         const mcqs = response.data.mcq
         const userTopics: Topic[] = mcqs.map((mcq: MCQs) => ({
@@ -51,7 +51,7 @@ export default function QuizPage() {
   }, [quizId])
 
   useEffect(() => {
-    axiosInstance.get(`/quiz/mcq/${quizId}`)
+    axiosInstance.get(`/quiz/${quizId}`)
     .then((response) => {
       setMcq(response.data.mcq.mcqs)
     })

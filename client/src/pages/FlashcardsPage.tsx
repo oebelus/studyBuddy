@@ -24,7 +24,7 @@ export default function FlashcardsPage() {
 
   useEffect(() => {
 
-    axiosInstance.get(`/quiz/flashcard`,
+    axiosInstance.get(`/flashcard`,
       {
         headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`
@@ -46,7 +46,7 @@ export default function FlashcardsPage() {
   }, [])
 
   useEffect(() => {
-    axiosInstance.get(`/quiz/flashcard/${flashcardId}`, 
+    axiosInstance.get(`/flashcard/${flashcardId}`, 
       {
         headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`

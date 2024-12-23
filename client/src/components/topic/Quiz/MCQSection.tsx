@@ -8,7 +8,6 @@ type MCQSectionProps = {
 };
 
 const MCQSection = ({ mcq }: MCQSectionProps) => {
-  // Move all hooks to the top level
   const [isQuizStarted, setIsQuizStarted] = useState<boolean>(false);
   const [length, setLength] = useState<number>(0);
 

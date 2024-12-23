@@ -3,7 +3,8 @@ import { Flashcard } from "../types/flashcard";
 import axios from "axios";
 import { FormEvent, useEffect, useState } from "react";
 import { formatJson } from "../utils/format";
-import { MCQ } from "../types/mcq";
+import { MCQ, MCQs } from "../types/mcq";
+import { useNavigate } from "react-router-dom";
 
 interface GenerateModalProps {
   isOpen: boolean;
@@ -40,6 +41,7 @@ export default function GenerateModal({
   const [extractedText, setExtractedText] = useState<string | undefined>("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
+  const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -52,7 +54,7 @@ export default function GenerateModal({
     formData.append("pdf", selectedFile, selectedFile.name);
 
     try {
-      const response = await axios.post("http://localhost:3000/api/upload-pdf", formData, {
+      const response = await axios.post("http://localhost:3000/api/generate/upload-pdf", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -83,7 +85,7 @@ export default function GenerateModal({
     };
 
     try {
-      const response = await axios.post("http://localhost:3000/api/quiz", requestData);
+      const response = await axios.post("http://localhost:3000/api/generate", requestData);
 
       console.log(response.data);
       const aiResponse = response.data.aiResponse.trim();
@@ -101,6 +103,19 @@ export default function GenerateModal({
       setIsGenerated(true);
       setGenerated(true);
       setIsOpen(false);
+
+      const formattedData: MCQs = {
+        mcqs: parsedData.questions.map((q: MCQ, index: number) => ({
+            id: index + 1,
+            question: q.question,
+            options: q.options,
+            answers: q.answers,
+        })),
+        title: form.topicName,
+        category: form.category,
+      };
+
+      navigate('/quiz-sample', { state: { locationQuiz: formattedData} })
     } catch (error) {
       setLoading(false);
       setIsGenerating(false);

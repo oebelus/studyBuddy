@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Answer } from "../types/Answer";
-import { MCQ } from "./topic/Mcq";
 import { Flashcard } from "../types/flashcard";
 import { Output } from "../types/output";
+import { MCQ } from "../types/mcq";
 
 interface QuizProps {
     quiz: MCQ[];

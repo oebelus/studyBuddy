@@ -9,7 +9,6 @@ type MCQSectionProps = {
 };
 
 const MCQSection: React.FC<MCQSectionProps> = ({ mode, mcq }) => {
-  // Move all hooks to the top level
   const [selectedOptions, setSelectedOptions] = useState<{ [key: number]: number[] }>({});
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
@@ -149,7 +148,6 @@ const MCQSection: React.FC<MCQSectionProps> = ({ mode, mcq }) => {
     return (selectedOptions[questionId] || []).length > 0;
   };
 
-  // Early return for loading state
   if (!mcq) {
     return (
       <div className="p-8 bg-white dark:bg-[#1F1F1F] rounded-lg shadow-lg max-w-2xl mx-auto mt-8">

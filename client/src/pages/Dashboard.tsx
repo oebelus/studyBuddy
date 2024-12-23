@@ -62,7 +62,7 @@ export default function Dashboard() {
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
     
   useEffect(() => {
-    axiosInstance.get(`/quiz/mcq`)
+    axiosInstance.get(`/quiz`)
       .then((response) => { 
         const count = response.data.mcq.reduce((acc: number, mcq: MCQs) => mcq.mcqs.length + acc, 0);
         setQuestionsCount(count);
@@ -70,7 +70,7 @@ export default function Dashboard() {
     })
       .catch((error) => { console.error(error); });
 
-    axiosInstance.get(`/quiz/flashcard`)
+    axiosInstance.get(`/flashcard`)
       .then((response) => { 
         const length = response.data.flashcard.reduce((acc: number, flashcard: Flashcards) => flashcard.flashcards.length + acc, 0);
         setFlashcardsCreated(length);
