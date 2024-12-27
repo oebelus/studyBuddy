@@ -46,9 +46,8 @@ export default function SaveQuiz({title, category, mcqs}: SaveProps) {
         }
     };
     return (
-        
-        <div className="flex justify-end mr-32">
-            <button onClick={save} className={`hover:bg-[#333 transition py-4 px-8 rounded-lg text-white bg-[#2D2D2D] w-fit ${loading ? "cursor-not-allowed bg-gray-500" : saved? "cursor-not-allowed bg-green-500" : error ? "cursor-not-allowed bg-red-500" : ""}`}>
+        <div className="flex justify-end">
+            <button onClick={save} className={`hover:bg-[#333 transition py-3 px-8 rounded-lg text-white bg-[#2D2D2D] w-fit ${loading ? "cursor-not-allowed bg-gray-500" : saved? "cursor-not-allowed bg-green-500" : error ? "cursor-not-allowed bg-red-500" : ""}`}>
                 {loading ? "Saving..." : error ? "Error" : saved ? "Saved" : "Save"}
             </button>
         </div>

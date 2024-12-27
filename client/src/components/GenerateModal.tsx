@@ -17,7 +17,6 @@ interface GenerateModalProps {
   setFlashcard?: (f: Flashcard[]) => void;
   quiz: MCQ[] | Flashcard[] | undefined;
   type: string;
-  setGenerated: (e: boolean) => void;
 }
 
 export default function GenerateModal({
@@ -29,7 +28,6 @@ export default function GenerateModal({
   setLoading,
   setQuiz,
   setFlashcard,
-  setGenerated,
   type,
 }: GenerateModalProps) {
   const [form, setForm] = useState({
@@ -95,7 +93,6 @@ export default function GenerateModal({
       setLoading(false);
       setIsGenerating(false);
       setIsGenerated(true);
-      setGenerated(true);
       setIsOpen(false);
 
       if (type === "quiz" && setQuiz) {
@@ -112,7 +109,7 @@ export default function GenerateModal({
         category: form.category,
       };
 
-      navigate('/quiz-sample', { state: { locationQuiz: formattedData} })
+      navigate('/quiz-sample', { state: { locationQuiz: formattedData } })
       } else if (type === "flashcard" && setFlashcard) {
         setFlashcard(parsedData.questions);
       }

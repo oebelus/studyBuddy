@@ -16,7 +16,6 @@ export default function FlipCard({ flashcards }: FlashcardProps) {
 
     const handleGrade = (grade: string) => {
         setGrades({ ...grades, [currentIndex]: grade });
-        goToNextCard();
     };
 
     const goToNextCard = () => {

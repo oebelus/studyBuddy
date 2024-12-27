@@ -4,12 +4,14 @@ import { MCQs } from "../types/mcq";
 import Questions from "../components/topic/Quiz/Elements/Questions";
 import UtilityBox from "../components/topic/Quiz/Elements/UtilityBox";
 import { answerKind } from "../types/Answer";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 
 export default function Quiz() {
     const { id: topicId } = useParams(); // Dynamic route parameter
     const location = useLocation();
     const { locationQuiz } = location.state || {};
+    const isSample = locationQuiz && locationQuiz.length > 0 ? true : false;
+    const navigate = useNavigate(); // Initialize navigate
 
     const [mcq, setMcq] = useState<MCQs | null>(locationQuiz || null);
     const [userId, setUserId] = useState<string>("");
@@ -19,7 +21,6 @@ export default function Quiz() {
     const [correction, setCorrection] = useState<{ answered: boolean; correct: answerKind }[]>([]);
     const [answers, setAnswers] = useState<{ [key: number]: boolean }>({});
 
-    console.log(locationQuiz)
     useEffect(() => {
         if (mcq?.mcqs) {
             const corrections = mcq.mcqs.map(() => ({
@@ -95,22 +96,32 @@ export default function Quiz() {
     }
 
     return (
-        <div>
-            <UtilityBox questions={correction} title={mcq.title} />
+        <div className="dark:bg-[#111111] bg-white min-h-screen overflow-x-hidden">
             <div>
                 <nav>
-                    <div className="bg-[#333333] w-screen rounded-b-lg flex items-center justify-between max-w-3xl mx-auto p-6">
+                    <div className="bg-[#333333] dark:bg-[#1f1f1f] w-full flex items-center justify-between p-6">
+                        <UtilityBox questions={correction} title={mcq.title} />
                         <h1
-                            onClick={() => window.location.href = "/"}
-                            className="cursor-pointer text-2xl text-white font-bold"
+                            onClick={() => window.location.href = "/dashboard"}
+                            className="cursor-pointer text-2xl text-white font-bold hover:text-gray-400 transition-colors"
                         >
                             StudyBuddy
                         </h1>
                     </div>
                 </nav>
+
+                <div className="p-4">
+                    <span
+                        onClick={() => navigate("/quiz")}
+                        className="cursor-pointer dark:text-white dark:hover:text-gray-400 hover:text-gray-700 transition-colors"
+                    >
+                        &lt; Go back to Quiz
+                    </span>
+                </div>
+
                 <div className="max-w-3xl mx-auto p-6">
-                    <h2 className="text-2xl font-bold mb-8">Quiz: {topic}</h2>
-                    <Questions mcq={mcq} userId={userId} answers={answers} setAnswers={setAnswers} />
+                    <h2 className="text-2xl font-bold mb-8 text-gray-800 dark:text-gray-200">Quiz: {topic}</h2>
+                    <Questions mcq={mcq} userId={userId} answers={answers} setAnswers={setAnswers} isSample={isSample} />
                 </div>
             </div>
         </div>

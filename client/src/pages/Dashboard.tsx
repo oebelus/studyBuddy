@@ -113,7 +113,7 @@ export default function Dashboard() {
   // Sample data
   const stats = {
     totalQuestions: questionsCount,
-    questionsAnswered: answeredQuestionsCount || 0,
+    questionsAnswered: correctAnswersCount + incorrectAnswersCount || 0,
     correctAnswers: correctAnswersCount || 0,
     incorrectAnswers: incorrectAnswersCount || 0,
     flashcardsCreated: flashcardsCreated || 0,
