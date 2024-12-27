@@ -21,28 +21,7 @@ import { axiosInstance } from "../services/auth.service";
 import { jwtDecode } from "jwt-decode";
 import { Stat } from "../types/Attempts";
 import { Flashcards } from "../types/flashcard";
-
-interface WeeklyData {
-  timestamp: Date;
-  score: number;
-  questionsAttempted: number;
-  correctAnswers: number;
-  wrongAnswers: number;
-}
-
-interface CategoryStat {
-  name: string;
-  avgScore: number;
-  attempts: number;
-  correctAnswers: number;
-  wrongAnswers: number;
-}
-
-interface DifficultyStats {
-  easy: number;
-  medium: number;
-  hard: number;
-}
+import { CategoryStat, DifficultyStats, WeeklyData, WeeklyGraphData } from "../types/Analytics";
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -57,10 +36,10 @@ export default function Dashboard() {
   const [flashcardsCreated, setFlashcardsCreated] = useState<number>(0);
   const [weeklyData, setWeeklyData] = useState<WeeklyData[]>([]);
   const [categoryData, setCategoryData] = useState<CategoryStat[]>([]);
-  const [difficultyStats, setDifficultyStats] = useState<DifficultyStats>({ easy: 0, medium: 0, hard: 0 });
+  const [difficultyStats, ] = useState<DifficultyStats>({ easy: 0, medium: 0, hard: 0 });
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
-    
+
   useEffect(() => {
     axiosInstance.get(`/quiz`)
       .then((response) => { 
@@ -86,7 +65,7 @@ export default function Dashboard() {
     const userId = jwtDecode(refreshToken).id;
     axiosInstance.get(`/attempt/user/${userId}`)
       .then((response) => {
-        console.log(response.data)
+        console.log(response.data);
         const { 
           weeklyData,
           categoryData,
@@ -142,12 +121,55 @@ export default function Dashboard() {
     streak: currentStreak
   };
 
-  // Transform weekly data for the chart
-  const formattedWeeklyData = weeklyData.map(data => ({
-    name: new Date(data.timestamp).toLocaleDateString('en-US', { weekday: 'short' }),
-    questions: data.questionsAttempted,
-    correct: data.correctAnswers
-  }));
+ // Helper to get all weekdays
+const getWeekdays = () => {
+  const weekdays = [];
+  const today = new Date();
+  const options: Intl.DateTimeFormatOptions = { weekday: 'short' };
+
+  for (let i = 6; i >= 0; i--) {
+    const day = new Date(today);
+    day.setDate(today.getDate() - i);
+    weekdays.push(day.toLocaleDateString('en-US', options));
+  }
+  return weekdays;
+};
+
+// Step 1: Aggregate weekly data using reduce
+const aggregatedData = weeklyData.reduce((acc: WeeklyGraphData[], data) => {
+  const dayName = new Date(data.timestamp).toLocaleDateString('en-US', {
+    weekday: 'short',
+  });
+
+  // Check if the day already exists in the accumulator
+  const existingDay = acc.find((item) => item.name === dayName);
+
+  if (existingDay) {
+    // Accumulate the values
+    existingDay.questionsAttempted += data.questionsAttempted;
+    existingDay.correctAnswers += data.correctAnswers;
+  } else {
+    // Add a new entry for the day
+    acc.push({
+      name: dayName,
+      questionsAttempted: data.questionsAttempted,
+      correctAnswers: data.correctAnswers,
+    });
+  }
+
+  return acc;
+}, []);
+
+// Step 2: Ensure all days of the week are represented
+const allWeekdays = getWeekdays();
+
+const formattedWeeklyData = allWeekdays.map((day) => {
+  const existingDay = aggregatedData.find((data) => data.name === day);
+
+  return existingDay
+    ? existingDay
+    : { name: day, questionsAttempted: 0, correctAnswers: 0 }; // Default values for missing days
+});
 
   // Transform category data for the pie chart
   const formattedCategoryData = categoryData.map(category => ({
@@ -160,7 +182,6 @@ export default function Dashboard() {
     { difficulty: 'Medium', count: difficultyStats.medium },
     { difficulty: 'Hard', count: difficultyStats.hard }
   ];
-
   return (
     <div className="dark:bg-[#111111] bg-white min-h-screen">
       <Navbar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
@@ -209,92 +230,52 @@ export default function Dashboard() {
                   <PieChart className="h-4 w-4 text-orange-500" />
                 </div>
                 <p className="text-2xl font-bold dark:text-gray-100">{stats.flashcardsCreated}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Active learning cards</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{flashcardsCreated} flashcards created</p>
               </div>
             </div>
-
-            {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-              {/* Performance Chart */}
+            
+            {/* Analytics Charts */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
               <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
-                <h3 className="text-lg font-medium mb-4 dark:text-gray-100">Weekly Performance</h3>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RechartsLineChart data={formattedWeeklyData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis dataKey="name" stroke="#9CA3AF" />
-                      <YAxis stroke="#9CA3AF" />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1F2937',
-                          border: 'none',
-                          borderRadius: '0.5rem',
-                          color: '#F3F4F6'
-                        }}
-                      />
-                      <Line type="monotone" dataKey="questions" stroke="#3B82F6" name="Questions Attempted" />
-                      <Line type="monotone" dataKey="correct" stroke="#10B981" name="Correct Answers" />
-                    </RechartsLineChart>
-                  </ResponsiveContainer>
-                </div>
+                <h3 className="text-lg font-medium dark:text-gray-100 mb-4">Weekly Performance</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsLineChart data={formattedWeeklyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="questionsAttempted" stroke="#0088FE" />
+                    <Line type="monotone" dataKey="correctAnswers" stroke="#00C49F" />
+                  </RechartsLineChart>
+                </ResponsiveContainer>
               </div>
 
-              {/* Category Distribution */}
               <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
-                <h3 className="text-lg font-medium mb-4 dark:text-gray-100">Category Distribution</h3>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RechartsPieChart>
-                      <Pie
-                        data={formattedCategoryData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                        label
-                      >
-                        {formattedCategoryData.map((_entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1F2937',
-                          border: 'none',
-                          borderRadius: '0.5rem',
-                          color: '#F3F4F6'
-                        }}
-                      />
-                    </RechartsPieChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
-
-            {/* Difficulty Distribution */}
-            <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
-              <h3 className="text-lg font-medium mb-4 dark:text-gray-100">Difficulty Distribution</h3>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartsBarChart data={formattedDifficultyData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="difficulty" stroke="#9CA3AF" />
-                    <YAxis stroke="#9CA3AF" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#1F2937',
-                        border: 'none',
-                        borderRadius: '0.5rem',
-                        color: '#F3F4F6'
-                      }}
-                    />
-                    <Bar dataKey="count">
-                      {formattedDifficultyData.map((_entry, index) => (
+                <h3 className="text-lg font-medium dark:text-gray-100 mb-4">Category Distribution</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsPieChart>
+                    <Pie data={formattedCategoryData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
+                      {formattedCategoryData.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
-                    </Bar>
+                    </Pie>
+                    <Tooltip
+                      formatter={(value: number, name: string) => [`${name}: ${value}%`]}
+                      labelFormatter={(name: string) => `Category: ${name}`}
+                    />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
+                <h3 className="text-lg font-medium dark:text-gray-100 mb-4">Difficulty Distribution</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsBarChart data={formattedDifficultyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="difficulty" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#8884d8" />
                   </RechartsBarChart>
                 </ResponsiveContainer>
               </div>

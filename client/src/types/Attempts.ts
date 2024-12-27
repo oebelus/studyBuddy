@@ -10,7 +10,7 @@ export interface MCQAttempt {
   title: string;
   numberOfQuestions: number;
   score: number;
-  answers: { [key: number]: boolean };
+  answers: { [key: number]: boolean | string };
   timestamp: Date;
 }
 

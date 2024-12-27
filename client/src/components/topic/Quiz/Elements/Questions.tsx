@@ -18,6 +18,7 @@ export default function Questions({ mcq, userId, answers, setAnswers }: Question
     const [selectedOptions, setSelectedOptions] = useState<{ [key: number]: number[] }>({});
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
     const [attempt, setAttempt] = useState(0);
+    const [answered, setAnswered] = useState(0);
 
     const handleSubmit = () => {
         const currentQuestion = mcq.mcqs[currentQuestionIndex];
@@ -25,6 +26,7 @@ export default function Questions({ mcq, userId, answers, setAnswers }: Question
         const isCorrect = selectedForThisQuestion.sort().toString() === currentQuestion.answers.sort().toString();
 
         setIsSubmitted(true);
+        setAnswered(x => x + 1);
         setAnswers(prevAnswers => ({
             ...prevAnswers,
             [currentQuestionIndex]: isCorrect
@@ -94,7 +96,9 @@ export default function Questions({ mcq, userId, answers, setAnswers }: Question
 
     const handleSaveAttempt = async () => {
         setAnswers(answers);
-        setAttempt(1)
+        setAttempt(answered)
+
+        console.log("Answered: ", answered)
 
         const mcqAttempt = {
             mcqAttempts: {
@@ -235,7 +239,7 @@ export default function Questions({ mcq, userId, answers, setAnswers }: Question
                             onClick={handleSaveAttempt}
                             className="bg-green-400 hover:bg-green-500 text-white px-4 py-2 rounded-lg"
                         >
-                            {attempt === 0 ? "Save" : attempt === 1 ? "Saving..." : attempt === 2 ? "Saved" : "Error Saving Attempt"}
+                            {attempt === 0 ? "Save Attempt" : attempt === 1 ? "Saving..." : attempt === 2 ? "Saved" : "Error Saving Attempt"}
                         </button>
                     </div>
                 </div>

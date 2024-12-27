@@ -19,7 +19,10 @@ export class AnalyticsService {
                 categoryStats,
                 answersStats,
             ] = await Promise.all([
-                MCQAttemptModel.countDocuments({ userId }),
+                MCQAttemptModel.countDocuments({
+                    userId,
+                answers: { $exists: true, $ne: {} }
+                }),
                 MCQAttemptModel.aggregate([
                     { $match: { userId } },
                     {
@@ -113,10 +116,12 @@ export class AnalyticsService {
                 return {
                     timestamp: mcq.timestamp,
                     score: mcq.score,
-                    questionsAttempted: Object.keys(mcq.answers).length,
+                    questionsAttempted: correctAnswers + wrongAnswers,
                     correctAnswers: correctAnswers || 0,
                     wrongAnswers: wrongAnswers || 0
             }});
+
+            console.log(weeklyData)
 
             const categoryData: CategoryStat[] = categoryStats.map((stat) => ({
                 name: stat._id,

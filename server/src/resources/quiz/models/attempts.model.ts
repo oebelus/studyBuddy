@@ -22,7 +22,7 @@ const mcqAttemptSchema  = new Schema<MCQAttempt>({
     score: Number,
     answers: {
         type: Map,
-        of: Boolean,
+        of: Boolean || String,
         default: new Map(),
     },
     timestamp: {

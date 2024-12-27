@@ -15,6 +15,7 @@ export interface MCQAttempt {
     score: number;
     answers: {[key: number]: boolean};
     timestamp: Date;
+    attempted: number;
 }
 
 export interface DifficultyStats {
