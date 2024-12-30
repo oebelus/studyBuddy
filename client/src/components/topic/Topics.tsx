@@ -2,23 +2,35 @@ import { useState } from "react";
 import { Topic } from "../../types/Topic";
 import DeleteTopic from "./DeleteTopic";
 import { Output } from "../../types/output";
+import { ChevronDown, ChevronUp } from "react-feather"; // Feather icons for chevrons
 
 interface TopicsProps {
-  topics: Topic[],
-  type: Output,
-  mcqLength: number
+  topics: Topic[];
+  type: Output;
+  mcqLength: number;
 }
 
-export default function Topics({type, topics}: TopicsProps) {
+export default function Topics({ type, topics }: TopicsProps) {
   const [del, setDel] = useState<boolean>(false);
   const [topicId, setTopicId] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
   const [numberOfQuestions, setNumberOfQuestions] = useState(0);
-  const [quizId, setQuizId] = useState("")
+  const [quizId, setQuizId] = useState("");
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
+
+  // Group topics by category
+  const groupedTopics = topics.reduce((acc, topic) => {
+    acc[topic.category] = acc[topic.category] || [];
+    acc[topic.category].push(topic);
+    return acc;
+  }, {} as Record<string, Topic[]>);
+
+  const toggleCategory = (category: string) => {
+    setOpenCategories((prev) => ({ ...prev, [category]: !prev[category] }));
+  };
 
   const handleTopicClick = (topic: Topic) => {
-    console.log(topic)
     setSelectedTopic(topic.name);
     setQuizId(topic.id);
     setIsModalOpen(true);
@@ -35,26 +47,54 @@ export default function Topics({type, topics}: TopicsProps) {
   };
 
   return (
-    <div className="w-[90%] flex p-4 gap-6 justify-start relative overflow-x-scroll">
-      {topics.map((topic, key) => (
-        <div
-          key={key}
-          onClick={() => handleTopicClick(topic)}
-          className="h-38 flex cursor-pointer hover:scale-105 min-w-[200px] p-4 dark:text-white rounded-lg dark:bg-[#1F1F1F] bg-yellow-100 transition-transform"
-        >
-          <div className="flex flex-col justify-between">
-            <p className="text-2xl">{topic.name}</p>
-            <div>
-              <p>{topic.category}</p>
-              <p>{topic.numberOfQuestions + 1} questions</p>
-            </div>
-          </div>
-          <span
-            onClick={() => { setDel(true); setTopicId(topic.id); }}
-            className="material-symbols-outlined h-fit p-2 rounded-full transition dark:hover:bg-[#111111] hover:bg-yellow-200"
+    <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {Object.keys(groupedTopics).map((categoryName) => (
+        <div key={categoryName} className="rounded-lg overflow-hidden">
+          {/* Category Button */}
+          <button
+            onClick={() => toggleCategory(categoryName)}
+            className="w-full flex items-center justify-between p-4 bg-gray-100 dark:bg-[#222222] hover:bg-gray-200 dark:hover:bg-[#2a2a2a] transition-colors rounded-lg"
           >
-            delete
-          </span>
+            <span className="text-lg font-semibold bg-pink-400 px-4">{categoryName}</span>
+            {openCategories[categoryName] ? (
+              <ChevronUp className="w-5 h-5" />
+            ) : (
+              <ChevronDown className="w-5 h-5" />
+            )}
+          </button>
+
+          {/* Topics List */}
+          {openCategories[categoryName] && (
+            <div className="flex flex-col gap-4 p-4">
+              {groupedTopics[categoryName].map((topic) => (
+                <div
+                  key={topic.id}
+                  className="relative border-pink-500 border-2 p-4 bg-white dark:bg-[#1a1a1a] rounded-lg shadow-lg hover:shadow-xl transition-all"
+                >
+                  {/* Delete Button */}
+                  <span
+                    onClick={() => {
+                      setDel(true);
+                      setTopicId(topic.id);
+                    }}
+                    className="absolute bottom-2 right-2 bg-[#2A2A2A] p-1 rounded-full text-gray-400 hover:text-red-500 cursor-pointer material-symbols-outlined"
+                  >
+                    delete
+                  </span>
+
+                  {/* Topic Details */}
+                  <div onClick={() => handleTopicClick(topic)} className="cursor-pointer">
+                    <h3 className="text-lg font-bold mb-2">{topic.name}</h3>
+                    <div className="flex flex-col space-y-2">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        Questions: {topic.numberOfQuestions}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       ))}
 

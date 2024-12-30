@@ -63,8 +63,6 @@ class QuizController implements Controller {
         }
     }
 
-    
-
     private getMcqTopic = async (
         req: Request,
         res: Response,

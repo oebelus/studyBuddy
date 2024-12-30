@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { MCQs } from "../types/mcq";
-import Questions from "../components/topic/Quiz/Elements/Questions";
+import Questions from "../components/topic/Quiz/Elements/questions/Questions";
 import UtilityBox from "../components/topic/Quiz/Elements/UtilityBox";
 import { answerKind } from "../types/Answer";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
@@ -10,7 +10,7 @@ export default function Quiz() {
     const { id: topicId } = useParams(); // Dynamic route parameter
     const location = useLocation();
     const { locationQuiz } = location.state || {};
-    const isSample = locationQuiz && locationQuiz.length > 0 ? true : false;
+    
     const navigate = useNavigate(); // Initialize navigate
 
     const [mcq, setMcq] = useState<MCQs | null>(locationQuiz || null);
@@ -43,7 +43,7 @@ export default function Quiz() {
     }, [answers, mcq]);
 
     useEffect(() => {
-        if ((mcq && mcq.mcqs.length > 0) || !topicId) return;
+        if ((mcq && mcq.mcqs && mcq.mcqs.length > 0) || !topicId) return;
 
         const fetchData = async () => {
             setIsLoading(true);
@@ -81,7 +81,7 @@ export default function Quiz() {
         };
 
         fetchData();
-    }, [topicId, mcq]);
+    }, []);
 
     if (isLoading) {
         return <div className="text-center py-8">Loading quiz...</div>;
@@ -121,7 +121,7 @@ export default function Quiz() {
 
                 <div className="max-w-3xl mx-auto p-6">
                     <h2 className="text-2xl font-bold mb-8 text-gray-800 dark:text-gray-200">Quiz: {topic}</h2>
-                    <Questions mcq={mcq} userId={userId} answers={answers} setAnswers={setAnswers} isSample={isSample} />
+                    <Questions mcq={mcq} userId={userId} answers={answers} setAnswers={setAnswers}/>
                 </div>
             </div>
         </div>

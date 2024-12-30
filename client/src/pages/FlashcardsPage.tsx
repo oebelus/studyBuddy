@@ -8,6 +8,8 @@ import FlipCard from "../components/topic/Flashcard/FlipCard";
 import SaveFlashcards from "../components/topic/Flashcard/SaveFlashcards";
 import { axiosInstance } from "../services/auth.service";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import DeleteTopic from "../components/topic/DeleteTopic";
+import { Output } from "../types/output";
 
 export default function FlashcardsPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -19,9 +21,10 @@ export default function FlashcardsPage() {
   const [categories, setCategories] = useState<{ [key: string]: Topic[] }>({});
   const [openCategories, setOpenCategories] = useState<{ [key: string]: boolean }>({});
   const [isOpen, setIsOpen] = useState(false);
-  const [generated, setGenerated] = useState(false);
   const [flashcardId, setFlashcardId] = useState("");
   const [flashcard, setFlashcard] = useState<Flashcard[]>();
+  const [del, setDel] = useState<boolean>(false);
+  const [topicId, setTopicId] = useState("");
 
   useEffect(() => {
     axiosInstance.get(`/flashcard`, {
@@ -74,6 +77,7 @@ export default function FlashcardsPage() {
       [category]: !prev[category]
     }));
   };
+  
 
   return (
     <div className="font-mono dark:bg-[#111111] bg-white min-h-screen overflow-y-hidden">
@@ -104,7 +108,6 @@ export default function FlashcardsPage() {
             setIsOpen={setIsOpen}
             isGenerateOpen={true}
             quiz={flashcards}
-            setGenerated={setGenerated}
           />
 
           <p className="text-xl mt-4 ml-4">Your topics:</p>
@@ -126,7 +129,7 @@ export default function FlashcardsPage() {
                 </button>
 
                 {openCategories[categoryName] && (
-                  <div className="flex flex-col gap-4 p-4">
+                  <div className="relative flex flex-col gap-4 p-4">
                     {categories[categoryName].map((topic) => (
                       <div
                         key={topic.id}
@@ -136,6 +139,14 @@ export default function FlashcardsPage() {
                         }}
                         className="border-pink-500 border-2 p-4 bg-white dark:bg-[#1a1a1a] rounded-lg shadow-lg hover:shadow-xl transition-all cursor-pointer"
                       >
+                        <span
+                          onClick={() => {
+                            setDel(true);
+                            setTopicId(topic.id);
+                          }}
+                            className="absolute bg-[#2A2A2A] rounded-full p-1 top-2 right-2 text-gray-400 hover:text-red-500 cursor-pointer material-symbols-outlined"                        >
+                          delete
+                        </span>
                         <h3 className="text-lg font-bold mb-2">{topic.name}</h3>
                         <div className="flex flex-col space-y-2">
                           <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -149,8 +160,10 @@ export default function FlashcardsPage() {
               </div>
             ))}
           </div>
+
+          <DeleteTopic type={"Flashcard" as Output} topicId={topicId} setDel={setDel} del={del} />
               
-          {generated && flashcards && flashcards.length > 0 && 
+          {flashcards && flashcards.length > 0 && 
             <div>
               <SaveFlashcards category={category} title={title} flashcards={flashcards}/>
               <FlipCard flashcards={flashcards} />
@@ -164,7 +177,7 @@ export default function FlashcardsPage() {
             }
           </button>
           
-          {!generated && selectedTopic && 
+          {selectedTopic && 
             <div className="flex flex-col">
               <h3 className="text-3xl mt-8 ml-4 font-mono dark:text-white">{selectedTopic}</h3>
               <FlipCard flashcards={flashcard} />
