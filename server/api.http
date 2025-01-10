@@ -1,9 +1,0 @@
-POST http://localhost:3000/api/users/register
-'Content-Type': 'application/json'
-
-{
-    "username": "oebelus",
-    "email": "imaneelfadilelidrissi@gmail.com",
-    "password": "inazuma11",
-    "role": "user"
-}
