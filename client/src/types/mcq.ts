@@ -11,3 +11,18 @@ export type MCQs = {
   category: string;
   _id?: string;
 };
+
+export interface EditingOption {
+  index: number;
+  text: string;
+  isCorrect: boolean;
+}
+
+export interface AddingOption {
+  text: string;
+  isCorrect: boolean;
+}
+
+export interface SelectedOptions {
+  [key: number]: number[];
+}

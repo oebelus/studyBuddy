@@ -6,7 +6,8 @@ import validate from '@/resources/user/user.validation'
 import { NextFunction } from "express-serve-static-core";
 import HttpException from "@/utils/exceptions/http.exception";
 import authenticatedMiddleware from "@/middleware/authenticated.middleware";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { generateRefreshToken } from "@/utils/token";
 
 class UserController implements Controller {
     public path = '/users';
@@ -78,11 +79,9 @@ class UserController implements Controller {
             }
             
             const newAccessToken = await this.UserService.refreshToken(refreshToken);
-            const newRefreshToken = jwt.sign(
-                { id: req.user.id, type: 'refresh' },
-                process.env.REFRESH_TOKEN_SECRET as jwt.Secret,
-                { expiresIn: '7d' }
-            );
+            
+            const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as jwt.Secret) as JwtPayload;
+            const newRefreshToken = generateRefreshToken(payload._id);
             
             res.status(200).json({
                 accessToken: newAccessToken,

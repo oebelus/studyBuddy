@@ -1,25 +1,50 @@
-import { Types } from "mongoose" 
-
-export interface MCQAttempt {
-    mcqSetId: string;
-    userId: Types.ObjectId;
-    answers: {
-        questionIndex: number
-        selectedAnsewer: number
-        isCorrect: boolean
-    }[];
-    score: number;
-    category: string;
-    timestamp: Date;
+export interface Answer {
+    isCorrect: boolean;
+    // Add other answer properties as needed
 }
 
-export interface FlashcardAttempt {
-    flashcardSetId: string;
-    userId: Types.ObjectId;
-    ratings: {
-        flashcardIndex: string;
-        rating: 1 | 2 | 3 | 4 | 5;
-    }[]
-    category: string;
+export interface Answers {
+    [key: number]: boolean;
+}
+
+export interface MCQAttempt {
+    userId: string;
+    mcqSetId: string;
+    title: string;
+    numberOfQuestions: number;
+    score: number;
+    answers: {[key: number]: boolean};
     timestamp: Date;
+    attempted: number;
+}
+
+export interface DifficultyStats {
+    easy: number;
+    medium: number;
+    hard: number;
+}
+
+export interface CategoryStat {
+    name: string;
+    avgScore: number;
+    attempts: number;
+}
+
+export interface WeeklyData {
+    timestamp: Date;
+    score: number;
+    questionsAttempted: number;
+    correctAnswers: number;
+    wrongAnswers: number;
+}
+
+export interface UserStats {
+    totalAttempts: number;
+    // flashcardsAttempts: number;
+    weeklyData: WeeklyData[];
+    categoryData: CategoryStat[];
+    answered: number;
+    totalCorrectAnswers: number;
+    totalWrongAnswers: number;
+    currentStreak: number;
 }

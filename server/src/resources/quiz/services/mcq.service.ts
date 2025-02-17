@@ -48,6 +48,7 @@ export default class McqService {
     public async getMcqTopic(mcqId: string) {
          try {
             const mcq = await this.mcq.findById(mcqId).exec()
+            console.log(mcq)
             
             if (!mcq) {
                 console.log("MCQ Not Found.")
@@ -57,7 +58,7 @@ export default class McqService {
             return mcq as MCQ;
             
         } catch (err) {
-            throw new Error(`Error deleting flashcard: ${(err as Error).message}`);
+            throw new Error(`Error getting MCQ: ${(err as Error).message}`);
         }
     }
 }

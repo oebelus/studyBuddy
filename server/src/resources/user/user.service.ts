@@ -69,7 +69,9 @@ class UserService {
         refreshToken: string
     ): Promise<string | Error> {
         try {
-            return token.refreshAccessToken(refreshToken);
+            const access = await token.refreshAccessToken(refreshToken);
+
+            return access;
         } catch (error) {
             throw new HttpException(400, (error as Error).message);
         }

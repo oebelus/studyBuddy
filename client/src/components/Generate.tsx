@@ -36,7 +36,7 @@ export default function Generate({type, setQuiz, setLoading, setTitle, setCatego
 
         console.log(formData)
 
-        await axios.post(`http://localhost:3000/api/upload-pdf`, formData, {
+        await axios.post(`http://localhost:3000/api/generate/upload-pdf`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },

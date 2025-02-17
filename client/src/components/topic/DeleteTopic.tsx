@@ -17,7 +17,7 @@ export default function DeleteTopic({del, topicId, type, setDel}: DeleteTopicPro
     const handleDelete = () => {
         const token = localStorage.getItem("accessToken");
         
-        axios.delete(`http://localhost:3000/api/quiz/${type == 'quiz' ? 'mcq' : 'flashcard'}/${topicId}`,
+        axios.delete(`http://localhost:3000/api/${type == 'quiz' ? 'quiz' : 'flashcard'}/${topicId}`,
             {
             headers: {
                 Authorization: `Bearer ${token}` // Add the token to headers
@@ -42,7 +42,7 @@ export default function DeleteTopic({del, topicId, type, setDel}: DeleteTopicPro
             <div className="flex items-center justify-center h-full">
                 <div className="flex flex-col max-w-md gap-2 p-6 rounded-md shadow-md bg-white dark:bg-[#111111] dark:text-gray-100">
                     <h2 className="text-xl font-semibold leading-tight tracking-tight text-center">Delete Topic</h2>
-                    <p className="flex-1 text-center dark:text-gray-400">Are you sure that you want to delete this topic?
+                    <p className="flex-1 text-center dark:text-gray-400">Are you sure that you want to delete this deck?
                     </p>
                     <div className="flex justify-center gap-3 mt-6 sm:mt-8 sm:flex-row">
                         <button onClick={() => setDel(false)} className="px-6 py-2 rounded-sm">Cancel</button>

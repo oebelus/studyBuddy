@@ -3,7 +3,8 @@ import { Flashcard } from "../types/flashcard";
 import axios from "axios";
 import { FormEvent, useEffect, useState } from "react";
 import { formatJson } from "../utils/format";
-import { MCQ } from "../types/mcq";
+import { MCQ, MCQs } from "../types/mcq";
+import { useNavigate } from "react-router-dom";
 
 interface GenerateModalProps {
   isOpen: boolean;
@@ -16,7 +17,6 @@ interface GenerateModalProps {
   setFlashcard?: (f: Flashcard[]) => void;
   quiz: MCQ[] | Flashcard[] | undefined;
   type: string;
-  setGenerated: (e: boolean) => void
 }
 
 export default function GenerateModal({
@@ -28,7 +28,6 @@ export default function GenerateModal({
   setLoading,
   setQuiz,
   setFlashcard,
-  setGenerated,
   type,
 }: GenerateModalProps) {
   const [form, setForm] = useState({
@@ -40,6 +39,7 @@ export default function GenerateModal({
   const [extractedText, setExtractedText] = useState<string | undefined>("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
+  const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -52,7 +52,7 @@ export default function GenerateModal({
     formData.append("pdf", selectedFile, selectedFile.name);
 
     try {
-      const response = await axios.post("http://localhost:3000/api/upload-pdf", formData, {
+      const response = await axios.post("http://localhost:3000/api/generate/upload-pdf", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -63,7 +63,7 @@ export default function GenerateModal({
     }
   }
 
-  function generate(e: FormEvent<HTMLFormElement>) {
+  async function generate(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setIsGenerating(true);
@@ -72,51 +72,65 @@ export default function GenerateModal({
     setTitle(form.topicName);
     setCategory(form.category);
 
-    console.log(language)
+    // Prepare the request data
+    const requestData = {
+      lesson: extractedText,
+      module: form.topicName,
+      subject: form.category,
+      type,
+      language,
+      n: form.numberOfQuestions,
+    };
 
-    axios
-      .get(
-        `http://localhost:3000/api/quiz?language=${language}&lesson=${encodeURIComponent(
-          extractedText!
-        )}&module=${encodeURIComponent(form.category)}&subject=${encodeURIComponent(
-          form.topicName
-        )}&type=${encodeURIComponent(type)}&n=${encodeURIComponent(form.numberOfQuestions)}`
-      )
-      .then((response) => {
-        try {
-          setLoading(false);
-          const ans = response.data.aiResponse.trim();
-          const formattedJson = formatJson(ans);
-          const parsedData = JSON.parse(formattedJson);
+    try {
+      const response = await axios.post("http://localhost:3000/api/generate", requestData);
 
-          if (type == 'quiz' && setQuiz) setQuiz(parsedData.questions);
-          else if (type == "flashcard" && setFlashcard) setFlashcard(parsedData.questions)
+      console.log(response.data);
+      const aiResponse = response.data.aiResponse.trim();
+      const formattedJson = formatJson(aiResponse);
+      const parsedData = JSON.parse(formattedJson);
 
-          setIsGenerating(false);
-          setIsGenerated(true);
-          setGenerated(true);
-          setIsOpen(false)
-        } catch (error) {
-          setLoading(false);
-          setIsGenerating(false);
-          console.error("Error parsing JSON:", error);
-        }
-      })
-      .catch((error) => {
-        setLoading(false);
-        setIsGenerating(false);
-        console.log(error);
-      });
+      setLoading(false);
+      setIsGenerating(false);
+      setIsGenerated(true);
+      setIsOpen(false);
+
+      if (type === "quiz" && setQuiz) {
+        setQuiz(parsedData.questions);
+
+        const formattedData: MCQs = {
+        mcqs: parsedData.questions.map((q: MCQ, index: number) => ({
+            id: index + 1,
+            question: q.question,
+            options: q.options,
+            answers: q.answers,
+        })),
+        title: form.topicName,
+        category: form.category,
+      };
+
+      navigate('/quiz-sample', { state: { locationQuiz: formattedData } })
+      } else if (type === "flashcard" && setFlashcard) {
+        setFlashcard(parsedData.questions);
+      }
+
+    } catch (error) {
+      setLoading(false);
+      setIsGenerating(false);
+      console.error("Error generating quiz/flashcards:", error);
+    }
   }
 
   const handleCancel = () => {
-    setIsOpen(false)
-    setIsGenerated(false)
-  }
+    setIsOpen(false);
+    setIsGenerated(false);
+  };
 
   useEffect(() => {
-    if (isGenerated) setIsOpen(false)
-  }, [isGenerated, setIsOpen])
+    if (isGenerated) {
+      setIsOpen(false);
+    }
+  }, [isGenerated, setIsOpen]);
 
   return (
     <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-title" aria-describedby="modal-description">

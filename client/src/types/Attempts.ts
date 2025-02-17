@@ -6,10 +6,18 @@ export interface MCQAnswer {
 
 export interface MCQAttempt {
   userId: string;
-  quizId: string;
-  category: string;
+  mcqSetId: string;
+  title: string;
+  numberOfQuestions: number;
   score: number;
+  answers: { [key: number]: boolean | string };
   timestamp: Date;
+}
+
+export interface Stat {
+  name: string;
+  avgScore: number;
+  attempts: number;
 }
 
 export interface FlashcardAttempt {

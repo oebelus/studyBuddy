@@ -16,36 +16,95 @@ import {
   Pie,
   Cell
 } from 'recharts';
-import axios from "axios";
 import { MCQs } from "../types/mcq";
+import { axiosInstance } from "../services/auth.service";
+import { jwtDecode } from "jwt-decode";
+import { Stat } from "../types/Attempts";
+import { Flashcards } from "../types/flashcard";
+import { CategoryStat, DifficultyStats, WeeklyData, WeeklyGraphData } from "../types/Analytics";
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [questionsCount, setQuestionsCount] = useState<number>();
+  const [questionsCount, setQuestionsCount] = useState<number>(0);
+  const [decksCount, setDecksCount] = useState<number>(0);
+  const [answeredQuestionsCount, setAnsweredQuestionsCount] = useState<number>(0);
+  const [averageScore, setAverageScore] = useState<number>(0);
+  const [correctAnswersCount, setCorrectAnswersCount] = useState<number>(0);
+  const [incorrectAnswersCount, setIncorrectAnswersCount] = useState<number>(0);
+  const [currentStreak, setCurrentStreak] = useState<number>(0);
+  const [streakMessage, setStreakMessage] = useState<string>("");
+  const [flashcardsCreated, setFlashcardsCreated] = useState<number>(0);
+  const [weeklyData, setWeeklyData] = useState<WeeklyData[]>([]);
+  const [categoryData, setCategoryData] = useState<CategoryStat[]>([]);
+  const [difficultyStats, ] = useState<DifficultyStats>({ easy: 0, medium: 0, hard: 0 });
 
-  const token = localStorage.getItem("accessToken");
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/api/quiz/mcq`,
-      {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-      }
-    ).then((response) => { 
-        console.log(response.data.mcq)
+    axiosInstance.get(`/quiz`)
+      .then((response) => { 
         const count = response.data.mcq.reduce((acc: number, mcq: MCQs) => mcq.mcqs.length + acc, 0);
         setQuestionsCount(count);
+        setDecksCount(response.data.mcq.length);
+    })
+      .catch((error) => { console.error(error); });
+
+    axiosInstance.get(`/flashcard`)
+      .then((response) => { 
+        const length = response.data.flashcard.reduce((acc: number, flashcard: Flashcards) => flashcard.flashcards.length + acc, 0);
+        setFlashcardsCreated(length);
     })
       .catch((error) => { console.error(error); });
   }, []);
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/api/attempt/user`)
+    const refreshToken = JSON.stringify(localStorage.getItem('refreshToken'));
+    
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const userId = jwtDecode(refreshToken).id;
+    axiosInstance.get(`/attempt/user/${userId}`)
       .then((response) => {
-        console.log(response.data)
+        console.log(response.data);
+        const { 
+          weeklyData,
+          categoryData,
+          answered,
+          totalCorrectAnswers,
+          totalWrongAnswers,
+          currentStreak
+        } = response.data;
+        
+        if (questionsCount && questionsCount > 0) {
+          const averageScore = response.data.categoryData.reduce((acc: number, stat: Stat) => acc + (stat.avgScore * stat.attempts), 0) / response.data.categoryData.reduce((acc: number, stat: Stat) => acc + stat.attempts, 0);
+          setAverageScore(parseFloat(averageScore.toFixed(2)));
+        }
+        
+        setAnsweredQuestionsCount(answered);
+        setCorrectAnswersCount(totalCorrectAnswers);
+        setIncorrectAnswersCount(totalWrongAnswers);
+        setCurrentStreak(currentStreak);
+
+        const processedWeeklyData = weeklyData.map((data: WeeklyData) => ({
+          ...data,
+          timestamp: new Date(data.timestamp).toLocaleDateString(),
+        }));
+        
+        setWeeklyData(processedWeeklyData);
+        setCategoryData(categoryData);
+
+        if (categoryData.length > 0) {
+          const avgScore = categoryData.reduce(
+            (acc: number, stat: CategoryStat) => acc + (stat.avgScore * stat.attempts),
+            0
+          ) / categoryData.reduce((acc: number, stat: CategoryStat) => acc + stat.attempts, 0);
+          setAverageScore(parseFloat(avgScore.toFixed(2)));
+        }
+
+        setStreakMessage(currentStreak > 0 ? "Keep it up!" : "Restore your streak!");
+        
     }).catch((error) => { console.error(error); });
-  }, []);
+  }, [currentStreak, questionsCount]);
  
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -54,38 +113,75 @@ export default function Dashboard() {
   // Sample data
   const stats = {
     totalQuestions: questionsCount,
-    questionsAnswered: 876,
-    correctAnswers: 654,
-    flashcardsCreated: 320,
-    averageScore: 75,
-    streak: 12
+    questionsAnswered: correctAnswersCount + incorrectAnswersCount || 0,
+    correctAnswers: correctAnswersCount || 0,
+    incorrectAnswers: incorrectAnswersCount || 0,
+    flashcardsCreated: flashcardsCreated || 0,
+    averageScore: averageScore.toFixed(2),
+    streak: currentStreak
   };
 
-  const weeklyData = [
-    { name: 'Mon', questions: 45, correct: 32 },
-    { name: 'Tue', questions: 38, correct: 28 },
-    { name: 'Wed', questions: 52, correct: 41 },
-    { name: 'Thu', questions: 35, correct: 25 },
-    { name: 'Fri', questions: 43, correct: 38 },
-    { name: 'Sat', questions: 28, correct: 20 },
-    { name: 'Sun', questions: 48, correct: 42 }
+ // Helper to get all weekdays
+const getWeekdays = () => {
+  const weekdays = [];
+  const today = new Date();
+  const options: Intl.DateTimeFormatOptions = { weekday: 'short' };
+
+  for (let i = 6; i >= 0; i--) {
+    const day = new Date(today);
+    day.setDate(today.getDate() - i);
+    weekdays.push(day.toLocaleDateString('en-US', options));
+  }
+  return weekdays;
+};
+
+// Step 1: Aggregate weekly data using reduce
+const aggregatedData = weeklyData.reduce((acc: WeeklyGraphData[], data) => {
+  const dayName = new Date(data.timestamp).toLocaleDateString('en-US', {
+    weekday: 'short',
+  });
+
+  // Check if the day already exists in the accumulator
+  const existingDay = acc.find((item) => item.name === dayName);
+
+  if (existingDay) {
+    // Accumulate the values
+    existingDay.questionsAttempted += data.questionsAttempted;
+    existingDay.correctAnswers += data.correctAnswers;
+  } else {
+    // Add a new entry for the day
+    acc.push({
+      name: dayName,
+      questionsAttempted: data.questionsAttempted,
+      correctAnswers: data.correctAnswers,
+    });
+  }
+
+  return acc;
+}, []);
+
+// Step 2: Ensure all days of the week are represented
+const allWeekdays = getWeekdays();
+
+const formattedWeeklyData = allWeekdays.map((day) => {
+  const existingDay = aggregatedData.find((data) => data.name === day);
+
+  return existingDay
+    ? existingDay
+    : { name: day, questionsAttempted: 0, correctAnswers: 0 }; // Default values for missing days
+});
+
+  // Transform category data for the pie chart
+  const formattedCategoryData = categoryData.map(category => ({
+    name: category.name,
+    value: parseFloat(category.avgScore.toFixed(2)),
+  }));
+
+  const formattedDifficultyData = [
+    { difficulty: 'Easy', count: difficultyStats.easy },
+    { difficulty: 'Medium', count: difficultyStats.medium },
+    { difficulty: 'Hard', count: difficultyStats.hard }
   ];
-
-  const categoryData = [
-    { name: 'Science', value: 35 },
-    { name: 'Math', value: 25 },
-    { name: 'History', value: 20 },
-    { name: 'Language', value: 20 }
-  ];
-
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
-
-  const difficultyData = [
-    { difficulty: 'Easy', count: 45 },
-    { difficulty: 'Medium', count: 35 },
-    { difficulty: 'Hard', count: 20 }
-  ];
-
   return (
     <div className="dark:bg-[#111111] bg-white min-h-screen">
       <Navbar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
@@ -99,125 +195,87 @@ export default function Dashboard() {
           <div className="container mx-auto px-6 py-8">
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <div className="dark:bg-[#1F2937] bg-white p-6 rounded-lg shadow-lg">
+              <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-medium dark:text-gray-100">Total Questions</h3>
                   <BarChart className="h-4 w-4 text-blue-500" />
                 </div>
                 <p className="text-2xl font-bold dark:text-gray-100">{stats.totalQuestions}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{stats.questionsAnswered} answered</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{decksCount} decks created</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{stats.questionsAnswered} {stats.questionsAnswered === 1 ? 'question' : 'questions'} answered</p>
               </div>
 
-              <div className="dark:bg-[#1F2937] bg-white p-6 rounded-lg shadow-lg">
+              <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-medium dark:text-gray-100">Average Score</h3>
                   <TrendingUp className="h-4 w-4 text-green-500" />
                 </div>
                 <p className="text-2xl font-bold dark:text-gray-100">{stats.averageScore}%</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{stats.correctAnswers} correct answers</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{stats.correctAnswers} {stats.correctAnswers === 1 ? 'correct answer' : 'correct answers'}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{stats.incorrectAnswers} {stats.incorrectAnswers === 1 ? 'incorrect answer' : 'incorrect answers'}</p>
               </div>
 
-              <div className="dark:bg-[#1F2937] bg-white p-6 rounded-lg shadow-lg">
+              <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-medium dark:text-gray-100">Current Streak</h3>
                   <LineChart className="h-4 w-4 text-purple-500" />
                 </div>
                 <p className="text-2xl font-bold dark:text-gray-100">{stats.streak} days</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Keep it up!</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{streakMessage}</p>
               </div>
 
-              <div className="dark:bg-[#1F2937] bg-white p-6 rounded-lg shadow-lg">
+              <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-medium dark:text-gray-100">Flashcards Created</h3>
                   <PieChart className="h-4 w-4 text-orange-500" />
                 </div>
                 <p className="text-2xl font-bold dark:text-gray-100">{stats.flashcardsCreated}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Active learning cards</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{flashcardsCreated} flashcards created</p>
               </div>
             </div>
-
-            {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-              {/* Performance Chart */}
-              <div className="dark:bg-[#1F2937] bg-white p-6 rounded-lg shadow-lg">
-                <h3 className="text-lg font-medium mb-4 dark:text-gray-100">Weekly Performance</h3>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RechartsLineChart data={weeklyData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis dataKey="name" stroke="#9CA3AF" />
-                      <YAxis stroke="#9CA3AF" />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1F2937',
-                          border: 'none',
-                          borderRadius: '0.5rem',
-                          color: '#F3F4F6'
-                        }}
-                      />
-                      <Line type="monotone" dataKey="questions" stroke="#3B82F6" name="Questions Attempted" />
-                      <Line type="monotone" dataKey="correct" stroke="#10B981" name="Correct Answers" />
-                    </RechartsLineChart>
-                  </ResponsiveContainer>
-                </div>
+            
+            {/* Analytics Charts */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+              <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
+                <h3 className="text-lg font-medium dark:text-gray-100 mb-4">Weekly Performance</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsLineChart data={formattedWeeklyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="questionsAttempted" stroke="#0088FE" />
+                    <Line type="monotone" dataKey="correctAnswers" stroke="#00C49F" />
+                  </RechartsLineChart>
+                </ResponsiveContainer>
               </div>
 
-              {/* Category Distribution */}
-              <div className="dark:bg-[#1F2937] bg-white p-6 rounded-lg shadow-lg">
-                <h3 className="text-lg font-medium mb-4 dark:text-gray-100">Category Distribution</h3>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RechartsPieChart>
-                      <Pie
-                        data={categoryData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                        label
-                      >
-                        {categoryData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1F2937',
-                          border: 'none',
-                          borderRadius: '0.5rem',
-                          color: '#F3F4F6'
-                        }}
-                      />
-                    </RechartsPieChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
-
-            {/* Difficulty Distribution */}
-            <div className="dark:bg-[#1F2937] bg-white p-6 rounded-lg shadow-lg">
-              <h3 className="text-lg font-medium mb-4 dark:text-gray-100">Difficulty Distribution</h3>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartsBarChart data={difficultyData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="difficulty" stroke="#9CA3AF" />
-                    <YAxis stroke="#9CA3AF" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#1F2937',
-                        border: 'none',
-                        borderRadius: '0.5rem',
-                        color: '#F3F4F6'
-                      }}
-                    />
-                    <Bar dataKey="count">
-                      {difficultyData.map((_entry, index) => (
+              <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
+                <h3 className="text-lg font-medium dark:text-gray-100 mb-4">Category Distribution</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsPieChart>
+                    <Pie data={formattedCategoryData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
+                      {formattedCategoryData.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
-                    </Bar>
+                    </Pie>
+                    <Tooltip
+                      formatter={(value: number, name: string) => [`${name}: ${value}%`]}
+                      labelFormatter={(name: string) => `Category: ${name}`}
+                    />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
+                <h3 className="text-lg font-medium dark:text-gray-100 mb-4">Difficulty Distribution</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsBarChart data={formattedDifficultyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="difficulty" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#8884d8" />
                   </RechartsBarChart>
                 </ResponsiveContainer>
               </div>
