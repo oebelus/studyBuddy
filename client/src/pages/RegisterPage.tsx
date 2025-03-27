@@ -3,7 +3,7 @@ import Register from "../components/authentication/Register"
 
 export default function SignupPage() {
   return (
-    <div className="bg-blue-300 h-screen">
+    <div className="bg-blue-100 h-screen">
       <Helmet>
         <title>Signup</title>
       </Helmet>

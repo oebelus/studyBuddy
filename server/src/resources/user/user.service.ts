@@ -70,6 +70,7 @@ class UserService {
     ): Promise<string | Error> {
         try {
             const access = await token.refreshAccessToken(refreshToken);
+            console.log("access", access)
 
             return access;
         } catch (error) {

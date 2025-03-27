@@ -3,7 +3,7 @@ import Login from "../components/authentication/Login"
 
 export default function LoginPage() {
   return (
-    <div className="bg-blue-300 h-screen">
+    <div className="bg-blue-100 h-screen">
       <Helmet>
         <title>Login</title>
       </Helmet>

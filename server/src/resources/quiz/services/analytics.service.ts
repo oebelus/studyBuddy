@@ -132,8 +132,8 @@ export class AnalyticsService {
             }));
 
             const answered: number =  questionsAnswered.length;
-            const totalCorrectAnswers: number = answersStats[0].correctAnswers;
-            const totalWrongAnswers: number = answersStats[0].wrongAnswers;
+            const totalCorrectAnswers: number = answersStats[0]?.correctAnswers;
+            const totalWrongAnswers: number = answersStats[0]?.wrongAnswers;
             
             let currentStreak = 0;
             if (recentMCQs.length > 0) {

@@ -10,8 +10,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart as RechartsBarChart,
-  Bar,
+  // BarChart as RechartsBarChart,
+  // Bar,
   PieChart as RechartsPieChart,
   Pie,
   Cell
@@ -21,13 +21,13 @@ import { axiosInstance } from "../services/auth.service";
 import { jwtDecode } from "jwt-decode";
 import { Stat } from "../types/Attempts";
 import { Flashcards } from "../types/flashcard";
-import { CategoryStat, DifficultyStats, WeeklyData, WeeklyGraphData } from "../types/Analytics";
+import { CategoryStat, WeeklyData, WeeklyGraphData } from "../types/Analytics";
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [questionsCount, setQuestionsCount] = useState<number>(0);
   const [decksCount, setDecksCount] = useState<number>(0);
-  const [answeredQuestionsCount, setAnsweredQuestionsCount] = useState<number>(0);
+  const [, setAnsweredQuestionsCount] = useState<number>(0);
   const [averageScore, setAverageScore] = useState<number>(0);
   const [correctAnswersCount, setCorrectAnswersCount] = useState<number>(0);
   const [incorrectAnswersCount, setIncorrectAnswersCount] = useState<number>(0);
@@ -36,7 +36,7 @@ export default function Dashboard() {
   const [flashcardsCreated, setFlashcardsCreated] = useState<number>(0);
   const [weeklyData, setWeeklyData] = useState<WeeklyData[]>([]);
   const [categoryData, setCategoryData] = useState<CategoryStat[]>([]);
-  const [difficultyStats, ] = useState<DifficultyStats>({ easy: 0, medium: 0, hard: 0 });
+  // const [difficultyStats, ] = useState<DifficultyStats>({ easy: 0, medium: 0, hard: 0 });
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -62,6 +62,7 @@ export default function Dashboard() {
     
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
+    console.log(jwtDecode(refreshToken))
     const userId = jwtDecode(refreshToken).id;
     axiosInstance.get(`/attempt/user/${userId}`)
       .then((response) => {
@@ -117,7 +118,7 @@ export default function Dashboard() {
     correctAnswers: correctAnswersCount || 0,
     incorrectAnswers: incorrectAnswersCount || 0,
     flashcardsCreated: flashcardsCreated || 0,
-    averageScore: averageScore.toFixed(2),
+    averageScore: averageScore == 0 ? averageScore : averageScore.toFixed(2),
     streak: currentStreak
   };
 
@@ -177,11 +178,12 @@ const formattedWeeklyData = allWeekdays.map((day) => {
     value: parseFloat(category.avgScore.toFixed(2)),
   }));
 
-  const formattedDifficultyData = [
-    { difficulty: 'Easy', count: difficultyStats.easy },
-    { difficulty: 'Medium', count: difficultyStats.medium },
-    { difficulty: 'Hard', count: difficultyStats.hard }
-  ];
+  // const formattedDifficultyData = [
+  //   { difficulty: 'Easy', count: difficultyStats.easy },
+  //   { difficulty: 'Medium', count: difficultyStats.medium },
+  //   { difficulty: 'Hard', count: difficultyStats.hard }
+  // ];
+
   return (
     <div className="dark:bg-[#111111] bg-white min-h-screen">
       <Navbar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
@@ -253,7 +255,10 @@ const formattedWeeklyData = allWeekdays.map((day) => {
               <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
                 <h3 className="text-lg font-medium dark:text-gray-100 mb-4">Category Distribution</h3>
                 <ResponsiveContainer width="100%" height={300}>
-                  <RechartsPieChart>
+                  {
+                    categoryData.length === 0 ? <div className="dark:text-white flex items-center justify-center h-full">No data available</div>
+                    :
+                    <RechartsPieChart>
                     <Pie data={formattedCategoryData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                       {formattedCategoryData.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -263,11 +268,11 @@ const formattedWeeklyData = allWeekdays.map((day) => {
                       formatter={(value: number, name: string) => [`${name}: ${value}%`]}
                       labelFormatter={(name: string) => `Category: ${name}`}
                     />
-                  </RechartsPieChart>
+                  </RechartsPieChart>}
                 </ResponsiveContainer>
               </div>
 
-              <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
+              {/* <div className="dark:bg-zinc-800 bg-white p-6 rounded-lg shadow-lg">
                 <h3 className="text-lg font-medium dark:text-gray-100 mb-4">Difficulty Distribution</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <RechartsBarChart data={formattedDifficultyData}>
@@ -278,7 +283,7 @@ const formattedWeeklyData = allWeekdays.map((day) => {
                     <Bar dataKey="count" fill="#8884d8" />
                   </RechartsBarChart>
                 </ResponsiveContainer>
-              </div>
+              </div> */}
             </div>
           </div>
         </main>

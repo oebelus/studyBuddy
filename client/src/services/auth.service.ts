@@ -111,6 +111,8 @@ class AuthService {
         }
       );
 
+      console.log(response);
+
       console.log(response.data.accessToken);
 
       this.setAccessToken(response.data.accessToken);

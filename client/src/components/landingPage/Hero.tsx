@@ -11,7 +11,7 @@ export default function Hero() {
               <span className="bg-gradient-to-r from-blue-600 via-green-500 to-indigo-400 bg-clip-text text-transparent">Interactive</span> <br className="sm:block hidden" /> {" "}
               <span className="font-normal">Learning Tools</span>
             </h1>
-            <p className={`${styles.paragraph} max-w-[470px] mt-5`}>Our intuitive tool simplifies the process of extracting key information from PDF documents, generating multiple-choice questions and concise flashcards tailored to your study needs.</p>
+            {/* <p className={`${styles.paragraph} max-w-[470px] mt-5`}>Our intuitive tool simplifies the process of extracting key information from PDF documents, generating multiple-choice questions and concise flashcards tailored to your study needs.</p> */}
             <div className="mt-10 sm:text-center lg:text-left xs:text-center">
             <GetStarted />
           </div>

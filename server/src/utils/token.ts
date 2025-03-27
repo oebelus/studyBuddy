@@ -85,7 +85,6 @@ export const verifyToken = async (
 export const refreshAccessToken = async (refreshToken: string): Promise<string> => {
     try {
         const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as jwt.Secret) as RefreshTokenPayload;
-        
         if (payload.type !== 'refresh') {
             throw new Error('Invalid token type');
         }

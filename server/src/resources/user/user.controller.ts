@@ -79,6 +79,7 @@ class UserController implements Controller {
             }
             
             const newAccessToken = await this.UserService.refreshToken(refreshToken);
+            console.log("secret", process.env.REFRESH_TOKEN_SECRET)
             
             const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as jwt.Secret) as JwtPayload;
             const newRefreshToken = generateRefreshToken(payload._id);

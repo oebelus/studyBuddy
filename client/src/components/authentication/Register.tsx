@@ -35,11 +35,15 @@ export default function Register() {
         })
         .then(response => {
             const token = response.data.token;
-            const user: User = jwtDecode(token)
-            console.log(user);
+            console.log(response.data.token.accessToken)
+            const user: User = jwtDecode(token.accessToken.toString())
             
-            localStorage.setItem('accessToken', token);
+            
+            localStorage.setItem('accessToken', token.accessToken.toString());
+            localStorage.setItem('refreshToken', token.refreshToken.toString());
             dispatch({type: 'USER_SIGNIN', payload: user})
+
+            console.log("HERE")
             
             window.location.href = `/dashboard`;
         })
