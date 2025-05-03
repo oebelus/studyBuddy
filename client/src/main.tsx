@@ -16,8 +16,9 @@ const router = createBrowserRouter(
 
       <Route element={<ProtectedRoute />}>
         <Route path='dashboard' element={<Dashboard />} />
-        <Route path='quiz' element={<Quiz />} />
-        <Route path='quiz/:id' element={<QuizPage />} />
+        <Route path='quiz' element={<QuizPage />} />
+        <Route path='quiz/:id' element={<Quiz />} />
+        <Route path='/quiz-sample' element={<Quiz />} />
         <Route path='flashcards' element={<FlashcardsPage />} />
         <Route path='settings' element={<Settings />} />
       </Route>

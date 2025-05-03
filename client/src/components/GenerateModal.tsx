@@ -35,7 +35,8 @@ export default function GenerateModal({
     numberOfQuestions: "",
     category: "",
   });
-  const [language, setLanguage] = useState("english");
+  const [language, setLanguage] = useState("french");
+  const [format, setFormat] = useState("pdf");
   const [extractedText, setExtractedText] = useState<string | undefined>("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
@@ -179,6 +180,7 @@ export default function GenerateModal({
                         </select>
                       </div>
                     </div>
+
                     <div>
                       <label className="block text-lg dark:text-white">Category:</label>
                       <input
@@ -190,17 +192,44 @@ export default function GenerateModal({
                         placeholder="Enter category"
                       />
                     </div>
-                    <div>
-                      <label className="block text-lg dark:text-white">Upload PDF:</label>
-                      <input
-                        type="file"
-                        name="pdf"
-                        accept="application/pdf"
-                        id="pdf"
-                        onChange={handlePdf}
-                        className="dark:text-gray-400 mt-1 p-2 w-full rounded-lg dark:bg-[#474646]"
-                      />
+
+                    <div className="flex gap-4">
+                      <div className="flex-1">
+                          <label className="text-lg dark:text-white">Choose a format</label>
+                          <select onChange={(e) => setFormat(e.target.value)} name="format" id="format" className="mt-1 p-2 w-full h-10 rounded-lg dark:bg-[#474646]">
+                              <option value="pdf">PDF</option>
+                              <option value="text">Text</option>
+                          </select>
+                      </div>
+
+                      {
+                        format == "text"
+                        ?
+                        <div className="flex-1">
+                          <label className="block text-lg dark:text-white">Paste a text:</label>
+                          <input
+                              type="text"
+                              name="text"
+                              id="pdf"
+                              onChange={(e) => setExtractedText(e.target.value)}
+                              className="mt-1 p-2 w-full rounded-lg dark:bg-[#474646]"
+                          />
+                        </div>
+                        :
+                        <div className="flex-1">
+                          <label className="block text-lg dark:text-white">Upload PDF:</label>
+                          <input
+                              type="file"
+                              name="pdf"
+                              accept="application/pdf"
+                              id="pdf"
+                              onChange={handlePdf}
+                              className="mt-1 p-2 w-full rounded-lg dark:bg-[#474646]"
+                          />
+                        </div>
+                      }
                     </div>
+                    
                     <div className="flex gap-8">
                       <button className="dark:text-black bg-gray-200 mt-4 p-2 flex-1 rounded-lg hover:bg-gray-300 transition" onClick={handleCancel}>
                         Cancel

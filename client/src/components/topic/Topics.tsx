@@ -87,7 +87,7 @@ export default function Topics({ type, topics }: TopicsProps) {
                     <h3 className="text-lg font-bold mb-2">{topic.name}</h3>
                     <div className="flex flex-col space-y-2">
                       <span className="text-sm text-gray-600 dark:text-gray-400">
-                        Questions: {topic.numberOfQuestions}
+                        Questions: {topic.numberOfQuestions + 1}
                       </span>
                     </div>
                   </div>
@@ -105,7 +105,7 @@ export default function Topics({ type, topics }: TopicsProps) {
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50">
           <div className="border-2 border-pink-500 bg-white p-6 rounded-lg dark:bg-[#1F1F1F] w-[80%] sm:w-[50%] text-center">
             <h2 className="text-xl font-semibold mb-4">Do you want to start the quiz for "{selectedTopic}"?</h2>
-            <p className="mb-8">You will answer {numberOfQuestions} questions.</p>
+            <p className="mb-8">You will answer {numberOfQuestions + 1} questions.</p>
             <div className="flex justify-around">
               <button
                 onClick={startQuiz}

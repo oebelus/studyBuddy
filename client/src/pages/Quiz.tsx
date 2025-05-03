@@ -16,6 +16,7 @@ export default function Quiz() {
     const [mcq, setMcq] = useState<MCQs | null>(locationQuiz || null);
     const [userId, setUserId] = useState<string>("");
     const [topic, setTopic] = useState<string>("");
+    const [category, setCategory] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(!locationQuiz);
     const [error, setError] = useState<string>("");
     const [correction, setCorrection] = useState<{ answered: boolean; correct: answerKind }[]>([]);
@@ -71,7 +72,8 @@ export default function Quiz() {
                 }
 
                 setMcq(mcqResponse.data.mcq);
-                setTopic(mcqResponse.data.mcq.category);
+                setTopic(mcqResponse.data.mcq.title);
+                setCategory(mcqResponse.data.category);
             } catch (error) {
                 console.error("Failed to fetch data:", error);
                 setError(error instanceof Error ? error.message : "Failed to load quiz data");
@@ -120,7 +122,7 @@ export default function Quiz() {
                 </div>
 
                 <div className="max-w-3xl mx-auto p-6">
-                    <h2 className="text-2xl font-bold mb-8 text-gray-800 dark:text-gray-200">Quiz: {topic}</h2>
+                    <h2 className="text-2xl font-bold mb-8 text-gray-800 dark:text-gray-200">Quiz: {topic} ({category})</h2>
                     <Questions mcq={mcq} userId={userId} answers={answers} setAnswers={setAnswers}/>
                 </div>
             </div>
