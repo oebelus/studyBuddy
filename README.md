@@ -11,4 +11,9 @@ I was preparing for midterms and I had the idea to make a simple MCQ and Flashca
 
 ![dark](./images/dark.png)
 ![light](./images/light.png)
+![quiz](./images/quiz.png)
 ![questions](./images/questions.png)
+
+### TODOs
+
+- [ ] Adding correction labels;

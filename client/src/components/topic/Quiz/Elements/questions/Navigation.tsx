@@ -40,7 +40,7 @@ export const Navigation: FC<NavigationProps> = ({
                         Check Your Score
                     </button>
                 )}
-                {isSample && currentIndex === totalQuestions - 1 && (
+                {isSample && (
                     <button 
                         className="bg-green-300 border-2 border-green-500 px-2 rounded-md text-green-700"
                         onClick={onSaveQuiz}

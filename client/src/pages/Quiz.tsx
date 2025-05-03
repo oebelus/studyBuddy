@@ -1,19 +1,20 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { MCQs } from "../types/mcq";
+import { MCQsQuiz } from "../types/mcq";
 import Questions from "../components/topic/Quiz/Elements/questions/Questions";
 import UtilityBox from "../components/topic/Quiz/Elements/UtilityBox";
 import { answerKind } from "../types/Answer";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
+import { formatMcq } from "../utils/format";
 
 export default function Quiz() {
-    const { id: topicId } = useParams(); // Dynamic route parameter
+    const { id: topicId } = useParams();
     const location = useLocation();
     const { locationQuiz } = location.state || {};
     
-    const navigate = useNavigate(); // Initialize navigate
+    const navigate = useNavigate();
 
-    const [mcq, setMcq] = useState<MCQs | null>(locationQuiz || null);
+    const [mcq, setMcq] = useState<MCQsQuiz | null>(locationQuiz || null);
     const [userId, setUserId] = useState<string>("");
     const [topic, setTopic] = useState<string>("");
     const [category, setCategory] = useState<string>("");
@@ -71,7 +72,7 @@ export default function Quiz() {
                     throw new Error("No MCQ data found");
                 }
 
-                setMcq(mcqResponse.data.mcq);
+                setMcq(formatMcq(mcqResponse.data.mcq));
                 setTopic(mcqResponse.data.mcq.title);
                 setCategory(mcqResponse.data.category);
             } catch (error) {
@@ -122,7 +123,7 @@ export default function Quiz() {
                 </div>
 
                 <div className="max-w-3xl mx-auto p-6">
-                    <h2 className="text-2xl font-bold mb-8 text-gray-800 dark:text-gray-200">Quiz: {topic} ({category})</h2>
+                    <h2 className="text-2xl font-bold mb-8 text-gray-800 dark:text-gray-200">Quiz: {topic} {category}</h2>
                     <Questions mcq={mcq} userId={userId} answers={answers} setAnswers={setAnswers}/>
                 </div>
             </div>

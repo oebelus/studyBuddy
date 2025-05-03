@@ -1,3 +1,5 @@
+import { MCQs, MCQsQuiz } from "../types/mcq";
+
 export function formatJson(jsonString: string) {
   if (!jsonString) {
     return "";
@@ -23,4 +25,14 @@ export default function formatString(string: string, numlines: number) {
     string = string.substring(nextPara.length + 1, string.length);
   }
   return paragraphs;
+}
+
+export function formatMcq(mcq: MCQs): MCQsQuiz {
+  return {
+    ...mcq,
+    mcqs: mcq.mcqs.map((q) => ({
+      ...q,
+      answered: false,
+    })),
+  };
 }

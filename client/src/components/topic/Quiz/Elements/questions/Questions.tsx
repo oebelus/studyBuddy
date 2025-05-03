@@ -6,7 +6,7 @@ import { ScoreDisplay } from "./DisplayScore";
 import { AddOptionModal } from "./AddOption";
 import { QuestionOption } from "./QuestionOption";
 import { Navigation } from "./Navigation";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface QuestionsProps {
     mcq: {
@@ -18,6 +18,7 @@ interface QuestionsProps {
             question: string;
             options: string[];
             answers: number[];
+            answered: boolean;
         }[];
     };
     userId: string;
@@ -38,6 +39,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
 
     const isSample = useLocation().pathname === '/quiz-sample';
 
+    const navigate = useNavigate();
 
     const handleOptionClick = (index: number): void => {
         const currentQuestion = mcq.mcqs[currentQuestionIndex];
@@ -170,7 +172,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
 
     const handleSaveQuestion = async (): Promise<void> => {
         setSavingQuestion(true);
-        console.log(mcq.mcqs)
+        
         try {
             await axiosInstance.post("/quiz", {
                 title: mcq.title,
@@ -181,6 +183,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
             console.error("Failed to save quiz:", error);
         } finally {
             setSavingQuestion(false);
+            navigate('/quiz', {replace: true})
         }
     };
 
