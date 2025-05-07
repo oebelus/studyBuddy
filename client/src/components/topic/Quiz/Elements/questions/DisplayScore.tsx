@@ -13,6 +13,7 @@ export const ScoreDisplay: FC<ScoreDisplayProps> = ({
     onSaveAttempt,
     onStartOver
 }) => {
+
     return (
         <div className="mt-6 text-center">
             <div className="text-lg font-semibold text-gray-700">
@@ -21,7 +22,7 @@ export const ScoreDisplay: FC<ScoreDisplayProps> = ({
             <div className="mt-6">
                 <button
                     onClick={onSaveAttempt}
-                    className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-all"
+                    className="cursor-pointer bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-all"
                 >
                     Save Attempt
                 </button>

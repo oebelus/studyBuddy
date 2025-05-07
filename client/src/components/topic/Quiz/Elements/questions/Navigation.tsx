@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 
 interface NavigationProps {
     currentIndex: number;
@@ -21,6 +21,19 @@ export const Navigation: FC<NavigationProps> = ({
     onShowScore,
     onSaveQuiz
 }) => {
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'ArrowRight') {
+            onNext();
+        } else if (e.key === 'ArrowLeft') {
+            onPrevious();
+        }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [onNext, onPrevious])
+
     return (
         <div className="flex justify-between mt-6">
             <button

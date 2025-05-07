@@ -118,6 +118,8 @@ class AuthService {
       this.setAccessToken(response.data.accessToken);
       return response.data.accessToken;
     } catch (error) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
       throw new Error("Failed to refresh token.");
     }
   }

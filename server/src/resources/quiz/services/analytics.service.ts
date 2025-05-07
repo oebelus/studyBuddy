@@ -7,7 +7,7 @@ import {
     WeeklyData, 
     CategoryStat 
 } from '../interfaces/attempt.interface';
-import { startOfDay, differenceInDays } from 'date-fns';
+import { startOfDay, differenceInDays, subDays } from 'date-fns';
 
 export class AnalyticsService {
     public async getUserStats(userId: string): Promise<UserStats> {
@@ -121,8 +121,6 @@ export class AnalyticsService {
                     wrongAnswers: wrongAnswers || 0
             }});
 
-            console.log(weeklyData)
-
             const categoryData: CategoryStat[] = categoryStats.map((stat) => ({
                 name: stat._id,
                 avgScore: (stat.correctAnswers / stat.totalAttempts) * 100,
@@ -137,18 +135,37 @@ export class AnalyticsService {
             
             let currentStreak = 0;
             if (recentMCQs.length > 0) {
+                // Sort attempts by date (newest first)
+                const sortedAttempts = [...recentMCQs].sort((a, b) => 
+                    new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+                );
+
                 const today = startOfDay(new Date());
-                let streakOngoing = true;
-
-                for (let i = 0; i < recentMCQs.length && streakOngoing; i++) {
-                    const attemptDate = startOfDay(recentMCQs[i].timestamp);
-                    const daysDifference = differenceInDays(today, attemptDate);
-
-                    if (daysDifference === currentStreak) {
+                let previousDate = startOfDay(sortedAttempts[0].timestamp);
+                
+                // Check if most recent attempt was today or yesterday
+                if (differenceInDays(today, previousDate) === 0) {
+                    // Started streak today
+                    currentStreak = 1;
+                } else if (differenceInDays(today, previousDate) === 1) {
+                    // Last attempt was yesterday
+                    currentStreak = 1;
+                }
+                
+                // Check previous days for consecutive streak
+                for (let i = 1; i < sortedAttempts.length; i++) {
+                    const currentDate = startOfDay(sortedAttempts[i].timestamp);
+                    const daysDiff = differenceInDays(previousDate, currentDate);
+                    
+                    if (daysDiff === 1) {
+                        // Consecutive day found
                         currentStreak++;
-                    } else if (daysDifference > currentStreak) {
-                        streakOngoing = false;
+                        previousDate = currentDate;
+                    } else if (daysDiff > 1) {
+                        // Streak broken
+                        break;
                     }
+                    // If daysDiff === 0, it's the same day - skip
                 }
             }
 

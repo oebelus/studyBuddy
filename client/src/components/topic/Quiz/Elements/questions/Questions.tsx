@@ -165,6 +165,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
 
         try {
             await axiosInstance.post("/attempt/mcq", mcqAttempt);
+            navigate("/quiz", { replace: true })
         } catch (error) {
             console.error("Failed to save attempt:", error);
         }
