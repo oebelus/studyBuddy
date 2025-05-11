@@ -16,7 +16,7 @@ I was preparing for midterms and I had the idea to make a simple MCQ and Flashca
 
 ### TODOs
 
-- [ ] Adding correction labels;
+- [X] Adding correction labels;
 - [ ] Adding a Save to Favourite to MCQs (maybe flashcards too);
 - [ ] Fixing flashcards;
 - [ ] Saving modifications automatically;

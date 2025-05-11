@@ -1,4 +1,4 @@
-import { useState, FC } from "react";
+import { useState, FC, useEffect } from "react";
 import { AddingOption, EditingOption } from "../../../../../types/mcq";
 import { axiosInstance } from "../../../../../services/auth.service";
 import { EditOptionModal } from "./EditOption";
@@ -116,7 +116,13 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
         }));
 
         if (isCorrect) setScore(prev => prev + 1);
+
+        currentQuestion.answered = true;
     };
+
+    useEffect(() => {
+        console.log(answers)
+    }, [answers])
 
     const handleNext = (): void => {
         if (currentQuestionIndex < mcq.mcqs.length - 1) {
@@ -200,7 +206,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
     }
 
     return (
-        <div className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg border border-gray-200">
+        <div className={`${answers[currentQuestionIndex] != undefined ? answers[currentQuestionIndex] ? "border-t-2 border-t-green-600" : "border-t-2 border-t-red-600" : ""} max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg border border-gray-200`}>
             {editingOption && (
                 <EditOptionModal
                     editingOption={editingOption}
@@ -233,7 +239,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
                         key={index}
                         option={option}
                         index={index}
-                        isSubmitted={isSubmitted}
+                        isSubmitted={isSubmitted || mcq.mcqs[currentQuestionIndex].answered}
                         isCorrectAnswer={isCorrectAnswer(index)}
                         isSelected={selectedOptions[mcq.mcqs[currentQuestionIndex].id]?.includes(index)}
                         onOptionClick={() => handleOptionClick(index)}

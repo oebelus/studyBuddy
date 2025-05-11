@@ -29,7 +29,7 @@ export const Navigation: FC<NavigationProps> = ({
             onPrevious();
         }
     };
-
+    
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
     }, [onNext, onPrevious])
@@ -44,7 +44,7 @@ export const Navigation: FC<NavigationProps> = ({
                 Previous
             </button>
             <div className="flex gap-2">
-                {!isSample && (
+                {!isSample && currentIndex == totalQuestions - 1 && (
                     <button
                         onClick={onShowScore}
                         disabled={!isSubmitted}
@@ -61,13 +61,15 @@ export const Navigation: FC<NavigationProps> = ({
                         Save Quiz
                     </button>
                 )}
-                <button
-                    onClick={onNext}
-                    disabled={currentIndex === totalQuestions - 1}
-                    className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-all"
-                >
-                    Next
-                </button>
+                {currentIndex < totalQuestions && 
+                    <button
+                        onClick={onNext}
+                        disabled={currentIndex === totalQuestions - 1}
+                        className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-all"
+                    >
+                        Next
+                    </button>
+                }
             </div>
         </div>
     );
