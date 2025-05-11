@@ -8,15 +8,15 @@ interface FlashcardProps {
 export default function FlipCard({ flashcards }: FlashcardProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showAnswer, setShowAnswer] = useState(false);
-    const [grades, setGrades] = useState<{ [key: number]: string }>({});
+    // const [grades, setGrades] = useState<{ [key: number]: string }>({});
 
     if (!flashcards || flashcards.length === 0) {
         return <p>No flashcards available</p>;
     }
 
-    const handleGrade = (grade: string) => {
-        setGrades({ ...grades, [currentIndex]: grade });
-    };
+    // const handleGrade = (grade: string) => {
+    //     setGrades({ ...grades, [currentIndex]: grade });
+    // };
 
     const goToNextCard = () => {
         setShowAnswer(false);
@@ -77,7 +77,7 @@ export default function FlipCard({ flashcards }: FlashcardProps) {
             </div>
 
             {/* Grade Buttons */}
-            <div className="flex gap-4">
+            {/* <div className="flex gap-4">
                 <button
                     onClick={() => handleGrade("Easy")}
                     className="px-4 py-2 bg-green-500 text-white rounded"
@@ -96,16 +96,16 @@ export default function FlipCard({ flashcards }: FlashcardProps) {
                 >
                     Hard
                 </button>
-            </div>
+            </div> */}
 
             {/* Status Display */}
             <div className="mt-4 text-center">
                 <p>
                     Card {currentIndex + 1} of {flashcards.length}
                 </p>
-                <p>
+                {/* <p>
                     Status: {grades[currentIndex] ? grades[currentIndex] : "Not graded"}
-                </p>
+                </p> */}
             </div>
         </div>
     );
