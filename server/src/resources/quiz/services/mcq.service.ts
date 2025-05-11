@@ -52,7 +52,6 @@ export default class McqService {
   public async getMcqTopic(mcqId: string) {
     try {
       const mcq = await this.mcq.findById(mcqId).exec();
-      console.log(mcq);
 
       if (!mcq) {
         console.log("MCQ Not Found.");

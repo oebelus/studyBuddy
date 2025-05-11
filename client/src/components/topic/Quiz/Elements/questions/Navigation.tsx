@@ -9,6 +9,7 @@ interface NavigationProps {
     onNext: () => void;
     onShowScore: () => void;
     onSaveQuiz: () => void;
+    canMove: boolean,
 }
 
 export const Navigation: FC<NavigationProps> = ({
@@ -18,20 +19,23 @@ export const Navigation: FC<NavigationProps> = ({
     onPrevious,
     onNext,
     onShowScore,
-    onSaveQuiz
+    onSaveQuiz,
+    canMove
 }) => {
     useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'ArrowRight') {
-            onNext();
-        } else if (e.key === 'ArrowLeft') {
-            onPrevious();
-        }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [onNext, onPrevious])
+        if (canMove) {
+            const handleKeyDown = (e: KeyboardEvent) => {
+                if (e.key === 'ArrowRight') {
+                    onNext();
+                } else if (e.key === 'ArrowLeft') {
+                    onPrevious();
+                }
+            };
+        
+            window.addEventListener('keydown', handleKeyDown);
+            return () => window.removeEventListener('keydown', handleKeyDown);
+        } else return
+    }, [canMove, onNext, onPrevious])
 
     return (
         <div className="flex justify-between mt-6">

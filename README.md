@@ -19,4 +19,13 @@ I was preparing for midterms and I had the idea to make a simple MCQ and Flashca
 - [X] Adding correction labels;
 - [ ] Adding a Save to Favourite to MCQs (maybe flashcards too);
 - [X] Fixing flashcards;
-- [ ] Saving modifications automatically;
+- [X] Saving modifications in MCQs:
+  - [X] Edit Option;
+  - [X] Add Option;
+  - [X] Delete Option;
+  - [X] Fix Navigation when modal is open;
+- [ ] Adding Scroll to Weekly Performance;
+- [ ] Edit category name;
+- [ ] Edit category of a lesson.
+- [ ] Edit lesson name.
+- [ ] Navigate to Questions with the quiz menu.

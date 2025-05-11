@@ -8,8 +8,6 @@ interface SaveProps {
 }
 
 export default function SaveFlashcard({title, category, flashcards}: SaveProps) {
-    // const navigate = useNavigate();
-
     const save = async () => {
         const token = localStorage.getItem("accessToken");
 
@@ -27,7 +25,6 @@ export default function SaveFlashcard({title, category, flashcards}: SaveProps) 
                     }
                 });
                 
-            // navigate("/flashcards", {replace: true})
             window.location.reload()
         } catch (error) {
             if (axios.isAxiosError(error) && error.response) {

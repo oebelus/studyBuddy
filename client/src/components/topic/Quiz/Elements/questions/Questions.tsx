@@ -1,4 +1,4 @@
-import { useState, FC, useEffect } from "react";
+import { useState, FC } from "react";
 import { AddingOption, EditingOption } from "../../../../../types/mcq";
 import { axiosInstance } from "../../../../../services/auth.service";
 import { EditOptionModal } from "./EditOption";
@@ -7,6 +7,7 @@ import { AddOptionModal } from "./AddOption";
 import { QuestionOption } from "./QuestionOption";
 import { Navigation } from "./Navigation";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 interface QuestionsProps {
     mcq: {
@@ -36,10 +37,12 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
     const [editingOption, setEditingOption] = useState<EditingOption | null>(null);
     const [addingOption, setAddingOption] = useState<AddingOption | null>(null);
     const [, setSavingQuestion] = useState<boolean>(false);
+    const [canMove, setCanMove] = useState(true)
 
     const isSample = useLocation().pathname === '/quiz-sample';
 
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleOptionClick = (index: number): void => {
         const currentQuestion = mcq.mcqs[currentQuestionIndex];
@@ -63,7 +66,9 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
         });
     };
 
-    const handleSaveOption = (): void => {
+    const handleSaveOption = async () => {
+        setCanMove(true);
+        
         if (!editingOption) return;
         const currentQuestion = mcq.mcqs[currentQuestionIndex];
         const { index, text, isCorrect } = editingOption;
@@ -74,13 +79,18 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
             : currentQuestion.answers.filter(i => i !== index);
 
         setEditingOption(null);
+
+        if (location.pathname.includes("sample-quiz")) return;
+        else saveChanges();
     };
 
     const handleAddOptionClick = (): void => {
+        setCanMove(false);
+
         setAddingOption({ text: "", isCorrect: false });
     };
 
-    const handleSaveNewOption = (): void => {
+    const handleSaveNewOption = async () => {
         if (!addingOption) return;
         const currentQuestion = mcq.mcqs[currentQuestionIndex];
         const newIndex = currentQuestion.options.length;
@@ -91,6 +101,11 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
         }
         
         setAddingOption(null);
+
+        if (location.pathname.includes("sample-quiz")) return;
+        else saveChanges();
+
+        setCanMove(true)
     };
 
     const handleDeleteOption = (index: number, e: React.MouseEvent): void => {
@@ -98,10 +113,43 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
         const currentQuestion = mcq.mcqs[currentQuestionIndex];
         
         currentQuestion.options = currentQuestion.options.filter((_, i) => i !== index);
-        currentQuestion.answers = currentQuestion.answers
+        currentQuestion.answers = currentQuestion.answers = currentQuestion.answers
             .filter(answerIndex => answerIndex !== index)
             .map(answerIndex => answerIndex > index ? answerIndex - 1 : answerIndex);
+
+        const selectedForThisQuestion = selectedOptions[currentQuestion.id as string] || [];
+        setSelectedOptions(prev => ({
+            ...prev,
+            [currentQuestion.id as string]: selectedForThisQuestion
+                .filter(i => i !== index)
+                .map(i => i > index ? i - 1 : i)
+        }));
+
+        if (location.pathname.includes("sample-quiz")) return;
+        else saveChanges();
     };
+
+    const saveChanges = async () => {
+        const token = localStorage.getItem("accessToken");
+
+        try {
+            await axios.put(`http://localhost:3000/api/quiz/${mcq._id}`, 
+            {
+                title: mcq.title,
+                category: mcq.category,
+                mcqs: mcq.mcqs,
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+
+            console.log("changes saved");
+        } catch(err) {
+            console.log(err)
+        }
+    }
 
     const handleSubmit = (): void => {
         const currentQuestion = mcq.mcqs[currentQuestionIndex];
@@ -119,10 +167,6 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
 
         currentQuestion.answered = true;
     };
-
-    useEffect(() => {
-        console.log(answers)
-    }, [answers])
 
     const handleNext = (): void => {
         if (currentQuestionIndex < mcq.mcqs.length - 1) {
@@ -210,7 +254,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
             {editingOption && (
                 <EditOptionModal
                     editingOption={editingOption}
-                    onClose={() => setEditingOption(null)}
+                    onClose={() => {setCanMove(true); setEditingOption(null)}}
                     onSave={handleSaveOption}
                     setEditingOption={setEditingOption}
                 />
@@ -219,7 +263,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
             {addingOption && (
                 <AddOptionModal
                     addingOption={addingOption}
-                    onClose={() => setAddingOption(null)}
+                    onClose={() => {setCanMove(true); setAddingOption(null)}}
                     onSave={handleSaveNewOption}
                     setAddingOption={setAddingOption}
                 />
@@ -243,7 +287,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
                         isCorrectAnswer={isCorrectAnswer(index)}
                         isSelected={selectedOptions[mcq.mcqs[currentQuestionIndex].id]?.includes(index)}
                         onOptionClick={() => handleOptionClick(index)}
-                        onEditClick={() => handleEditOption(index)}
+                        onEditClick={() => {setCanMove(false); handleEditOption(index)}}
                         onDeleteClick={(e) => handleDeleteOption(index, e)}
                     />
                 ))}
@@ -274,6 +318,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
                 onNext={handleNext}
                 onShowScore={handleShowScore}
                 onSaveQuiz={handleSaveQuestion}
+                canMove={canMove}
             />
         </div>
     );

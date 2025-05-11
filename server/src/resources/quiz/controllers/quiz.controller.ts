@@ -40,7 +40,6 @@ class QuizController implements Controller {
       }: { title: string; category: string; mcqs: MCQ[] } = req.body;
 
       const userId = req.user?.id;
-      console.log(mcqs);
 
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
@@ -61,7 +60,6 @@ class QuizController implements Controller {
   ) => {
     try {
       const mcqId = req.params.id;
-      console.log(mcqId);
 
       const mcq = await this.McqService.getMcqTopic(mcqId);
 
