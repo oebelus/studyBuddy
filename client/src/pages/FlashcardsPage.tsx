@@ -112,7 +112,6 @@ export default function FlashcardsPage() {
 
           <p className="text-xl mt-4 ml-4">Your topics:</p>
 
-          {/* Styled Topics Dropdown Section */}
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {Object.keys(categories).map((categoryName) => (
               <div key={categoryName} className="rounded-lg overflow-hidden">
@@ -137,21 +136,24 @@ export default function FlashcardsPage() {
                           setFlashcardId(topic.id);
                           setSelectedTopic(topic.name);
                         }}
-                        className="border-pink-500 border-2 p-4 bg-white dark:bg-[#1a1a1a] rounded-lg shadow-lg hover:shadow-xl transition-all cursor-pointer"
+                        className="flex justify-between border-pink-500 border-2 p-4 bg-white dark:bg-[#1a1a1a] rounded-lg shadow-lg hover:shadow-xl transition-all cursor-pointer"
                       >
-                        <span
+                        <div>
+                          <h3 className="text-lg font-bold mb-2">{topic.name}</h3>
+                          <div className="flex flex-col space-y-2">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              Questions: {topic.numberOfQuestions}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div
                           onClick={() => {
                             setDel(true);
                             setTopicId(topic.id);
                           }}
-                            className="absolute bg-[#2A2A2A] rounded-full p-1 top-2 right-2 text-gray-400 hover:text-red-500 cursor-pointer material-symbols-outlined"                        >
-                          delete
-                        </span>
-                        <h3 className="text-lg font-bold mb-2">{topic.name}</h3>
-                        <div className="flex flex-col space-y-2">
-                          <span className="text-sm text-gray-600 dark:text-gray-400">
-                            Questions: {topic.numberOfQuestions}
-                          </span>
+                            className="p-1 text-gray-400 hover:text-red-500 cursor-pointer material-symbols-outlined"                        >
+                          <p className="rounded-full bg-[#2A2A2A] p-1">delete</p>
                         </div>
                       </div>
                     ))}

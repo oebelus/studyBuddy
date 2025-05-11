@@ -1,6 +1,5 @@
 import axios from "axios";
 import { Flashcard } from "../../../types/flashcard";
-import { useNavigate } from "react-router-dom";
 
 interface SaveProps {
     flashcards: Flashcard[];
@@ -9,7 +8,7 @@ interface SaveProps {
 }
 
 export default function SaveFlashcard({title, category, flashcards}: SaveProps) {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
     const save = async () => {
         const token = localStorage.getItem("accessToken");
@@ -28,7 +27,8 @@ export default function SaveFlashcard({title, category, flashcards}: SaveProps) 
                     }
                 });
                 
-            navigate("/flashcards", {replace: true})
+            // navigate("/flashcards", {replace: true})
+            window.location.reload()
         } catch (error) {
             if (axios.isAxiosError(error) && error.response) {
                 console.error('Error:', error.response.data.message || 'An error occurred');

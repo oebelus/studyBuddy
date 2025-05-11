@@ -164,7 +164,7 @@ export default function GenerateModal({
                           onChange={handleInputChange}
                           className="mt-1 p-2 w-full h-10 rounded-lg dark:bg-[#474646]"
                           min="1"
-                          max="20"
+                          max="30"
                         />
                       </div>
                       <div className="flex-1">
