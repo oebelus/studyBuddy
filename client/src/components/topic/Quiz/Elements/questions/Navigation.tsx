@@ -14,7 +14,6 @@ interface NavigationProps {
 export const Navigation: FC<NavigationProps> = ({
     currentIndex,
     totalQuestions,
-    isSubmitted,
     isSample,
     onPrevious,
     onNext,
@@ -47,7 +46,6 @@ export const Navigation: FC<NavigationProps> = ({
                 {!isSample && currentIndex == totalQuestions - 1 && (
                     <button
                         onClick={onShowScore}
-                        disabled={!isSubmitted}
                         className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-all"
                     >
                         Check Your Score
@@ -61,7 +59,7 @@ export const Navigation: FC<NavigationProps> = ({
                         Save Quiz
                     </button>
                 )}
-                {currentIndex < totalQuestions && 
+                {currentIndex < totalQuestions - 1 && 
                     <button
                         onClick={onNext}
                         disabled={currentIndex === totalQuestions - 1}
