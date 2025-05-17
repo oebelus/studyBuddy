@@ -13,14 +13,12 @@ export default class FlashcardService {
     user: Types.ObjectId,
   ): Promise<String | Error> {
     try {
-      console.log(flashcards);
       const newFlashcard: Flashcard = new this.flashcard({
         title,
         category,
         flashcards,
         user,
       });
-      console.log(newFlashcard);
 
       await newFlashcard.save();
       return "Flashcard created successfully";
@@ -41,23 +39,18 @@ export default class FlashcardService {
 
   public async delete(flashcardId: string) {
     try {
-      console.log("hello");
       const result = await this.flashcard.findByIdAndDelete(flashcardId).exec();
 
       if (!result) {
-        console.log("not found");
         throw new Error("Flashcard not found");
       }
     } catch (err) {
-      console.log(err);
       throw new Error(`Error deleting flashcard: ${(err as Error).message}`);
     }
   }
 
   public async getFlashcardTopic(flashcardId: string) {
     try {
-      console.log("Flashcard ID received: ", flashcardId);
-
       if (!flashcardId || !mongoose.Types.ObjectId.isValid(flashcardId)) {
         throw new Error("Invalid Flashcard ID");
       }

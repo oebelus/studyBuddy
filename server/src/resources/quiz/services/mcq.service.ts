@@ -54,7 +54,6 @@ export default class McqService {
       const mcq = await this.mcq.findById(mcqId).exec();
 
       if (!mcq) {
-        console.log("MCQ Not Found.");
         throw new Error("Flashcard not found");
       }
 

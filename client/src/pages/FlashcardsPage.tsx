@@ -142,7 +142,7 @@ export default function FlashcardsPage() {
                           <h3 className="text-lg font-bold mb-2">{topic.name}</h3>
                           <div className="flex flex-col space-y-2">
                             <span className="text-sm text-gray-600 dark:text-gray-400">
-                              Questions: {topic.numberOfQuestions}
+                              Questions: {topic.numberOfQuestions + 1}
                             </span>
                           </div>
                         </div>

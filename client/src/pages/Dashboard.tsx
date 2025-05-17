@@ -62,7 +62,7 @@ export default function Dashboard() {
     
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    console.log(jwtDecode(refreshToken))
+    
     const userId = jwtDecode(refreshToken).id;
     axiosInstance.get(`/attempt/user/${userId}`)
       .then((response) => {

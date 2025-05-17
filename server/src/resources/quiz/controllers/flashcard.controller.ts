@@ -51,8 +51,6 @@ class FlashcardController {
         return res.status(401).json({ message: "User not authenticated" });
       }
 
-      console.log(flashcards);
-
       await this.FlashcardService.save(title, category, flashcards, userId);
 
       res.status(201).json({ message: "Flashcards Created Successfully" });
@@ -106,9 +104,7 @@ class FlashcardController {
     next: NextFunction,
   ) => {
     try {
-      console.log("HERE");
       const flashcardId = req.params.id;
-      console.log(flashcardId);
       await this.FlashcardService.delete(flashcardId);
 
       res.status(200).json("Flashcard Deleted Successfully");

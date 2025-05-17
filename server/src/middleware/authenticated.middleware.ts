@@ -6,44 +6,42 @@ import HttpException from "@/utils/exceptions/http.exception";
 import jwt from "jsonwebtoken";
 
 async function authenticatedMiddleware(
-    req: Request,
-    res: Response,
-    next: NextFunction
-): Promise<Response | void> {    
-    const bearer = req.headers.authorization;
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<Response | void> {
+  const bearer = req.headers.authorization;
 
-    if (!bearer || !bearer.startsWith('Bearer ')) {
-        return next(new HttpException(401, 'Unauthorized'))
+  if (!bearer || !bearer.startsWith("Bearer ")) {
+    return next(new HttpException(401, "Unauthorized"));
+  }
+
+  const accessToken = bearer.split("Bearer ")[1].trim();
+
+  try {
+    const payload: Token | jwt.JsonWebTokenError =
+      await verifyToken(accessToken);
+
+    if (payload instanceof jwt.JsonWebTokenError) {
+      return next(new HttpException(401, "Unauthorized"));
     }
 
-    const accessToken = bearer.split('Bearer ')[1].trim();
-    
-    try {
-        const payload: Token | jwt.JsonWebTokenError = await verifyToken(accessToken)
+    const user = await userModel
+      .findById(payload.id)
+      .select("-password")
+      .exec();
 
-        if (payload instanceof jwt.JsonWebTokenError) {
-            console.log("UNAUTHORIZED");
-            
-            return next(new HttpException(401, 'Unauthorized'))
-        }
-
-        const user = await userModel.findById(payload.id)
-            .select('-password')
-            .exec()
-
-        if (!user) {
-            console.log("NO USER");
-            
-            return next(new HttpException(401, 'Unauthorized'))
-        }
-
-        // @ts-ignore
-        req.user = user;
-        
-        next()
-    } catch (error) {
-        console.error('Token verification error:', error);
+    if (!user) {
+      return next(new HttpException(401, "Unauthorized"));
     }
+
+    // @ts-ignore
+    req.user = user;
+
+    next();
+  } catch (error) {
+    console.error("Token verification error:", error);
+  }
 }
 
 export default authenticatedMiddleware;

@@ -56,7 +56,6 @@ class AuthService {
 
           try {
             const refreshToken = this.getRefreshToken();
-            console.log("refresh", refreshToken);
             const response = await axios.post<TokenResponse>(
               `${API_URL}/users/refresh`,
               { refreshToken: refreshToken }
@@ -64,12 +63,9 @@ class AuthService {
 
             const { accessToken, refreshToken: newRefreshToken } =
               response.data;
-            console.log(accessToken, newRefreshToken);
-            // Store the new access and refresh tokens.
             this.setAccessToken(accessToken);
             this.setRefreshToken(newRefreshToken);
 
-            console.log(accessToken, refreshToken);
             // Update the authorization header with the new access token.
             axiosInstance.defaults.headers.common[
               "Authorization"
@@ -110,10 +106,6 @@ class AuthService {
           refreshToken,
         }
       );
-
-      console.log(response);
-
-      console.log(response.data.accessToken);
 
       this.setAccessToken(response.data.accessToken);
       return response.data.accessToken;

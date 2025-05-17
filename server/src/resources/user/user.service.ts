@@ -5,78 +5,71 @@ import { Request } from "express";
 import User from "./user.interface";
 
 class UserService {
-    private user = userModel;
+  private user = userModel;
 
-    /**
-     * Register a new user
-     */
+  /**
+   * Register a new user
+   */
 
-    public async register(
-        username: string, 
-        email: string, 
-        password:string, 
-        role: string
-    ): Promise<TokenResponse | Error>{
-        try {
-            const user = await this.user.create({ username, email, password, role });
-            
-            const accessToken = token.createToken(user);
+  public async register(
+    username: string,
+    email: string,
+    password: string,
+    role: string,
+  ): Promise<TokenResponse | Error> {
+    try {
+      const user = await this.user.create({ username, email, password, role });
 
-            return accessToken;
-        } catch (error) {
-            throw new HttpException(400, (error as Error).message)
-        }
+      const accessToken = token.createToken(user);
+
+      return accessToken;
+    } catch (error) {
+      throw new HttpException(400, (error as Error).message);
     }
+  }
 
-    /**
-     * Login a new user
-     */
+  /**
+   * Login a new user
+   */
 
-    public async login(
-        email: string, 
-        password: string,
-        req: Request
-    ): Promise<TokenResponse | Error> {
-        try {
-            const user = await this.user.findOne({ email: email })
-        
-            if (!user) 
-                throw new Error('Unable to find a user with that email');
+  public async login(
+    email: string,
+    password: string,
+    req: Request,
+  ): Promise<TokenResponse | Error> {
+    try {
+      const user = await this.user.findOne({ email: email });
 
-            if (await user.isValidPassword(password)) {
-                // @ts-ignore
-                req.user = user
-                const tokens: TokenResponse = token.createToken(user); 
-                return tokens;
-            }
-            else
-                throw new Error('Incorrect Password')
+      if (!user) throw new Error("Unable to find a user with that email");
 
-        } catch(error) {
-            throw new Error('Unable to login user')
-        }
+      if (await user.isValidPassword(password)) {
+        // @ts-ignore
+        req.user = user;
+        const tokens: TokenResponse = token.createToken(user);
+        return tokens;
+      } else throw new Error("Incorrect Password");
+    } catch (error) {
+      throw new Error("Unable to login user");
     }
+  }
 
-    public async findUserById(userId: string): Promise<User | null> {
-        try {
-            return await this.user.findById(userId).exec();
-        } catch (error) {
-            throw new HttpException(400, (error as Error).message);
-        }
+  public async findUserById(userId: string): Promise<User | null> {
+    try {
+      return await this.user.findById(userId).exec();
+    } catch (error) {
+      throw new HttpException(400, (error as Error).message);
     }
+  }
 
-    public async refreshToken(
-        refreshToken: string
-    ): Promise<string | Error> {
-        try {
-            const access = await token.refreshAccessToken(refreshToken);
-            console.log("access", access)
+  public async refreshToken(refreshToken: string): Promise<string | Error> {
+    try {
+      const access = await token.refreshAccessToken(refreshToken);
 
-            return access;
-        } catch (error) {
-            throw new HttpException(400, (error as Error).message);
-        }
+      return access;
+    } catch (error) {
+      throw new HttpException(400, (error as Error).message);
     }
+  }
 }
 
 export default UserService;
