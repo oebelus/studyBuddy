@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Topic } from "../../types/Topic";
 import DeleteTopic from "./DeleteTopic";
 import { Output } from "../../types/output";
-import { ChevronDown, ChevronUp } from "react-feather"; // Feather icons for chevrons
+import { ChevronDown, ChevronUp } from "react-feather";
+import { Trash } from "lucide-react";
+import DeleteCategory from "./DeleteCategory";
 
 interface TopicsProps {
   topics: Topic[];
@@ -18,8 +20,9 @@ export default function Topics({ type, topics }: TopicsProps) {
   const [numberOfQuestions, setNumberOfQuestions] = useState(0);
   const [quizId, setQuizId] = useState("");
   const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
+  const [isDeleteCategoryModalOpen, setIsDeleteCategoryModalOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState("");
 
-  // Group topics by category
   const groupedTopics = topics.reduce((acc, topic) => {
     acc[topic.category] = acc[topic.category] || [];
     acc[topic.category].push(topic);
@@ -35,6 +38,11 @@ export default function Topics({ type, topics }: TopicsProps) {
     setQuizId(topic.id);
     setIsModalOpen(true);
     setNumberOfQuestions(topic.numberOfQuestions);
+  };
+
+  const handleDeleteCategory = (category: string) => {
+    setCategoryToDelete(category);
+    setIsDeleteCategoryModalOpen(true);
   };
 
   const startQuiz = () => {
@@ -57,9 +65,16 @@ export default function Topics({ type, topics }: TopicsProps) {
           >
             <span className="text-lg font-semibold bg-pink-400 px-4">{categoryName}</span>
             {openCategories[categoryName] ? (
-              <ChevronUp className="w-5 h-5" />
+              <div className="">
+                <ChevronUp className="w-5 h-5" />
+                <Trash
+                 onClick={() => handleDeleteCategory(categoryName)}
+                 className="w-5 h-5 mt-4 hover:text-pink-400 rounded-full " />
+              </div>
             ) : (
-              <ChevronDown className="w-5 h-5" />
+              <div className="">
+                <ChevronDown className="w-5 h-5" />
+              </div>
             )}
           </button>
 
@@ -99,6 +114,12 @@ export default function Topics({ type, topics }: TopicsProps) {
       ))}
 
       <DeleteTopic type={type} topicId={topicId} setDel={setDel} del={del} />
+
+      <DeleteCategory
+        del={isDeleteCategoryModalOpen}
+        setDel={setIsDeleteCategoryModalOpen}
+        category={categoryToDelete}
+      />
 
       {/* Modal for starting the quiz */}
       {isModalOpen && (

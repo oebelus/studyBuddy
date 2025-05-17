@@ -84,4 +84,16 @@ export default class McqService {
       throw new Error(`Error Editing MCQ: ${(err as Error).message}`);
     }
   }
+
+  public async deleteCategory(category: string) {
+    try {
+      const quizzes = await this.mcq.find({ category: category });
+
+      quizzes.forEach(async (quiz) => {
+        await quiz.deleteOne();
+      });
+    } catch (err) {
+      throw new Error(`Error Deleting Category: ${(err as Error).message}`);
+    }
+  }
 }

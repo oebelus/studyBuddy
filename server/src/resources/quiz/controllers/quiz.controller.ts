@@ -20,6 +20,12 @@ class QuizController implements Controller {
 
     this.router.get(`${this.path}`, authenticatedMiddleware, this.getMcq);
 
+    this.router.delete(
+      `${this.path}/delete-category/:category`,
+      authenticatedMiddleware,
+      this.deleteMcqCategory,
+    );
+
     this.router.get(`${this.path}/:id`, this.getMcqTopic);
 
     this.router.delete(
@@ -66,6 +72,24 @@ class QuizController implements Controller {
       res.status(200).json({ mcq });
     } catch (err) {
       console.log(err);
+      next(new HttpException(400, (err as Error).message));
+    }
+  };
+
+  private deleteMcqCategory = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const category = req.params.category;
+
+      console.log(category);
+
+      await this.McqService.deleteCategory(category);
+
+      res.status(200).json("Category deleted successfully");
+    } catch (err) {
       next(new HttpException(400, (err as Error).message));
     }
   };
