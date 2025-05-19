@@ -1,14 +1,14 @@
 import { FC, Dispatch, SetStateAction } from 'react';
-import { AddingOption } from '../../../../../types/mcq';
+import { AddingOption } from '../../types/mcq';
 
-interface AddOptionModalProps {
+interface AddOptionProps {
     addingOption: AddingOption;
     onClose: () => void;
     onSave: () => void;
     setAddingOption: Dispatch<SetStateAction<AddingOption | null>>;
 }
 
-export const AddOptionModal: FC<AddOptionModalProps> = ({
+export const AddOption: FC<AddOptionProps> = ({
     addingOption,
     onClose,
     onSave,
@@ -39,7 +39,7 @@ export const AddOptionModal: FC<AddOptionModalProps> = ({
                         checked={addingOption.isCorrect}
                         onChange={(e) => handleCorrectChange(e.target.checked)}
                     />
-                    Is Correct
+                    Correct
                 </label>
                 <div className="flex justify-end gap-2 mt-4">
                     <button 

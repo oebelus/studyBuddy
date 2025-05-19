@@ -1,9 +1,11 @@
 import Modal from 'react-modal';
 import { customStyles } from './modalUtils/styles';
-import { Dispatch, SetStateAction, useState } from 'react';
-import { Flashcard, MCQ, Output } from '../../types/output';
-import axiosInstance from '../../api/instances';
 import { formatJson } from '../../utils/format';
+import { Dispatch, SetStateAction, useState } from 'react';
+import { MCQ } from '../../types/mcq';
+import { Flashcard } from '../../types/flashcard';
+import { Output } from '../../types/output';
+import { axiosInstance } from '../../services/auth.service';
 
 interface GenerateType {
     modalIsOpen: boolean;
@@ -105,7 +107,7 @@ export default function Generate({setLoading, modalIsOpen, setIsOpen, titles, se
                                 id="numQuestions"
                                 type="number"
                                 min="1"
-                                max="20"
+                                max="50"
                                 value={n}
                                 onChange={(e) => setN(parseInt(e.target.value))}
                                 className="w-[250px] px-4 py-2 bg-white text-black border border-black rounded-lg focus:outline-none"

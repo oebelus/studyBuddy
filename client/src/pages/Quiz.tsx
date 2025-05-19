@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { MCQsQuiz } from "../types/mcq";
+import { MCQs } from "../types/mcq";
 import Questions from "../components/topic/Quiz/Elements/questions/Questions";
 import UtilityBox from "../components/topic/Quiz/Elements/UtilityBox";
 import { answerKind } from "../types/Answer";
@@ -14,7 +14,7 @@ export default function Quiz() {
     
     const navigate = useNavigate();
 
-    const [mcq, setMcq] = useState<MCQsQuiz | null>(locationQuiz || null);
+    const [mcq, setMcq] = useState<MCQs | null>(locationQuiz || null);
     const [userId, setUserId] = useState<string>("");
     const [topic, setTopic] = useState<string>("");
     const [category, setCategory] = useState<string>("");
@@ -84,6 +84,7 @@ export default function Quiz() {
         };
 
         fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     if (isLoading) {
@@ -113,7 +114,7 @@ export default function Quiz() {
                     </div>
                 </nav>
 
-                <div className="p-4">
+                <div className="p-1">
                     <span
                         onClick={() => navigate("/quiz")}
                         className="cursor-pointer dark:text-white dark:hover:text-gray-400 hover:text-gray-700 transition-colors"
@@ -124,7 +125,7 @@ export default function Quiz() {
 
                 <div className="max-w-3xl mx-auto p-6">
                     <h2 className="text-2xl font-bold mb-8 text-gray-800 dark:text-gray-200">Quiz: {topic} {category}</h2>
-                    <Questions mcq={mcq} userId={userId} answers={answers} setAnswers={setAnswers}/>
+                    <Questions mcq={mcq} setMcq={setMcq} userId={userId} answers={answers} setAnswers={setAnswers}/>
                 </div>
             </div>
         </div>

@@ -8,8 +8,8 @@ import FlipCard from "../components/topic/Flashcard/FlipCard";
 import SaveFlashcards from "../components/topic/Flashcard/SaveFlashcards";
 import { axiosInstance } from "../services/auth.service";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import DeleteTopic from "../components/topic/DeleteTopic";
 import { Output } from "../types/output";
+import DeleteTopic from "../components/modals/DeleteTopic";
 
 export default function FlashcardsPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);

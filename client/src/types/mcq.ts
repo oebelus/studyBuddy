@@ -1,12 +1,5 @@
 export type MCQ = {
-  id: number;
-  answers: number[];
-  question: string;
-  options: string[];
-};
-
-export type Quiz = {
-  id: number;
+  id: string;
   answers: number[];
   question: string;
   options: string[];
@@ -15,13 +8,6 @@ export type Quiz = {
 
 export type MCQs = {
   mcqs: MCQ[];
-  title: string;
-  category: string;
-  _id?: string;
-};
-
-export type MCQsQuiz = {
-  mcqs: Quiz[];
   title: string;
   category: string;
   _id?: string;

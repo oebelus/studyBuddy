@@ -27,12 +27,12 @@ I was preparing for midterms and I had the idea to make a simple MCQ and Flashca
   - [ ] Edit the question;
 - [ ] If existing topic added, questions be added up.
 - [ ] Shuffle from different topics.
-- [ ] Delete an individual question;
+- [X] Delete an individual question;
 - [X] Delete a full category;
 - [ ] Display answers vs correction;
-- [ ] Adding Scroll to Weekly Performance;
 - [ ] Edit category name;
 - [ ] Edit category of a lesson;
 - [ ] Edit lesson name;
 - [ ] Navigate to Questions with the quiz menu;
 - [ ] More Detailed Analytics;
+- [ ] Recent flashcards and mcq done.

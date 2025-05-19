@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Topic } from "../../types/Topic";
-import DeleteTopic from "./DeleteTopic";
 import { Output } from "../../types/output";
 import { ChevronDown, ChevronUp } from "react-feather";
 import { Trash } from "lucide-react";
-import DeleteCategory from "./DeleteCategory";
+import DeleteTopic from "../modals/DeleteTopic";
+import DeleteCategory from "../modals/DeleteCategory";
 
 interface TopicsProps {
   topics: Topic[];

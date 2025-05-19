@@ -1,13 +1,16 @@
-import { useState, FC } from "react";
-import { AddingOption, EditingOption } from "../../../../../types/mcq";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useState, FC, useEffect } from "react";
+import { AddingOption, EditingOption, MCQ, MCQs } from "../../../../../types/mcq";
 import { axiosInstance } from "../../../../../services/auth.service";
-import { EditOptionModal } from "./EditOption";
 import { ScoreDisplay } from "./DisplayScore";
-import { AddOptionModal } from "./AddOption";
 import { QuestionOption } from "./QuestionOption";
 import { Navigation } from "./Navigation";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { X } from "lucide-react";
+import { AddOption } from "../../../../modals/AddOption";
+import { EditOption } from "../../../../modals/EditOption";
+import DeleteQuestion from "../../../../modals/DeleteQuestion";
 
 interface QuestionsProps {
     mcq: {
@@ -22,12 +25,13 @@ interface QuestionsProps {
             answered: boolean;
         }[];
     };
+    setMcq: (m: MCQs | null) => void;
     userId: string;
     answers: Record<number, boolean>;
     setAnswers: React.Dispatch<React.SetStateAction<Record<number, boolean>>>;
 }
 
-const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => {
+const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswers }) => {
     const [showScore, setShowScore] = useState<boolean>(false);
     const [score, setScore] = useState<number>(0);
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
@@ -38,6 +42,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
     const [addingOption, setAddingOption] = useState<AddingOption | null>(null);
     const [, setSavingQuestion] = useState<boolean>(false);
     const [canMove, setCanMove] = useState(true)
+    const [deleteQuestion, setDeleteQuestion] = useState(false)
 
     const isSample = useLocation().pathname === '/quiz-sample';
 
@@ -70,6 +75,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
         setCanMove(true);
         
         if (!editingOption) return;
+
         const currentQuestion = mcq.mcqs[currentQuestionIndex];
         const { index, text, isCorrect } = editingOption;
 
@@ -81,8 +87,31 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
         setEditingOption(null);
 
         if (location.pathname.includes("sample-quiz")) return;
-        else saveChanges();
     };
+
+    useEffect(() => {
+        if (!location.pathname.includes("sample-quiz")) saveChanges();
+    }, [mcq])
+
+    const handleDeleteQuestion = async () => {
+        const updatedMcqs: MCQ[] = [
+            ...mcq.mcqs.slice(0, currentQuestionIndex),
+            ...mcq.mcqs.slice(currentQuestionIndex + 1)
+        ];
+        
+        setMcq({
+            ...mcq,
+            mcqs: updatedMcqs
+        });
+
+        setDeleteQuestion(false);
+
+        if (currentQuestionIndex >= updatedMcqs.length && updatedMcqs.length > 0) {
+            setCurrentQuestionIndex(updatedMcqs.length - 1);
+        }
+
+        setCanMove(true);
+    }
 
     const handleAddOptionClick = (): void => {
         setCanMove(false);
@@ -101,9 +130,6 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
         }
         
         setAddingOption(null);
-
-        if (location.pathname.includes("sample-quiz")) return;
-        else saveChanges();
 
         setCanMove(true)
     };
@@ -124,9 +150,6 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
                 .filter(i => i !== index)
                 .map(i => i > index ? i - 1 : i)
         }));
-
-        if (location.pathname.includes("sample-quiz")) return;
-        else saveChanges();
     };
 
     const saveChanges = async () => {
@@ -223,7 +246,6 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
 
     const handleSaveQuestion = async (): Promise<void> => {
         setSavingQuestion(true);
-        
         try {
             await axiosInstance.post("/quiz", {
                 title: mcq.title,
@@ -252,7 +274,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
     return (
         <div className={`${answers[currentQuestionIndex] != undefined ? answers[currentQuestionIndex] ? "border-t-2 border-t-green-600" : "border-t-2 border-t-red-600" : ""} max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg border border-gray-200`}>
             {editingOption && (
-                <EditOptionModal
+                <EditOption
                     editingOption={editingOption}
                     onClose={() => {setCanMove(true); setEditingOption(null)}}
                     onSave={handleSaveOption}
@@ -261,7 +283,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
             )}
 
             {addingOption && (
-                <AddOptionModal
+                <AddOption
                     addingOption={addingOption}
                     onClose={() => {setCanMove(true); setAddingOption(null)}}
                     onSave={handleSaveNewOption}
@@ -269,9 +291,26 @@ const Questions: FC<QuestionsProps> = ({ mcq, userId, answers, setAnswers }) => 
                 />
             )}
 
-            <h3 className="text-xl font-semibold mb-6 text-gray-700">
-                Question {currentQuestionIndex + 1} of {mcq.mcqs.length}
-            </h3>
+            {deleteQuestion && (
+                <DeleteQuestion 
+                    del={deleteQuestion} 
+                    setDel={setDeleteQuestion} 
+                    n={currentQuestionIndex + 1} 
+                    handleDeleteQuestion={handleDeleteQuestion} 
+                    setCanMove={setCanMove}
+                />
+            )}
+
+            <div className="flex justify-between">
+                <h3 className="text-xl font-semibold mb-6 text-gray-700">
+                    Question {currentQuestionIndex + 1} of {mcq.mcqs.length}
+                </h3>
+                <div
+                    onClick={() => { setCanMove(false); setDeleteQuestion(true) }} 
+                    className="flex justify-center items-center w-10 h-10 cursor-pointer transition-full duration-300 hover:bg-red-500 hover:text-white rounded-full">
+                    <X className="text-2xl" />
+                </div>
+            </div>
 
             <div className="mb-6">
                 <p className="text-xl font-semibold text-gray-700">{mcq.mcqs[currentQuestionIndex].question}</p>

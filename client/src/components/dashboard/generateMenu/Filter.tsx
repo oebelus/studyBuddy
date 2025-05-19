@@ -34,7 +34,7 @@ export default function Filter({
           <div className="flex lg:flex-row flex-col mt-6 lg:mt-1 gap-2">
             <input required onChange={(e) => setModule(e.target.value)} value={module} className="shadow p-2 rounded-lg" placeholder="Module Name" type="text" name="module" id="module" />
             <input required onChange={(e) => setSubject(e.target.value)} value={subject} className="shadow p-2 rounded-lg" placeholder="Lesson Name" type="text" name="subject" id="subject" />
-            <input required onChange={(e) => setN(parseInt(e.target.value))} value={n} className="shadow p-2 rounded-lg" placeholder="Questions" type="number" max={30} name="number" id="number" />
+            <input required onChange={(e) => setN(parseInt(e.target.value))} value={n} className="shadow p-2 rounded-lg" placeholder="Questions" type="number" max={50} name="number" id="number" />
           </div>
       </div>
       <input className="hidden" type="text" value={extractedText} onChange={(e) => setExtractedText(e.target.value)} name="lesson" />

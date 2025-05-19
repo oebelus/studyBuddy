@@ -1,13 +1,13 @@
 import { FC } from 'react';
 
-interface EditOptionModalProps {
+interface EditOptionProps {
     editingOption: { index: number; text: string; isCorrect: boolean };
     onClose: () => void;
     onSave: () => void;
     setEditingOption: (option: { index: number; text: string; isCorrect: boolean } | null) => void;
 }
 
-export const EditOptionModal: FC<EditOptionModalProps> = ({ 
+export const EditOption: FC<EditOptionProps> = ({ 
     editingOption, 
     onClose, 
     onSave, 
@@ -29,7 +29,7 @@ export const EditOptionModal: FC<EditOptionModalProps> = ({
                         checked={editingOption.isCorrect}
                         onChange={(e) => setEditingOption({ ...editingOption, isCorrect: e.target.checked })}
                     />
-                    Is Correct
+                    Correct
                 </label>
                 <div className="flex justify-end gap-2 mt-4">
                     <button onClick={onClose} className="bg-gray-300 px-4 py-2 rounded-lg">

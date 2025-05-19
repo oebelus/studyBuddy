@@ -51,6 +51,17 @@ class AuthService {
           return Promise.reject(error);
         }
 
+        if (
+          error.response.data?.message?.includes("Invalid Token") ||
+          error.response.data?.name === "TokenVerificationError"
+        ) {
+          if (!originalRequest._invalidTokenHandled) {
+            originalRequest._invalidTokenHandled = true;
+            window.location.reload();
+            return Promise.reject(error);
+          }
+        }
+
         if (error.response.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
 

@@ -1,8 +1,9 @@
+import { useReducer } from "react";
 import { Modal } from "@mui/material";
 import axios from "axios";
-import { Output } from "../../types/output";
-import { useReducer } from "react";
 import { initialState, reducer } from "../../reducer/store";
+import { Output } from "../../types/output";
+
 
 interface DeleteTopicProps {
     del: boolean;
