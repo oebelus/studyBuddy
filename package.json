@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "bcryptjs": "^3.0.1"
+    "bcryptjs": "^3.0.1",
+    "pdfjs-dist": "^5.2.133"
   },
   "devDependencies": {
     "electron": "^35.1.2"

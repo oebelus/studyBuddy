@@ -1,7 +1,7 @@
-import axios from "axios";
 import { MCQ } from "../../../types/mcq";
 import { useReducer, useState } from "react";
 import { initialState, reducer } from "../../../reducer/store";
+import { axiosInstance } from "../../../services/auth.service";
 
 interface SaveProps {
     mcqs: MCQ[];
@@ -16,27 +16,21 @@ export default function SaveQuiz({title, category, mcqs}: SaveProps) {
     const [, dispatch] = useReducer(reducer, initialState)
 
     const save = async () => {
-        const token = localStorage.getItem("accessToken");
         setLoading(true)
 
         try {
-            await axios.post(
+            await axiosInstance.post(
                 `http://localhost:3000/api/quiz`, 
                 {
                     title,
                     category,
                     mcqs
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}` // Add the token to headers
-                    }
                 });
             setSaved(true);
             dispatch({type: "ADD_MCQS", payload: {title, category, mcqs}})
         } catch (error) {
             setLoading(false)
-            if (axios.isAxiosError(error) && error.response) {
+            if (error.response) {
                 setError(true)
                 console.error('Error:', error.response.data.message || 'An error occurred');
             } else {

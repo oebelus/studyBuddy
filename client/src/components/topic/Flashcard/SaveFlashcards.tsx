@@ -1,4 +1,4 @@
-import axios from "axios";
+import { axiosInstance } from "../../../services/auth.service";
 import { Flashcard } from "../../../types/flashcard";
 
 interface SaveProps {
@@ -9,29 +9,18 @@ interface SaveProps {
 
 export default function SaveFlashcard({title, category, flashcards}: SaveProps) {
     const save = async () => {
-        const token = localStorage.getItem("accessToken");
-
         try {
-            await axios.post(
+            await axiosInstance.post(
                 `http://localhost:3000/api/flashcard`, 
                 {
                     title,
                     category,
                     flashcards
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
+                })
                 
             window.location.reload()
         } catch (error) {
-            if (axios.isAxiosError(error) && error.response) {
-                console.error('Error:', error.response.data.message || 'An error occurred');
-            } else {
-                console.error('Error:', (error as Error).message || 'An error occurred');
-            }
+            console.log(error)
         }
     };
     return (

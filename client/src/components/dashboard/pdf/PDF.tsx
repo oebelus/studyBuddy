@@ -17,7 +17,7 @@ export default function PDF(props: PDFProps) {
     const [allPageNumbers, setAllPageNumbers] = useState<number[]>(); // default value is undefined.
 
     function onDocumentLoadSuccess(pdf: PDFDocumentProxy) {
-		const allPageNumbers: number[] = []; // array of numbers
+		const allPageNumbers: number[] = [];
 		for (let p = 1; p < pdf.numPages + 1; p++) {
 			allPageNumbers.push(p);
 		}

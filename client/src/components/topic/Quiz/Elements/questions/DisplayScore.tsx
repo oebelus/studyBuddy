@@ -16,7 +16,7 @@ export const ScoreDisplay: FC<ScoreDisplayProps> = ({
 
     return (
         <div className="mt-6 text-center">
-            <div className="text-lg font-semibold text-gray-700">
+            <div className="text-lg font-semibold text-gray-700 dark:text-white">
                 Your score: {score}/{totalQuestions}
             </div>
             <div className="mt-6">

@@ -6,7 +6,6 @@ import { ScoreDisplay } from "./DisplayScore";
 import { QuestionOption } from "./QuestionOption";
 import { Navigation } from "./Navigation";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { X } from "lucide-react";
 import { AddOption } from "../../../../modals/AddOption";
 import { EditOption } from "../../../../modals/EditOption";
@@ -22,7 +21,7 @@ interface QuestionsProps {
             question: string;
             options: string[];
             answers: number[];
-            answered: boolean;
+            answered?: boolean;
         }[];
     };
     setMcq: (m: MCQs | null) => void;
@@ -43,6 +42,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     const [, setSavingQuestion] = useState<boolean>(false);
     const [canMove, setCanMove] = useState(true)
     const [deleteQuestion, setDeleteQuestion] = useState(false)
+    const [shouldDelete, setShouldDelete] = useState(false)
 
     const isSample = useLocation().pathname === '/quiz-sample';
 
@@ -69,6 +69,8 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
             text: currentQuestion.options[index],
             isCorrect: currentQuestion.answers.includes(index)
         });
+
+        if (!location.pathname.includes("sample-quiz")) saveChanges();
     };
 
     const handleSaveOption = async () => {
@@ -86,14 +88,19 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
 
         setEditingOption(null);
 
-        if (location.pathname.includes("sample-quiz")) return;
+        if (!location.pathname.includes("sample-quiz")) saveChanges();
     };
 
     useEffect(() => {
-        if (!location.pathname.includes("sample-quiz")) saveChanges();
-    }, [mcq])
+        if (!location.pathname.includes("sample-quiz") && shouldDelete) {
+            saveChanges();
+            setShouldDelete(false);
+        }
+    }, [mcq, shouldDelete])
 
     const handleDeleteQuestion = async () => {
+        setShouldDelete(true)
+
         const updatedMcqs: MCQ[] = [
             ...mcq.mcqs.slice(0, currentQuestionIndex),
             ...mcq.mcqs.slice(currentQuestionIndex + 1)
@@ -150,13 +157,15 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                 .filter(i => i !== index)
                 .map(i => i > index ? i - 1 : i)
         }));
+
+        if (!location.pathname.includes("sample-quiz")) saveChanges();
     };
 
     const saveChanges = async () => {
         const token = localStorage.getItem("accessToken");
 
         try {
-            await axios.put(`http://localhost:3000/api/quiz/${mcq._id}`, 
+            await axiosInstance.put(`http://localhost:3000/api/quiz/${mcq._id}`, 
             {
                 title: mcq.title,
                 category: mcq.category,
@@ -167,8 +176,6 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                     Authorization: `Bearer ${token}`
                 }
             })
-
-            console.log("changes saved");
         } catch(err) {
             console.log(err)
         }
@@ -227,7 +234,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
         const mcqAttempt = {
             mcqAttempts: {
                 userId,
-                mcqSetId: mcq._id || uuidv4(),
+                mcqSetId: mcq._id,
                 title: mcq.title,
                 numberOfQuestions: mcq.mcqs.length,
                 score,
@@ -272,7 +279,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     }
 
     return (
-        <div className={`${answers[currentQuestionIndex] != undefined ? answers[currentQuestionIndex] ? "border-t-2 border-t-green-600" : "border-t-2 border-t-red-600" : ""} max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg border border-gray-200`}>
+        <div className={`${answers[currentQuestionIndex] != undefined ? answers[currentQuestionIndex] ? "border-t-8 border-t-green-600" : "border-t-8 border-t-red-600" : ""} max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg border border-gray-200`}>
             {editingOption && (
                 <EditOption
                     editingOption={editingOption}
@@ -322,7 +329,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                         key={index}
                         option={option}
                         index={index}
-                        isSubmitted={isSubmitted || mcq.mcqs[currentQuestionIndex].answered}
+                        isSubmitted={isSubmitted || mcq.mcqs[currentQuestionIndex].answered as boolean}
                         isCorrectAnswer={isCorrectAnswer(index)}
                         isSelected={selectedOptions[mcq.mcqs[currentQuestionIndex].id]?.includes(index)}
                         onOptionClick={() => handleOptionClick(index)}
@@ -364,7 +371,3 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
 };
 
 export default Questions;
-
-function uuidv4(): string | undefined {
-    throw new Error("Function not implemented.");
-}

@@ -16,17 +16,17 @@ export default function UtilityBox({questions, title}: UtilityBoxProps) {
         <div>
             <div
                 onClick={() => setToggle(!toggle)}
-                className={`rounded-sm p-4 bg-white absolute top-6 z-50 h-7 w-8 flex items-center justify-center cursor-pointer shadow`}>
-                {toggle ? "X" : "☰"}
+                className={`z-50 rounded-sm p-4 dark:text-white text-[#1f1f1f] text-4xl h-7 w-8 flex items-center justify-center cursor-pointer`}>
+                    {toggle ? "X" : "☰"}
             </div>
 
             <div
-                className={`left-0 ${
-                    toggle ? "w-64" : "hidden"
-                } h-full bg-[#333333] fixed text-white transition-transform duration-300 p-4`}
+                className={`left-0 top-24 ${
+                    toggle ? "w-64" : "w-0 overflow-hidden hidden"
+                } h-full border-r-4 bg-white dark:bg-[#1f1f1f] fixed text-white transition-transform duration-300 p-4`}
             >
-                <p className="mt-24 mb-4 text-2xl font-bold">{title}</p>
-                <div className="grid grid-cols-4 gap-4 bg-zinc-600 p-2 rounded-lg">
+                <p className="mb-4 text-2xl dark:text-gray-200 text-[#1f1f1f] text-center underline">{title.toUpperCase()}</p>
+                <div className="grid grid-cols-4 gap-4 dark:bg-zinc-600 bg-blue-200 border-2 border-violet-300 dark:border-gray-500 p-2 rounded-lg">
                     {questions.map((question, index) => {
                         const bgColor = question.answered
                             ? question.correct === "correct"

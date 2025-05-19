@@ -35,7 +35,6 @@ export default function Register() {
         })
         .then(response => {
             const token = response.data.token;
-            console.log(response.data.token.accessToken)
             const user: User = jwtDecode(token.accessToken.toString())
             
             

@@ -1,8 +1,8 @@
 import { useReducer } from "react";
 import { Modal } from "@mui/material";
-import axios from "axios";
 import { initialState, reducer } from "../../reducer/store";
 import { Output } from "../../types/output";
+import { axiosInstance } from "../../services/auth.service";
 
 
 interface DeleteTopicProps {
@@ -16,14 +16,7 @@ export default function DeleteTopic({del, topicId, type, setDel}: DeleteTopicPro
     const [, dispatch] = useReducer(reducer, initialState)
 
     const handleDelete = () => {
-        const token = localStorage.getItem("accessToken");
-        
-        axios.delete(`http://localhost:3000/api/${type == 'quiz' ? 'quiz' : 'flashcard'}/${topicId}`,
-            {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
+        axiosInstance.delete(`http://localhost:3000/api/${type == 'quiz' ? 'quiz' : 'flashcard'}/${topicId}`)
         .then(() => {
             console.log("Topic Deleted Successfully!")
             setDel(false);

@@ -1,10 +1,10 @@
 import { Modal } from "@mui/material";
 import { Flashcard } from "../types/flashcard";
-import axios from "axios";
 import { FormEvent, useEffect, useState } from "react";
 import { formatJson } from "../utils/format";
 import { MCQ, MCQs } from "../types/mcq";
 import { useNavigate } from "react-router-dom";
+import { axiosInstance } from "../services/auth.service";
 
 interface GenerateModalProps {
   isOpen: boolean;
@@ -53,7 +53,7 @@ export default function GenerateModal({
     formData.append("pdf", selectedFile, selectedFile.name);
 
     try {
-      const response = await axios.post("http://localhost:3000/api/generate/upload-pdf", formData, {
+      const response = await axiosInstance.post("http://localhost:3000/api/generate/upload-pdf", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -84,7 +84,7 @@ export default function GenerateModal({
     };
 
     try {
-      const response = await axios.post("http://localhost:3000/api/generate", requestData);
+      const response = await axiosInstance.post("http://localhost:3000/api/generate", requestData);
 
       console.log(response.data);
       const aiResponse = response.data.aiResponse.trim();

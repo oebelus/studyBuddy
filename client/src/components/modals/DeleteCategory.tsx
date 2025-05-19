@@ -1,5 +1,5 @@
 import { Modal } from "@mui/material";
-import axios from "axios";
+import { axiosInstance } from "../../services/auth.service";
 
 interface DeleteCategoryProps {
     del: boolean;
@@ -9,15 +9,7 @@ interface DeleteCategoryProps {
 
 export default function DeleteCategory({del, setDel, category}: DeleteCategoryProps) {
     const deleteCategory = () => {
-        const token = localStorage.getItem("accessToken");
-
-        axios.delete(`http://localhost:3000/api/quiz/delete-category/${category}`,
-            {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
-        
+        axiosInstance.delete(`http://localhost:3000/api/quiz/delete-category/${category}`)
             .then(() => {
                 setDel(false);
                 window.location.reload();

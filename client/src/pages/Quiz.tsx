@@ -1,27 +1,30 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { MCQs } from "../types/mcq";
 import Questions from "../components/topic/Quiz/Elements/questions/Questions";
 import UtilityBox from "../components/topic/Quiz/Elements/UtilityBox";
 import { answerKind } from "../types/Answer";
-import { useLocation, useParams, useNavigate } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { formatMcq } from "../utils/format";
+import { LogOut } from "lucide-react";
+import Theme from "../components/Theme";
+import GoBack from "../components/modals/GoBack";
+import { axiosInstance } from "../services/auth.service";
 
 export default function Quiz() {
     const { id: topicId } = useParams();
     const location = useLocation();
     const { locationQuiz } = location.state || {};
     
-    const navigate = useNavigate();
-
     const [mcq, setMcq] = useState<MCQs | null>(locationQuiz || null);
     const [userId, setUserId] = useState<string>("");
-    const [topic, setTopic] = useState<string>("");
-    const [category, setCategory] = useState<string>("");
+    const [, setTopic] = useState<string>("");
+    const [, setCategory] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(!locationQuiz);
     const [error, setError] = useState<string>("");
     const [correction, setCorrection] = useState<{ answered: boolean; correct: answerKind }[]>([]);
     const [answers, setAnswers] = useState<{ [key: number]: boolean }>({});
+    const [canExit, setCanExit] = useState(false);
+    const [redirect, setRedirect] = useState("");
 
     useEffect(() => {
         if (mcq?.mcqs) {
@@ -52,18 +55,9 @@ export default function Quiz() {
             setError("");
 
             try {
-                const token = localStorage.getItem("accessToken");
-                if (!token) {
-                    throw new Error("No authentication token found");
-                }
-
                 const [userResponse, mcqResponse] = await Promise.all([
-                    axios.get("http://localhost:3000/api/users", {
-                        headers: { Authorization: `Bearer ${token}` },
-                    }),
-                    axios.get(`http://localhost:3000/api/quiz/${topicId}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    }),
+                    axiosInstance.get("http://localhost:3000/api/users"),
+                    axiosInstance.get(`http://localhost:3000/api/quiz/${topicId}`),
                 ]);
 
                 setUserId(userResponse.data.user._id);
@@ -87,6 +81,11 @@ export default function Quiz() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const handleExit = (redirect: string) => {
+        setCanExit(true);
+        setRedirect(redirect)
+    }
+
     if (isLoading) {
         return <div className="text-center py-8">Loading quiz...</div>;
     }
@@ -100,34 +99,39 @@ export default function Quiz() {
     }
 
     return (
-        <div className="dark:bg-[#111111] bg-white min-h-screen overflow-x-hidden">
+        <div className="dark:bg-[#111111] bg-white min-h-screen overflow-x-hidden overflow-y-hidden">
             <div>
                 <nav>
-                    <div className="bg-[#333333] dark:bg-[#1f1f1f] w-full flex items-center justify-between p-6">
-                        <UtilityBox questions={correction} title={mcq.title} />
-                        <h1
-                            onClick={() => window.location.href = "/dashboard"}
-                            className="cursor-pointer text-2xl text-white font-bold hover:text-gray-400 transition-colors"
-                        >
-                            StudyBuddy
-                        </h1>
+                    <div className="dark:bg-[#1f1f1f] w-full flex items-center justify-between p-6">
+                        <div className="flex gap-8">
+                            <UtilityBox questions={correction} title={mcq.title} />
+                            <h1
+                                onClick={() => handleExit("/dashboard")}
+                                className="mt-1 text-2xl font-semibold dark:text-white text-zinc-800 font-serif cursor-pointer dark:hover:text-gray-300 hover:text-gray-600 transition-colors"
+                            >
+                                StudyBuddy
+                            </h1>
+                        </div>
+                        <div className="flex gap-4">
+                            <div className="relative top-2">
+                                <Theme />
+                            </div>
+                            <div
+                                onClick={() => handleExit("/quiz")}
+                                className="hover:bg-red-500 p-2 rounded-lg transition-full duration-300 text-red-500 hover:text-white cursor-pointer"
+                            >
+                                <LogOut />
+                            </div>
+                        </div>
                     </div>
                 </nav>
 
-                <div className="p-1">
-                    <span
-                        onClick={() => navigate("/quiz")}
-                        className="cursor-pointer dark:text-white dark:hover:text-gray-400 hover:text-gray-700 transition-colors"
-                    >
-                        &lt; Go back to Quiz
-                    </span>
-                </div>
-
                 <div className="max-w-3xl mx-auto p-6">
-                    <h2 className="text-2xl font-bold mb-8 text-gray-800 dark:text-gray-200">Quiz: {topic} {category}</h2>
                     <Questions mcq={mcq} setMcq={setMcq} userId={userId} answers={answers} setAnswers={setAnswers}/>
                 </div>
             </div>
+
+            { canExit && <GoBack del={canExit} setDel={setCanExit} redirect={redirect} /> }
         </div>
     );
 }
