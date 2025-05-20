@@ -3,13 +3,13 @@ import Sidebar from "../components/dashboard/Sidebar";
 import Navbar from "../components/dashboard/Navbar";
 import { Topic } from "../types/Topic";
 import { Flashcard, Flashcards } from "../types/flashcard";
-import GenerateModal from "../components/GenerateModal";
 import FlipCard from "../components/topic/Flashcard/FlipCard";
 import SaveFlashcards from "../components/topic/Flashcard/SaveFlashcards";
 import { axiosInstance } from "../services/auth.service";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Output } from "../types/output";
 import DeleteTopic from "../components/modals/DeleteTopic";
+import Generate from "../components/modals/Generate";
 
 export default function FlashcardsPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -98,7 +98,7 @@ export default function FlashcardsPage() {
             </div> 
           </div>
 
-          <GenerateModal
+          <Generate
             type="flashcard"
             setCategory={setCategory}
             setTitle={setTitle}

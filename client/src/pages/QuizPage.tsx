@@ -3,10 +3,12 @@ import Sidebar from "../components/dashboard/Sidebar";
 import Navbar from "../components/dashboard/Navbar";
 import Topics from "../components/topic/Topics";
 import { Topic } from "../types/Topic";
-import GenerateModal from "../components/GenerateModal";
 import { MCQ, MCQs } from "../types/mcq";
 import { initialState, reducer } from "../reducer/store";
 import { axiosInstance } from "../services/auth.service";
+import { Upload } from "lucide-react";
+import UploadJson from "../components/modals/UploadJson";
+import Generate from "../components/modals/Generate";
 
 export default function QuizPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -14,7 +16,8 @@ export default function QuizPage() {
   const [loading, setLoading] = useState(false);
   const [, setTitle] = useState("");
   const [, setCategory] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
+  const [isGenerateOpen, setIsGenerateOpen] = useState(false);
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [quizId, ] = useState("")
   const [mcq, setMcq] = useState<MCQs>();
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -60,19 +63,31 @@ export default function QuizPage() {
         >
 
           <h1 className="text-5xl mt-4 ml-4">Quiz</h1>
-          <div className="flex rounded-lg cursor-pointer gap-4 p-2 w-fit mt-2" onClick={() => setIsOpen(true)}>
-            <div className="flex gap-2">
+          <div className="flex justify-between w-full rounded-lg cursor-pointer p-2 mt-2">
+            <div 
+              className="flex gap-2"
+              onClick={() => setIsGenerateOpen(true)}
+            >
               <span className="text-2xl bg-pink-100 hover:bg-pink-200 transition px-2 dark:bg-[#3b3939] dark:hover:bg-[#2b2929] rounded-md material-symbols-outlined">
                 add
               </span>
               <p className="text-xl">Generate a Quiz:</p>
-            </div> 
+            </div>
+            <div 
+              className="flex gap-2"
+              onClick={() => setIsUploadOpen(true)}  
+            >
+              <div className="rounded-lg bg-pink-100 hover:bg-pink-200 transition px-2 dark:bg-[#3b3939] dark:hover:bg-[#2b2929]">
+                <Upload className="mt-1" />
+              </div>
+              <p className="text-xl">Upload your Quiz</p>
+            </div>
           </div>
 
           <p className="text-xl mt-4 ml-4">Your topics:</p>
           {state.mcqsTopics && <Topics mcqLength={mcq && mcq.mcqs ? mcq.mcqs.length : 0} type='quiz' topics={state.mcqsTopics} />}
 
-          <GenerateModal
+          <Generate
             type="quiz"
             setCategory={setCategory}
             setTitle={setTitle}
@@ -80,10 +95,20 @@ export default function QuizPage() {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             setQuiz={setQuiz}
-            isOpen={isOpen}
-            setIsOpen={setIsOpen}
+            isOpen={isGenerateOpen}
+            setIsOpen={setIsGenerateOpen}
             isGenerateOpen={true}
             quiz={quiz}
+          />
+
+          <UploadJson 
+            isOpen={isUploadOpen}
+            setIsOpen={setIsUploadOpen}
+            setCategory={setCategory}
+            setTitle={setTitle}
+            setQuiz={setQuiz}
+            quiz={quiz}
+            type="quiz"  
           />
 
           <button className={`${loading ? "" : "hidden"}`} type="submit">

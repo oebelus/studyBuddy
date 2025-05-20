@@ -36,3 +36,6 @@ I was preparing for midterms and I had the idea to make a simple MCQ and Flashca
 - [ ] Navigate to Questions with the quiz menu;
 - [ ] More Detailed Analytics;
 - [ ] Recent flashcards and mcq done.
+- [ ] Adding other document formats.
+- [ ] Fix small screens' UI.
+- [X] Upload your own quiz from a JSON file.
