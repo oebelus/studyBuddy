@@ -279,7 +279,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     }
 
     return (
-        <div className={`${answers[currentQuestionIndex] != undefined ? answers[currentQuestionIndex] ? "border-t-8 border-t-green-600" : "border-t-8 border-t-red-600" : ""} max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg border border-gray-200`}>
+        <div className={`${answers[currentQuestionIndex] != undefined ? answers[currentQuestionIndex] ? "border-t-8 border-t-green-600 dark:border-t-green-600" : "border-t-8 border-t-red-600 dark:border-t-red-600" : ""} max-w-4xl mx-auto p-6 bg-white dark:bg-[#1f1f1f] rounded-xl shadow-lg border border-gray-700 dark:border-gray-200`}>
             {editingOption && (
                 <EditOption
                     editingOption={editingOption}
@@ -309,18 +309,18 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
             )}
 
             <div className="flex justify-between">
-                <h3 className="text-xl font-semibold mb-6 text-gray-700">
+                <h3 className="text-xl font-semibold mb-6 text-gray-700 dark:text-gray-300">
                     Question {currentQuestionIndex + 1} of {mcq.mcqs.length}
                 </h3>
                 <div
                     onClick={() => { setCanMove(false); setDeleteQuestion(true) }} 
                     className="flex justify-center items-center w-10 h-10 cursor-pointer transition-full duration-300 hover:bg-red-500 hover:text-white rounded-full">
-                    <X className="text-2xl" />
+                    <X className="text-2xl dark:text-white" />
                 </div>
             </div>
 
             <div className="mb-6">
-                <p className="text-xl font-semibold text-gray-700">{mcq.mcqs[currentQuestionIndex].question}</p>
+                <p className="text-xl font-semibold text-gray-700 dark:text-gray-300">{mcq.mcqs[currentQuestionIndex].question}</p>
             </div>
             
             <div className="space-y-4 mb-6">
@@ -340,7 +340,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                 
                 <button
                     onClick={handleAddOptionClick}
-                    className="w-full p-3 border border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-gray-500 hover:text-gray-700 transition-all flex items-center justify-center gap-2"
+                    className="w-full p-3 border border-dashed border-gray-300 rounded-lg text-gray-500 dark:text-gray-400 hover:border-gray-500 hover:text-gray-700 transition-all flex items-center justify-center gap-2"
                 >
                     <span className="material-symbols-outlined">add_circle</span>
                     Add Option
@@ -350,7 +350,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
             <button
                 onClick={handleSubmit}
                 disabled={!selectedOptions[mcq.mcqs[currentQuestionIndex].id]?.length || isSubmitted || answers[currentQuestionIndex] !== undefined}
-                className="mt-4 bg-blue-500 py-3 px-6 rounded-lg w-full text-lg text-white disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-blue-600 transition-all"
+                className="mt-4 bg-blue-500 py-3 px-6 rounded-lg w-full text-lg text-white disabled:bg-gray-300 disabled:dark:bg-zinc-500 disabled:cursor-not-allowed hover:bg-blue-600 transition-all"
             >
                 Submit
             </button>

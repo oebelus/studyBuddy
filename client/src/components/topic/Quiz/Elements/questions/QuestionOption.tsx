@@ -23,7 +23,7 @@ export const QuestionOption: FC<QuestionOptionProps> = ({
     return (
         <div
             onClick={onOptionClick}
-            className={`justify-between flex items-center p-3 rounded-lg border cursor-pointer transition-all ${
+            className={`justify-between dark:bg-[#2b2a2a] flex items-center p-3 rounded-lg border cursor-pointer transition-all ${
                 isSubmitted
                     ? isCorrectAnswer
                         ? "border-green-500 bg-green-50"
@@ -40,13 +40,13 @@ export const QuestionOption: FC<QuestionOptionProps> = ({
                         : "text-red-600"
                     : isSelected
                     ? "text-blue-600"
-                    : "text-gray-800"
+                    : "text-gray-800 dark:text-gray-300"
             }`}>
                 {option}
             </label>
             <div className="flex gap-2">
                 <button onClick={onEditClick} type="button">
-                    <span className="material-symbols-outlined hover:bg-gray-200 p-2 rounded-lg">
+                    <span className="material-symbols-outlined dark:text-white hover:bg-gray-200 p-2 rounded-lg">
                         edit
                     </span>
                 </button>
