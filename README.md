@@ -24,7 +24,7 @@ I was preparing for midterms and I had the idea to make a simple MCQ and Flashca
   - [X] Add Option;
   - [X] Delete Option;
   - [X] Fix Navigation when modal is open;
-  - [ ] Edit the question;
+  - [X] Edit the question;
 - [ ] If existing topic added, questions be added up.
 - [ ] Shuffle from different topics.
 - [X] Delete an individual question;

@@ -26,8 +26,8 @@ export const QuestionOption: FC<QuestionOptionProps> = ({
             className={`justify-between dark:bg-[#2b2a2a] flex items-center p-3 rounded-lg border cursor-pointer transition-all ${
                 isSubmitted
                     ? isCorrectAnswer
-                        ? "border-green-500 bg-green-50"
-                        : "border-red-500 bg-red-50"
+                        ? "border-green-500 dark:border-green-300 bg-green-50"
+                        : "border-red-500 dark:border-red-300 bg-red-50"
                     : isSelected
                     ? "border-blue-500 bg-blue-50"
                     : "border-gray-300 hover:border-gray-500"
@@ -36,8 +36,8 @@ export const QuestionOption: FC<QuestionOptionProps> = ({
             <label className={`text-lg transition-all ${
                 isSubmitted
                     ? isCorrectAnswer
-                        ? "text-green-600"
-                        : "text-red-600"
+                        ? "text-green-600 dark:text-green-400"
+                        : "text-red-600 dark:text-red-400"
                     : isSelected
                     ? "text-blue-600"
                     : "text-gray-800 dark:text-gray-300"

@@ -19,6 +19,11 @@ export interface EditingOption {
   isCorrect: boolean;
 }
 
+export interface EditingQuestion {
+  index: number;
+  text: string;
+}
+
 export interface AddingOption {
   text: string;
   isCorrect: boolean;

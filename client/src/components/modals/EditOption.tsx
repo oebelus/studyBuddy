@@ -2,16 +2,16 @@ import { FC } from 'react';
 
 interface EditOptionProps {
     editingOption: { index: number; text: string; isCorrect: boolean };
+    setEditingOption: (option: { index: number; text: string; isCorrect: boolean } | null) => void;
     onClose: () => void;
     onSave: () => void;
-    setEditingOption: (option: { index: number; text: string; isCorrect: boolean } | null) => void;
 }
 
 export const EditOption: FC<EditOptionProps> = ({ 
     editingOption, 
+    setEditingOption,
     onClose, 
     onSave, 
-    setEditingOption 
 }) => {
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

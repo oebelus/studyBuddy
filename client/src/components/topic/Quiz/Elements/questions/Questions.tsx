@@ -1,15 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, FC, useEffect } from "react";
-import { AddingOption, EditingOption, MCQ, MCQs } from "../../../../../types/mcq";
+import { AddingOption, EditingOption, EditingQuestion, MCQ, MCQs } from "../../../../../types/mcq";
 import { axiosInstance } from "../../../../../services/auth.service";
 import { ScoreDisplay } from "./DisplayScore";
 import { QuestionOption } from "./QuestionOption";
 import { Navigation } from "./Navigation";
 import { useLocation, useNavigate } from "react-router-dom";
-import { X } from "lucide-react";
+import { Edit, X } from "lucide-react";
 import { AddOption } from "../../../../modals/AddOption";
 import { EditOption } from "../../../../modals/EditOption";
 import DeleteQuestion from "../../../../modals/DeleteQuestion";
+import { EditQuestion } from "../../../../modals/EditQuestion";
 
 interface QuestionsProps {
     mcq: {
@@ -41,8 +42,12 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     const [addingOption, setAddingOption] = useState<AddingOption | null>(null);
     const [, setSavingQuestion] = useState<boolean>(false);
     const [canMove, setCanMove] = useState(true)
+    
     const [deleteQuestion, setDeleteQuestion] = useState(false)
     const [shouldDelete, setShouldDelete] = useState(false)
+
+    const [shouldEdit, setShouldEdit] = useState(false)
+    const [editingQuestion, setEditingQuestion] = useState<EditingQuestion | null>(null);
 
     const isSample = useLocation().pathname === '/quiz-sample';
 
@@ -92,9 +97,10 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     };
 
     useEffect(() => {
-        if (!location.pathname.includes("sample-quiz") && shouldDelete) {
+        if (!location.pathname.includes("sample-quiz") && (shouldDelete || shouldEdit)) {
             saveChanges();
             setShouldDelete(false);
+            setShouldEdit(false);
         }
     }, [mcq, shouldDelete])
 
@@ -120,9 +126,41 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
         setCanMove(true);
     }
 
+    const handleEditQuestion = async (question: string) => {
+        setShouldEdit(true);
+
+        const toEdit = mcq.mcqs[currentQuestionIndex]
+
+        if (!toEdit) return;
+
+        toEdit.question = question;
+        
+        const updatedMcqs = [
+            ...mcq.mcqs.slice(0, currentQuestionIndex),
+            toEdit,
+            ...mcq.mcqs.slice(currentQuestionIndex + 1)
+        ]
+
+        setMcq({
+            ...mcq,
+            mcqs: updatedMcqs
+        })
+
+        setEditingQuestion(null);
+
+        setCanMove(true);
+    }
+
+    const handleEditQuestionClick = (): void => {
+        const currentQuestion = mcq.mcqs[currentQuestionIndex];
+        setEditingQuestion({
+            index: currentQuestionIndex,
+            text: currentQuestion.question
+        })
+    }
+
     const handleAddOptionClick = (): void => {
         setCanMove(false);
-
         setAddingOption({ text: "", isCorrect: false });
     };
 
@@ -279,7 +317,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
     }
 
     return (
-        <div className={`${answers[currentQuestionIndex] != undefined ? answers[currentQuestionIndex] ? "border-t-8 border-t-green-600 dark:border-t-green-600" : "border-t-8 border-t-red-600 dark:border-t-red-600" : ""} max-w-4xl mx-auto p-6 bg-white dark:bg-[#1f1f1f] rounded-xl shadow-lg border border-gray-700 dark:border-gray-200`}>
+        <div className={`${answers[currentQuestionIndex] != undefined ? answers[currentQuestionIndex] ? "border-t-8 border-t-green-600 dark:border-t-green-600" : "border-t-8 border-t-red-600 dark:border-t-red-600" : ""} max-w-4xl mx-auto p-6 bg-white dark:bg-[#1f1f1f] rounded-xl shadow-lg border border-gray-300 dark:border-transparent`}>
             {editingOption && (
                 <EditOption
                     editingOption={editingOption}
@@ -292,9 +330,9 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
             {addingOption && (
                 <AddOption
                     addingOption={addingOption}
+                    setAddingOption={setAddingOption}
                     onClose={() => {setCanMove(true); setAddingOption(null)}}
                     onSave={handleSaveNewOption}
-                    setAddingOption={setAddingOption}
                 />
             )}
 
@@ -305,6 +343,15 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                     n={currentQuestionIndex + 1} 
                     handleDeleteQuestion={handleDeleteQuestion} 
                     setCanMove={setCanMove}
+                />
+            )}
+
+            {editingQuestion && (
+                <EditQuestion 
+                    editingQuestion={editingQuestion}
+                    setEditingQuestion={setEditingQuestion}
+                    onSave={handleEditQuestion}
+                    onClose={() => { setCanMove(true); setEditingQuestion(null) }}
                 />
             )}
 
@@ -319,8 +366,11 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                 </div>
             </div>
 
-            <div className="mb-6">
+            <div className="mb-6 flex justify-between">
                 <p className="text-xl font-semibold text-gray-700 dark:text-gray-300">{mcq.mcqs[currentQuestionIndex].question}</p>
+                <Edit 
+                    onClick={() => { setCanMove(false); handleEditQuestionClick() }}
+                    className="dark:text-gray-300 mt-1 cursor-pointer hover:text-gray-500" />
             </div>
             
             <div className="space-y-4 mb-6">
