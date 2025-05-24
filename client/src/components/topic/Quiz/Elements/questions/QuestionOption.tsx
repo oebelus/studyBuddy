@@ -46,7 +46,7 @@ export const QuestionOption: FC<QuestionOptionProps> = ({
             </label>
             <div className="flex gap-2">
                 <button onClick={onEditClick} type="button">
-                    <span className="material-symbols-outlined dark:text-white hover:bg-gray-200 p-2 rounded-lg">
+                    <span className="material-symbols-outlined dark:text-white hover:dark:text-zinc-800 hover:bg-gray-200 p-2 rounded-lg">
                         edit
                     </span>
                 </button>

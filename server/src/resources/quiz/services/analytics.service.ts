@@ -16,6 +16,7 @@ export class AnalyticsService {
         mcqsAttempts,
         questionsAnswered,
         recentMCQs,
+        titleStats,
         categoryStats,
         answersStats,
       ] = await Promise.all([
@@ -41,8 +42,6 @@ export class AnalyticsService {
         MCQAttemptModel.aggregate([
           { $match: { userId } },
           {
-            // Selects specific fields to process
-            // 1: keep these fields as they are
             $project: {
               title: 1,
               category: 1,
@@ -51,12 +50,9 @@ export class AnalyticsService {
             },
           },
           {
-            // Creates a separate document for each array element (spreading out)
-            // if 2 questions in an attempt -> 2 documents
             $unwind: "$answers",
           },
           {
-            // Groups the documents by category and calculate various aggregations
             $group: {
               _id: "$title",
               avgScore: { $avg: "$score" },
@@ -70,28 +66,106 @@ export class AnalyticsService {
             },
           },
         ]),
+        // FIXED CATEGORY STATS AGGREGATION
         MCQAttemptModel.aggregate([
-          { $match: { userId } },
+          { $match: { userId: userId } },
+
           {
-            $project: {
-              answers: { $objectToArray: "$answers" },
+            $lookup: {
+              from: "mcqs",
+              localField: "title",
+              foreignField: "title",
+              as: "mcqInfo",
             },
           },
+
+          // Only keep documents where lookup was successful
+          {
+            $match: {
+              "mcqInfo.0": { $exists: true }, // Ensure mcqInfo has at least one element
+            },
+          },
+
+          // Extract category from the lookup result
+          {
+            $addFields: {
+              category: { $arrayElemAt: ["$mcqInfo.category", 0] },
+            },
+          },
+
+          // Additional safety check for category
+          {
+            $match: {
+              category: { $exists: true, $ne: null },
+            },
+          },
+
+          // Extract answers and other fields
+          {
+            $project: {
+              title: 1,
+              score: 1,
+              answers: { $objectToArray: "$answers" },
+              category: 1,
+            },
+          },
+
           { $unwind: "$answers" },
+
+          // Calculate title-level averages within each category
           {
             $group: {
-              _id: null,
-              correctAnswers: {
+              _id: {
+                category: "$category",
+                title: "$title",
+              },
+              titleAvgScore: { $avg: "$score" },
+              titleAttempts: { $sum: 1 },
+              titleCorrectAnswers: {
                 $sum: { $cond: [{ $eq: ["$answers.v", true] }, 1, 0] },
               },
-              wrongAnswers: {
+              titleWrongAnswers: {
                 $sum: { $cond: [{ $eq: ["$answers.v", false] }, 1, 0] },
               },
             },
           },
+
+          // Calculate category-level averages
+          {
+            $group: {
+              _id: "$_id.category",
+              avgScore: { $avg: "$titleAvgScore" },
+              attempts: { $sum: "$titleAttempts" },
+              correctAnswers: { $sum: "$titleCorrectAnswers" },
+              wrongAnswers: { $sum: "$titleWrongAnswers" },
+              titlesCount: { $sum: 1 },
+            },
+          },
+
+          // Format output
+          {
+            $project: {
+              name: "$_id",
+              avgScore: { $round: ["$avgScore", 2] },
+              attempts: 1,
+              correctAnswers: 1,
+              wrongAnswers: 1,
+              titlesCount: 1,
+              _id: 0,
+            },
+          },
+
+          { $sort: { name: 1 } },
         ]),
+
+        // ALTERNATIVE: If category is stored directly in MCQAttempt documents
         MCQAttemptModel.aggregate([
           { $match: { userId } },
+          {
+            $match: {
+              category: { $exists: true, $ne: null }, // Only process documents with category
+            },
+          },
           {
             $group: {
               _id: "$category",
@@ -126,20 +200,28 @@ export class AnalyticsService {
       });
 
       const categoryData: CategoryStat[] = categoryStats.map((stat) => ({
-        name: stat._id,
-        avgScore: (stat.correctAnswers / stat.totalAttempts) * 100,
-        attempts: stat.totalAttempts,
+        name: stat.name,
+        avgScore: stat.avgScore,
+        attempts: stat.attempts,
         correctAnswers: stat.correctAnswers || 0,
         wrongAnswers: stat.wrongAnswers || 0,
       }));
 
-      const answered: number = questionsAnswered.length;
-      const totalCorrectAnswers: number = answersStats[0]?.correctAnswers;
-      const totalWrongAnswers: number = answersStats[0]?.wrongAnswers;
+      const answered: number =
+        questionsAnswered.length > 0 ? questionsAnswered[0].total : 0;
+
+      // Fix: Handle case where categoryStats might be empty
+      const totalCorrectAnswers: number = categoryStats.reduce(
+        (sum, stat) => sum + (stat.correctAnswers || 0),
+        0,
+      );
+      const totalWrongAnswers: number = categoryStats.reduce(
+        (sum, stat) => sum + (stat.wrongAnswers || 0),
+        0,
+      );
 
       let currentStreak = 0;
       if (recentMCQs.length > 0) {
-        // Sort attempts by date (newest first)
         const sortedAttempts = [...recentMCQs].sort(
           (a, b) =>
             new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
@@ -148,31 +230,26 @@ export class AnalyticsService {
         const today = startOfDay(new Date());
         let previousDate = startOfDay(sortedAttempts[0].timestamp);
 
-        // Check if most recent attempt was today or yesterday
         if (differenceInDays(today, previousDate) === 0) {
-          // Started streak today
           currentStreak = 1;
         } else if (differenceInDays(today, previousDate) === 1) {
-          // Last attempt was yesterday
           currentStreak = 1;
         }
 
-        // Check previous days for consecutive streak
         for (let i = 1; i < sortedAttempts.length; i++) {
           const currentDate = startOfDay(sortedAttempts[i].timestamp);
           const daysDiff = differenceInDays(previousDate, currentDate);
 
           if (daysDiff === 1) {
-            // Consecutive day found
             currentStreak++;
             previousDate = currentDate;
           } else if (daysDiff > 1) {
-            // Streak broken
             break;
           }
-          // If daysDiff === 0, it's the same day - skip
         }
       }
+
+      console.log("Final categoryData:", categoryData);
 
       return {
         totalAttempts: mcqsAttempts,
@@ -186,6 +263,39 @@ export class AnalyticsService {
     } catch (error) {
       console.error("Error fetching user stats:", error);
       throw new Error("Failed to fetch user statistics");
+    }
+  }
+
+  // DEBUG METHOD: Add this method to help diagnose the issue
+  public async debugCategoryLookup(userId: string): Promise<any> {
+    try {
+      const debugResult = await MCQAttemptModel.aggregate([
+        { $match: { userId: userId } },
+        { $limit: 5 }, // Just check first 5 documents
+        {
+          $lookup: {
+            from: "mcqs",
+            localField: "title",
+            foreignField: "title",
+            as: "mcqInfo",
+          },
+        },
+        {
+          $project: {
+            title: 1,
+            originalCategory: "$category", // Category from attempts collection
+            mcqInfo: 1, // Full lookup result
+            lookupCategory: { $arrayElemAt: ["$mcqInfo.category", 0] },
+            lookupSize: { $size: "$mcqInfo" },
+          },
+        },
+      ]);
+
+      console.log("Debug lookup result:", JSON.stringify(debugResult, null, 2));
+      return debugResult;
+    } catch (error) {
+      console.error("Debug lookup error:", error);
+      throw error;
     }
   }
 
