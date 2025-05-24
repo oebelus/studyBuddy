@@ -130,15 +130,34 @@ export class AnalyticsService {
             },
           },
 
-          // Calculate category-level averages
+          // Calculate category-level averages (weighted by attempts)
           {
             $group: {
               _id: "$_id.category",
-              avgScore: { $avg: "$titleAvgScore" },
+              totalWeightedScore: {
+                $sum: {
+                  $multiply: ["$titleAvgScore", "$titleAttempts"],
+                },
+              },
               attempts: { $sum: "$titleAttempts" },
               correctAnswers: { $sum: "$titleCorrectAnswers" },
               wrongAnswers: { $sum: "$titleWrongAnswers" },
               titlesCount: { $sum: 1 },
+            },
+          },
+
+          // Calculate the actual weighted average
+          {
+            $addFields: {
+              avgScore: {
+                $cond: {
+                  if: { $gt: ["$attempts", 0] },
+                  then: {
+                    $divide: ["$totalWeightedScore", "$attempts"],
+                  },
+                  else: 0,
+                },
+              },
             },
           },
 
@@ -201,7 +220,7 @@ export class AnalyticsService {
 
       const categoryData: CategoryStat[] = categoryStats.map((stat) => ({
         name: stat.name,
-        avgScore: stat.avgScore,
+        avgScore: (stat.correctAnswers / stat.attempts) * 100,
         attempts: stat.attempts,
         correctAnswers: stat.correctAnswers || 0,
         wrongAnswers: stat.wrongAnswers || 0,
