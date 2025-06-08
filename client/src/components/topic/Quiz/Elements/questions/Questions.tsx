@@ -24,6 +24,7 @@ interface QuestionsProps {
             answers: number[];
             answered?: boolean;
         }[];
+        score: number
     };
     setMcq: (m: MCQs | null) => void;
     userId: string;
@@ -111,16 +112,40 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
             ...mcq.mcqs.slice(0, currentQuestionIndex),
             ...mcq.mcqs.slice(currentQuestionIndex + 1)
         ];
+
+        const deletedQuestionId = mcq.mcqs[currentQuestionIndex].id;
         
         setMcq({
             ...mcq,
             mcqs: updatedMcqs
         });
 
+        setSelectedOptions(prev => {
+            const newSelectedOptions = {...prev};
+            delete newSelectedOptions[deletedQuestionId];
+            return newSelectedOptions;
+        });
+
+        setAnswers(prev => {
+            const newAnswers = {...prev};
+            delete newAnswers[currentQuestionIndex];
+
+            return Object.fromEntries(
+                Object.entries(newAnswers)
+                    .map(([key, value]) => {
+                        const numKey = Number(key);
+                        return [numKey > currentQuestionIndex ? numKey - 1 : numKey, value];
+                    })
+            );
+        });    
+
         setDeleteQuestion(false);
+        setIsSubmitted(false);
 
         if (currentQuestionIndex >= updatedMcqs.length && updatedMcqs.length > 0) {
             setCurrentQuestionIndex(updatedMcqs.length - 1);
+        } else if (updatedMcqs.length === 0) {
+            setCurrentQuestionIndex(0);
         }
 
         setCanMove(true);
@@ -208,6 +233,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
                 title: mcq.title,
                 category: mcq.category,
                 mcqs: mcq.mcqs,
+                score: mcq.score
             },
             {
                 headers: {
@@ -283,6 +309,7 @@ const Questions: FC<QuestionsProps> = ({ mcq, setMcq, userId, answers, setAnswer
 
         try {
             await axiosInstance.post("/attempt/mcq", mcqAttempt);
+            await saveChanges()
             navigate("/quiz", { replace: true })
         } catch (error) {
             console.error("Failed to save attempt:", error);
